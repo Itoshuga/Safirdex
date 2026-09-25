@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /cards/{cardId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /seasons/{seasonId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /sets/{setId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /rarities/{rarityId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /cardTypes/{cardTypeId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /glossaryEntries/{entryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

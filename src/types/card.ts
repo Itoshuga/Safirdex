@@ -1,24 +1,15 @@
-import type { TranslationMap } from "@/types/i18n";
+import type { CardArtwork } from "@/types/artwork";
+import type { FirestoreEntity } from "@/types/firestore";
+import type {
+  RequiredNameDescriptionTranslation,
+  Translations,
+} from "@/types/translation";
 
-export type ArtworkOrientation = "vertical" | "horizontal";
-
-export interface Artwork {
-  id?: string;
-  url: string;
-  orientation: ArtworkOrientation;
-  alt: TranslationMap<string>;
-}
-
-export interface CardTranslation {
-  name: string;
-  description: string;
-}
-
-export interface Card {
-  id: string;
+export interface Card extends FirestoreEntity {
   number: number;
+  slug: string;
   seasonId: string;
-  editionId?: string;
+  setId: string | null;
   rarityId: string;
   typeIds: string[];
   attack: number;
@@ -26,12 +17,12 @@ export interface Card {
   defense: number;
   isCommander: boolean;
   isPromo: boolean;
-  artwork: Artwork;
-  alternativeArtworks?: Artwork[];
-  translations: TranslationMap<CardTranslation>;
+  isFeatured: boolean;
+  translations: Translations<RequiredNameDescriptionTranslation>;
+  artwork: CardArtwork;
+  alternativeArtworks: CardArtwork[];
 }
 
-export interface CardPreviewData extends Card {
-  rarity: TranslationMap<string>;
-  types: TranslationMap<string[]>;
-}
+export type CreateCardInput = Omit<Card, keyof FirestoreEntity>;
+
+export type UpdateCardInput = Partial<CreateCardInput>;

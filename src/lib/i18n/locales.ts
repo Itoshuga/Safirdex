@@ -1,15 +1,23 @@
-export const supportedLocales = ["en", "fr"] as const;
+export const SUPPORTED_LOCALES = ["fr", "en"] as const;
 
-export type AppLocale = (typeof supportedLocales)[number];
+export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
 
-export const defaultLocale: AppLocale = "en";
+export const DEFAULT_LOCALE: AppLocale = "fr";
+export const FALLBACK_LOCALE: AppLocale = "en";
+
+// Lowercase aliases keep existing imports readable while the uppercase exports
+// remain the canonical configuration.
+export const supportedLocales = SUPPORTED_LOCALES;
+export const defaultLocale = DEFAULT_LOCALE;
+export const fallbackLocale = FALLBACK_LOCALE;
 
 export function resolveLocale(
   locale: string | string[] | undefined,
 ): AppLocale {
   const candidate = Array.isArray(locale) ? locale[0] : locale;
+  const normalizedCandidate = candidate?.toLowerCase();
 
-  return supportedLocales.includes(candidate as AppLocale)
-    ? (candidate as AppLocale)
-    : defaultLocale;
+  return SUPPORTED_LOCALES.includes(normalizedCandidate as AppLocale)
+    ? (normalizedCandidate as AppLocale)
+    : DEFAULT_LOCALE;
 }

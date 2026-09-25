@@ -8,7 +8,7 @@ import { getLocalizedValue } from "@/lib/i18n/get-localized-value";
 import type { AppLocale } from "@/lib/i18n/locales";
 import type { Messages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
-import type { CardPreviewData } from "@/types/card";
+import type { CardPreviewData } from "@/types/card-preview";
 
 interface HeroProps {
   locale: AppLocale;
@@ -29,8 +29,11 @@ function HeroCard({
   className,
   rotation,
 }: HeroCardProps) {
-  const translation = getLocalizedValue(card.translations, locale);
-  const artworkAlt = getLocalizedValue(card.artwork.alt, locale);
+  const translation = getLocalizedValue(card.translations, locale) ?? {
+    name: `Card #${card.number}`,
+    description: "",
+  };
+  const artworkAlt = getLocalizedValue(card.artwork.alt, locale) ?? "";
 
   return (
     <article

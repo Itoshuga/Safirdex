@@ -5,7 +5,7 @@ import { SectionHeading } from "@/components/home/section-heading";
 import { Button } from "@/components/ui/button";
 import type { AppLocale } from "@/lib/i18n/locales";
 import type { Messages } from "@/lib/i18n/messages";
-import type { CardPreviewData } from "@/types/card";
+import type { CardPreviewData } from "@/types/card-preview";
 
 interface CardsSectionProps {
   locale: AppLocale;

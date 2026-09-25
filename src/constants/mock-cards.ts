@@ -1,4 +1,4 @@
-import type { CardPreviewData } from "@/types/card";
+import type { CardPreviewData } from "@/types/card-preview";
 
 export const mockCards: CardPreviewData[] = [
   {

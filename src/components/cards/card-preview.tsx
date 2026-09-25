@@ -6,7 +6,7 @@ import { Card as UiCard } from "@/components/ui/card";
 import { getLocalizedValue } from "@/lib/i18n/get-localized-value";
 import type { AppLocale } from "@/lib/i18n/locales";
 import type { Messages } from "@/lib/i18n/messages";
-import type { CardPreviewData } from "@/types/card";
+import type { CardPreviewData } from "@/types/card-preview";
 
 interface CardPreviewProps {
   card: CardPreviewData;
@@ -21,10 +21,13 @@ const statIcons = {
 };
 
 export function CardPreview({ card, locale, labels }: CardPreviewProps) {
-  const translation = getLocalizedValue(card.translations, locale);
-  const rarity = getLocalizedValue(card.rarity, locale);
-  const types = getLocalizedValue(card.types, locale);
-  const artworkAlt = getLocalizedValue(card.artwork.alt, locale);
+  const translation = getLocalizedValue(card.translations, locale) ?? {
+    name: `Card #${card.number}`,
+    description: "",
+  };
+  const rarity = getLocalizedValue(card.rarity, locale) ?? "";
+  const types = getLocalizedValue(card.types, locale) ?? [];
+  const artworkAlt = getLocalizedValue(card.artwork.alt, locale) ?? "";
   const stats = [
     { key: "attack" as const, value: card.attack },
     { key: "value" as const, value: card.value },

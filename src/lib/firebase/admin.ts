@@ -12,6 +12,14 @@ import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 
 function getAdminCredential() {
+  if (
+    process.env.FIRESTORE_EMULATOR_HOST ||
+    process.env.FIREBASE_AUTH_EMULATOR_HOST ||
+    process.env.STORAGE_EMULATOR_HOST
+  ) {
+    return undefined;
+  }
+
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(
@@ -27,10 +35,12 @@ function getAdminCredential() {
 }
 
 export function getFirebaseAdminApp() {
+  const credential = getAdminCredential();
+
   return getApps().length > 0
     ? getApp()
     : initializeApp({
-        credential: getAdminCredential(),
+        ...(credential ? { credential } : {}),
         projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
