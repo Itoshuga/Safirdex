@@ -8,34 +8,41 @@ import type { CardListItem } from "@/features/cards/types";
 
 export interface CardPreviewProps {
   card: CardListItem;
+  eager?: boolean;
   owned?: boolean;
   quantity?: number;
 }
 
-export function CardPreview({ card }: CardPreviewProps) {
+export function CardPreview({ card, eager = false }: CardPreviewProps) {
   const labels = useTranslations("Cards.labels");
   const stats = useTranslations("Cards.stats");
+  const isHorizontal = card.artwork.orientation === "horizontal";
 
   return (
-    <article className="group relative min-w-0">
+    <article className={`group relative min-w-0 ${isHorizontal ? "col-span-2" : ""}`}>
       <Link
         href={`/cards/${card.slug}`}
         prefetch={false}
-        className="block overflow-hidden rounded-2xl border bg-card transition duration-200 motion-reduce:transition-none hover:-translate-y-1 hover:border-safir/45 hover:shadow-[0_20px_45px_-28px_color-mix(in_oklch,var(--safir)_55%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring motion-reduce:hover:translate-y-0"
+        className="block h-full overflow-hidden rounded-2xl border bg-card transition duration-200 motion-reduce:transition-none hover:-translate-y-1 hover:border-safir/45 hover:shadow-[0_20px_45px_-28px_color-mix(in_oklch,var(--safir)_55%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring motion-reduce:hover:translate-y-0"
         aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
       >
-        <div className="relative aspect-[5/7] overflow-hidden bg-[radial-gradient(circle_at_50%_25%,color-mix(in_oklch,var(--safir)_14%,transparent),transparent_62%)]">
+        <div
+          className={`relative overflow-hidden bg-[radial-gradient(circle_at_50%_25%,color-mix(in_oklch,var(--safir)_14%,transparent),transparent_62%)] ${
+            isHorizontal ? "aspect-[37/25]" : "aspect-[5/7]"
+          }`}
+        >
           {card.artwork.url ? (
             <Image
               src={card.artwork.url}
               alt={card.artwork.alt}
               fill
-              className={
-                card.artwork.orientation === "horizontal"
-                  ? "object-contain p-3"
-                  : "object-cover"
+              loading={eager ? "eager" : "lazy"}
+              className="object-cover"
+              sizes={
+                isHorizontal
+                  ? "(max-width: 639px) 100vw, (max-width: 1023px) 66vw, (max-width: 1535px) 50vw, 34vw"
+                  : "(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1535px) 25vw, 17vw"
               }
-              sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, (max-width: 1535px) 25vw, 17vw"
             />
           ) : (
             <div className="grid h-full place-items-center text-muted-foreground/45">

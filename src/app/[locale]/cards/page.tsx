@@ -136,9 +136,9 @@ export default async function CardsPage({
             <CodexActiveFilters options={data.options} query={data.query} />
             {data.query.q ? <p className="text-[0.68rem] text-muted-foreground md:hidden">{results("searchNote")}</p> : null}
               {data.items.length ? (
-                <div className={data.query.view === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6" : "space-y-2.5"}>
-                  {data.items.map((card) => data.query.view === "grid"
-                    ? <CardPreview key={card.id} card={card} />
+                <div className={data.query.view === "grid" ? "grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6" : "space-y-2.5"}>
+                  {data.items.map((card, index) => data.query.view === "grid"
+                    ? <CardPreview key={card.id} card={card} eager={index < 2} />
                     : <CardListRow key={card.id} card={card} />)}
                 </div>
               ) : (
