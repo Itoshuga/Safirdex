@@ -6,7 +6,7 @@
 - Slugs are stable, human-readable URL identifiers. They are indexed fields, not primary keys.
 - Relationships use document IDs (`seasonId`, `setId`, `rarityId`, and `typeIds`) instead of translated labels.
 - All main entities carry Firestore `createdAt` and `updatedAt` timestamps. Repositories write these with `serverTimestamp()`.
-- Firestore documents remain normalized until measured performance requires deliberate denormalization.
+- Firestore reference IDs remain canonical. Card documents deliberately denormalize a small `display` snapshot for the read-heavy public Codex.
 
 ```mermaid
 erDiagram
@@ -25,7 +25,9 @@ erDiagram
 
 ### `cards/{cardId}`
 
-A card stores its stable `slug`, number, reference IDs, stats, flags, translations, primary artwork, optional alternatives, and timestamps. `number` is not globally unique: two seasons or sets may both contain card `#001`. `setId` is nullable because a card does not have to belong to a set.
+A card stores its stable `slug`, number, reference IDs, stats, flags, translations, primary artwork, optional alternatives, display snapshot, and timestamps. `number` is not globally unique: two seasons or sets may both contain card `#001`. `setId` is nullable because a card does not have to belong to a set.
+
+`display.season`, `display.set`, `display.rarity`, and `display.types` are read-model snapshots. They contain only the localized names and visuals required to render the catalogue and detail page. The related collections remain the source of truth; Admin updates propagate changes to affected cards in batches.
 
 Stats (`attack`, `value`, `defense`) are integers from 0 through 9 and are validated at runtime. `isPromo` and `isCommander` are intentionally simple flags. Future promo categories can be modeled through dedicated sets or an additional entity without changing existing IDs.
 
@@ -98,7 +100,7 @@ The stored key is independent of the displayed language. `extractGlossaryReferen
 
 ## Artwork and Storage
 
-Firestore persists `storagePath` as the source of truth. A cached `url` is optional because download URLs can change. `getStorageDownloadUrl()` resolves a current Firebase download URL when needed.
+Firestore persists `storagePath` as the source of truth and a token-backed `url` as the public read optimization. Public card rendering never resolves Storage URLs on demand.
 
 Path conventions:
 
@@ -122,7 +124,7 @@ UI → feature service → server-only repository → Firebase Admin / Firestore
 
 Converters inject `document.id` and validate every read with Zod. Repositories validate create/update DTOs, use generated Firestore IDs, and apply server timestamps. Firebase Admin modules carry `import "server-only"` so a Client Component cannot import them accidentally.
 
-`CardDetails` resolves a card with its season, optional set, rarity, and types on the server. These values are not duplicated in Firestore.
+The public Codex converts one autonomous card document into a locale-specific `CardListItem` or `CardDetailItem`. It does not resolve relations during reads.
 
 ## Indexes and future queries
 

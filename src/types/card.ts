@@ -1,4 +1,5 @@
 import type { CardArtwork } from "@/types/artwork";
+import type { CardDisplaySnapshot } from "@/types/card-display";
 import type { FirestoreEntity } from "@/types/firestore";
 import type {
   RequiredNameDescriptionTranslation,
@@ -21,6 +22,8 @@ export interface Card extends FirestoreEntity {
   translations: Translations<RequiredNameDescriptionTranslation>;
   artwork: CardArtwork;
   alternativeArtworks: CardArtwork[];
+  /** Read-optimized relation snapshot. Reference IDs remain the source of truth. */
+  display?: CardDisplaySnapshot;
 }
 
 export type CreateCardInput = Omit<Card, keyof FirestoreEntity>;

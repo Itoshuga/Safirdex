@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
 import { getLocalizedValue } from "@/lib/i18n/get-localized-value";
 import type { AppLocale } from "@/lib/i18n/locales";
 import { cn } from "@/lib/utils";
@@ -95,7 +96,7 @@ export function CodexSearch({
   }
 
   const quickLinks = [
-    { id: "cards", label: t("cards"), icon: BookOpen },
+    { id: "cards", label: t("cards"), icon: BookOpen, href: "/cards" as const },
     { id: "decks", label: t("decks"), icon: Layers3 },
     { id: "community", label: t("community"), icon: Users },
   ];
@@ -152,16 +153,23 @@ export function CodexSearch({
       </form>
 
       <nav className="mt-5 grid overflow-hidden rounded-xl border border-border/80 bg-card/55 text-left sm:grid-cols-3" aria-label={nav("quickAccess")}>
-        {quickLinks.map(({ id, label, icon: Icon }, index) => {
-          return (
-            <span
-              key={id}
-              aria-disabled="true"
-              className="flex min-h-14 cursor-default items-center gap-3 border-b px-4 text-xs font-medium text-muted-foreground last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0"
-            >
+        {quickLinks.map(({ id, label, icon: Icon, ...item }, index) => {
+          const content = (
+            <>
               <span className="font-mono text-[0.62rem] text-muted-foreground/55">0{index + 1}</span>
               <Icon className="size-3.5" />
               <span>{label}</span>
+            </>
+          );
+          const className = "flex min-h-14 items-center gap-3 border-b px-4 text-xs font-medium text-muted-foreground transition last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0";
+          const href = "href" in item ? item.href : undefined;
+          return href ? (
+            <Link key={id} href={href} className={`${className} hover:bg-muted/55 hover:text-foreground`}>
+              {content}
+            </Link>
+          ) : (
+            <span key={id} aria-disabled="true" className={`${className} cursor-default`}>
+              {content}
             </span>
           );
         })}

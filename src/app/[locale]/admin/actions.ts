@@ -3,12 +3,20 @@
 import { randomUUID } from "node:crypto";
 
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import type { AdminActionState } from "@/features/admin/action-state";
 import { compactTranslations } from "@/features/admin/form-mapping";
+import { CODEX_CACHE_TAGS } from "@/features/cards/server/cache-tags";
+import {
+  buildCardDisplaySnapshot,
+  syncCardTypeSnapshots,
+  syncRaritySnapshots,
+  syncSeasonSnapshots,
+  syncSetSnapshots,
+} from "@/features/cards/server/display-snapshots";
 import { requireAdminSession } from "@/lib/auth/admin-session";
 import { FIRESTORE_COLLECTIONS } from "@/lib/firebase/collections";
 import {
@@ -16,6 +24,7 @@ import {
   getFirebaseAdminStorage,
 } from "@/lib/firebase/admin";
 import { storagePaths } from "@/lib/firebase/storage-paths";
+import { buildFirebaseStorageUrl } from "@/lib/firebase/public-url";
 import { createUniqueSlug } from "@/lib/utils/slug";
 import { cardTypesRepository } from "@/repositories/card-types.repository";
 import { cardsRepository } from "@/repositories/cards.repository";
@@ -73,14 +82,18 @@ function validateImage(file: File, allowSvg = false) {
 }
 
 async function uploadFile(file: File, storagePath: string) {
+  const bucket = getFirebaseAdminStorage().bucket();
+  const downloadToken = randomUUID();
   const buffer = Buffer.from(await file.arrayBuffer());
-  await getFirebaseAdminStorage().bucket().file(storagePath).save(buffer, {
+  await bucket.file(storagePath).save(buffer, {
     resumable: false,
     metadata: {
       contentType: file.type,
       cacheControl: "public,max-age=31536000,immutable",
+      metadata: { firebaseStorageDownloadTokens: downloadToken },
     },
   });
+  return buildFirebaseStorageUrl(bucket.name, storagePath, downloadToken);
 }
 
 async function deleteStoragePrefix(prefix: string) {
@@ -141,6 +154,18 @@ async function failure(error: unknown): Promise<AdminActionState> {
 }
 
 type EntityKey = "card" | "season" | "set" | "rarity" | "type" | "glossaryEntry";
+
+function invalidateReferenceCache(entity: EntityKey) {
+  const tag = {
+    season: CODEX_CACHE_TAGS.seasons,
+    set: CODEX_CACHE_TAGS.sets,
+    rarity: CODEX_CACHE_TAGS.rarities,
+    type: CODEX_CACHE_TAGS.types,
+    glossaryEntry: CODEX_CACHE_TAGS.glossary,
+    card: CODEX_CACHE_TAGS.cards,
+  }[entity];
+  updateTag(tag);
+}
 
 async function entityFeedback(action: "created" | "deleted", entity: EntityKey) {
   const [t, entities] = await Promise.all([
@@ -238,11 +263,24 @@ async function uploadCardFiles(
   data: CreateCardInput,
   mainFile: File | null,
 ) {
-  if (mainFile) await uploadFile(mainFile, data.artwork.storagePath);
-  for (const artwork of data.alternativeArtworks) {
-    const file = optionalFile(formData, `alternativeArtwork:${artwork.id}`);
-    if (file) await uploadFile(file, artwork.storagePath);
+  const artwork = mainFile
+    ? {
+        ...data.artwork,
+        url: await uploadFile(mainFile, data.artwork.storagePath),
+      }
+    : data.artwork;
+  const alternativeArtworks = [];
+
+  for (const entry of data.alternativeArtworks) {
+    const file = optionalFile(formData, `alternativeArtwork:${entry.id}`);
+    alternativeArtworks.push(
+      file
+        ? { ...entry, url: await uploadFile(file, entry.storagePath) }
+        : entry,
+    );
   }
+
+  return { ...data, artwork, alternativeArtworks };
 }
 
 export async function createCardAction(
@@ -255,8 +293,11 @@ export async function createCardAction(
     cardId = getFirebaseAdminFirestore().collection(FIRESTORE_COLLECTIONS.cards).doc().id;
     const { data, mainFile } = await prepareCardData(formData, cardId);
     await assertUniqueSlug(data.slug, cardsRepository.getBySlug);
-    await uploadCardFiles(formData, data, mainFile);
-    await cardsRepository.createWithId(cardId, data);
+    const uploadedData = await uploadCardFiles(formData, data, mainFile);
+    const display = await buildCardDisplaySnapshot(uploadedData);
+    await cardsRepository.createWithId(cardId, { ...uploadedData, display });
+    updateTag(CODEX_CACHE_TAGS.cards);
+    updateTag(CODEX_CACHE_TAGS.card(uploadedData.slug));
     revalidatePath("/[locale]/admin", "page");
     revalidatePath("/[locale]/admin/cards", "page");
     return { status: "success", message: await entityFeedback("created", "card"), id: cardId };
@@ -276,12 +317,13 @@ export async function updateCardAction(
     const existing = await cardsRepository.getByIdOrThrow(id);
     const { data, mainFile } = await prepareCardData(formData, id, existing);
     await assertUniqueSlug(data.slug, cardsRepository.getBySlug, id);
-    await uploadCardFiles(formData, data, mainFile);
-    await cardsRepository.update(id, data);
+    const uploadedData = await uploadCardFiles(formData, data, mainFile);
+    const display = await buildCardDisplaySnapshot(uploadedData);
+    await cardsRepository.update(id, { ...uploadedData, display });
 
     const retained = new Set([
-      data.artwork.storagePath,
-      ...data.alternativeArtworks.map(({ storagePath }) => storagePath),
+      uploadedData.artwork.storagePath,
+      ...uploadedData.alternativeArtworks.map(({ storagePath }) => storagePath),
     ]);
     const removed = [existing.artwork, ...existing.alternativeArtworks].filter(
       ({ storagePath }) => !retained.has(storagePath),
@@ -291,6 +333,9 @@ export async function updateCardAction(
         getFirebaseAdminStorage().bucket().file(storagePath).delete({ ignoreNotFound: true }),
       ),
     );
+    updateTag(CODEX_CACHE_TAGS.cards);
+    updateTag(CODEX_CACHE_TAGS.card(existing.slug));
+    updateTag(CODEX_CACHE_TAGS.card(uploadedData.slug));
     revalidatePath("/[locale]/admin", "page");
     revalidatePath("/[locale]/admin/cards", "page");
     revalidatePath("/[locale]/admin/cards/[id]", "page");
@@ -304,8 +349,11 @@ export async function updateCardAction(
 export async function deleteCardAction(id: string): Promise<AdminActionState> {
   try {
     await requireAdminSession();
+    const existing = await cardsRepository.getByIdOrThrow(id);
     await cardsRepository.remove(id);
     await deleteStoragePrefix(`cards/${id}/`);
+    updateTag(CODEX_CACHE_TAGS.cards);
+    updateTag(CODEX_CACHE_TAGS.card(existing.slug));
     revalidatePath("/[locale]/admin", "page");
     revalidatePath("/[locale]/admin/cards", "page");
     return { status: "success", message: await entityFeedback("deleted", "card") };
@@ -324,16 +372,24 @@ export async function duplicateCardAction(id: string): Promise<AdminActionState>
       Boolean(await cardsRepository.getBySlug(candidate)),
     );
     const rewrite = async (storagePath: string, nextPath: string) => {
-      await getFirebaseAdminStorage().bucket().file(storagePath).copy(nextPath);
-      return nextPath;
+      const bucket = getFirebaseAdminStorage().bucket();
+      const [copiedFile] = await bucket.file(storagePath).copy(nextPath);
+      const downloadToken = randomUUID();
+      await copiedFile.setMetadata({
+        metadata: { firebaseStorageDownloadTokens: downloadToken },
+      });
+      return {
+        storagePath: nextPath,
+        url: buildFirebaseStorageUrl(bucket.name, nextPath, downloadToken),
+      };
     };
     const mainExtension = original.artwork.storagePath.split(".").pop() ?? "webp";
     const artwork = {
       ...original.artwork,
-      storagePath: await rewrite(
+      ...(await rewrite(
         original.artwork.storagePath,
         storagePaths.cardMainArtwork(newId, mainExtension),
-      ),
+      )),
     };
     const alternativeArtworks = await Promise.all(
       original.alternativeArtworks.map(async (entry, index) => {
@@ -343,17 +399,18 @@ export async function duplicateCardAction(id: string): Promise<AdminActionState>
           ...entry,
           id: artworkId,
           order: index,
-          storagePath: await rewrite(
+          ...(await rewrite(
             entry.storagePath,
             storagePaths.cardAlternativeArtwork(
               newId,
               artworkId,
               extension,
             ),
-          ),
+          )),
         };
       }),
     );
+    const display = await buildCardDisplaySnapshot(original);
     await cardsRepository.createWithId(newId, {
       number: original.number,
       slug,
@@ -370,7 +427,10 @@ export async function duplicateCardAction(id: string): Promise<AdminActionState>
       translations: original.translations,
       artwork,
       alternativeArtworks,
+      display,
     });
+    updateTag(CODEX_CACHE_TAGS.cards);
+    updateTag(CODEX_CACHE_TAGS.card(slug));
     revalidatePath("/[locale]/admin/cards", "page");
     const t = await getTranslations("Admin.feedback");
     return { status: "success", message: t("duplicated"), id: newId };
@@ -441,8 +501,11 @@ export async function createSeasonAction(
     }
     const data = seasonPayload(payload);
     await assertUniqueSlug(data.slug, seasonsRepository.getBySlug);
-    if (file && data.artwork) await uploadFile(file, data.artwork.storagePath);
+    if (file && data.artwork) {
+      data.artwork.url = await uploadFile(file, data.artwork.storagePath);
+    }
     await writeSeasonAtomically(id, data, "create");
+    updateTag(CODEX_CACHE_TAGS.seasons);
     revalidatePath("/[locale]/admin", "page");
     revalidatePath("/[locale]/admin/seasons", "page");
     return { status: "success", message: await entityFeedback("created", "season"), id };
@@ -468,11 +531,16 @@ export async function updateSeasonAction(
     }
     const data = seasonPayload(payload);
     await assertUniqueSlug(data.slug, seasonsRepository.getBySlug, id);
-    if (file && data.artwork) await uploadFile(file, data.artwork.storagePath);
+    if (file && data.artwork) {
+      data.artwork.url = await uploadFile(file, data.artwork.storagePath);
+    }
     await writeSeasonAtomically(id, data, "update");
+    await syncSeasonSnapshots(id);
     if (existing.artwork && !data.artwork) {
       await deleteStoragePrefix(`seasons/${id}/`);
     }
+    updateTag(CODEX_CACHE_TAGS.seasons);
+    updateTag(CODEX_CACHE_TAGS.cards);
     revalidatePath("/[locale]/admin", "page");
     revalidatePath("/[locale]/admin/seasons", "page");
     const t = await getTranslations("Admin.feedback");
@@ -596,13 +664,20 @@ async function saveVisualEntity<T extends CreateRarityInput | CreateCardTypeInpu
     const data = (kind === "rarity" ? rarityPayload(payload) : typePayload(payload)) as T;
     await assertUniqueSlug(data.slug, repository.getBySlug, id);
     if (file && data.visual?.iconStoragePath) {
-      await uploadFile(file, data.visual.iconStoragePath);
+      data.visual.iconUrl = await uploadFile(file, data.visual.iconStoragePath);
     }
     if (id) {
       await repository.update(id, data as never);
+      if (kind === "rarity") {
+        await syncRaritySnapshots(id);
+      } else {
+        await syncCardTypeSnapshots(id);
+      }
     } else {
       await repository.createWithId(entityId, data as never);
     }
+    invalidateReferenceCache(kind);
+    updateTag(CODEX_CACHE_TAGS.cards);
     revalidatePath("/[locale]/admin", "page");
     revalidatePath(kind === "rarity" ? "/[locale]/admin/rarities" : "/[locale]/admin/types", "page");
     return {
@@ -633,6 +708,7 @@ export async function createGlossaryAction(
       throw new Error(`The glossary key \"${data.key}\" is already in use.`);
     }
     const entry = await glossaryRepository.create(data);
+    invalidateReferenceCache("glossaryEntry");
     revalidatePath("/[locale]/admin", "page");
     revalidatePath("/[locale]/admin/glossary", "page");
     return { status: "success", message: await entityFeedback("created", "glossaryEntry"), id: entry.id };
@@ -655,6 +731,7 @@ export async function updateGlossaryAction(
       throw new Error(`The glossary key \"${data.key}\" is already in use.`);
     }
     await glossaryRepository.update(id, data);
+    invalidateReferenceCache("glossaryEntry");
     revalidatePath("/[locale]/admin/glossary", "page");
     const t = await getTranslations("Admin.feedback");
     return { status: "success", message: t("updated"), id };
@@ -680,6 +757,7 @@ async function saveSimpleEntity<T extends { slug: string }>(
     const data = parse(jsonPayload(formData));
     await assertUniqueSlug(data.slug, lookup);
     const entity = await create(data);
+    invalidateReferenceCache(name as EntityKey);
     revalidatePath("/[locale]/admin", "page");
     revalidatePath(`/[locale]${path}`, "page");
     return { status: "success", message: await entityFeedback("created", name as EntityKey), id: entity.id };
@@ -702,6 +780,11 @@ async function updateSimpleEntity<T extends { slug: string }>(
     const data = parse(jsonPayload(formData));
     await assertUniqueSlug(data.slug, lookup, id);
     await update(id, data);
+    if (name === "set") {
+      await syncSetSnapshots(id);
+      updateTag(CODEX_CACHE_TAGS.cards);
+    }
+    invalidateReferenceCache(name as EntityKey);
     revalidatePath(`/[locale]${path}`, "page");
     const t = await getTranslations("Admin.feedback");
     return { status: "success", message: t("updated"), id };
@@ -720,6 +803,12 @@ async function deleteEntity(
     await requireAdminSession();
     await remove(id);
     if (storagePrefix) await deleteStoragePrefix(storagePrefix);
+    invalidateReferenceCache(
+      (name === "glossary entry" ? "glossaryEntry" : name) as EntityKey,
+    );
+    if (["season", "set", "rarity", "type"].includes(name)) {
+      updateTag(CODEX_CACHE_TAGS.cards);
+    }
     revalidatePath("/[locale]/admin", "page");
     revalidatePath(`/[locale]/admin/${name === "type" ? "types" : name === "glossary entry" ? "glossary" : `${name}s`}`, "page");
     const entity = name === "glossary entry" ? "glossaryEntry" : name as EntityKey;

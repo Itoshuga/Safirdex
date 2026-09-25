@@ -1,10 +1,10 @@
-import * as rootParams from "next/root-params";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
 
 import { formats } from "@/i18n/formats";
 import { routing } from "@/i18n/routing";
+import type { AppLocale } from "@/lib/i18n/locales";
 
 const namespaces = [
   "common",
@@ -25,20 +25,28 @@ async function loadMessages(locale: string) {
   return Object.assign({}, ...modules.map((module) => module.default));
 }
 
-export default getRequestConfig(async ({ locale }) => {
+export default getRequestConfig(async ({ locale, requestLocale }) => {
+  let resolvedLocale: AppLocale;
+
   if (!locale) {
-    const paramValue = await rootParams.locale();
+    // `next/root-params` cannot run inside Server Actions. `requestLocale`
+    // resolves the locale propagated by next-intl's middleware and works in
+    // routes, Server Components and Server Actions alike.
+    const requestedLocale = await requestLocale;
 
-    if (!hasLocale(routing.locales, paramValue)) {
-      notFound();
+    if (!requestedLocale) {
+      resolvedLocale = routing.defaultLocale;
+    } else {
+      if (!hasLocale(routing.locales, requestedLocale)) notFound();
+      resolvedLocale = requestedLocale;
     }
-
-    locale = paramValue;
+  } else {
+    resolvedLocale = locale;
   }
 
   return {
-    locale,
-    messages: await loadMessages(locale),
+    locale: resolvedLocale,
+    messages: await loadMessages(resolvedLocale),
     formats,
     onError(error) {
       if (process.env.NODE_ENV === "development") {

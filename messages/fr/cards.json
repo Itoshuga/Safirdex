@@ -1,14 +1,92 @@
 {
   "Cards": {
+    "metadata": {
+      "title": "Codex des cartes — Safirdex",
+      "description": "Explorez toutes les cartes Safir par saison, édition, rareté et type."
+    },
+    "hero": {
+      "eyebrow": "Catalogue officiel",
+      "title": "Codex",
+      "description": "Explorez toutes les cartes de l’univers Safir, à travers les saisons, les éditions et les raretés."
+    },
     "stats": {
       "attack": "Attaque",
+      "attackShort": "ATK",
       "value": "Valeur",
-      "defense": "Défense"
+      "valueShort": "VAL",
+      "defense": "Défense",
+      "defenseShort": "DEF"
     },
     "labels": {
       "commander": "Commandant",
       "promo": "Promotionnelle",
-      "fallbackName": "Carte n°{number}"
+      "fallbackName": "Carte n°{number}",
+      "number": "N°{number}",
+      "season": "Saison",
+      "set": "Édition",
+      "rarity": "Rareté",
+      "types": "Types",
+      "description": "Description",
+      "alternativeArtworks": "Illustrations alternatives",
+      "mainArtwork": "Illustration principale",
+      "unknownRelation": "Information indisponible"
+    },
+    "filters": {
+      "title": "Filtres",
+      "description": "Affinez le catalogue sans charger de données supplémentaires par carte.",
+      "open": "Ouvrir les filtres",
+      "search": "Rechercher une carte…",
+      "searchLabel": "Rechercher par nom ou numéro",
+      "season": "Saison",
+      "set": "Édition",
+      "rarity": "Rareté",
+      "type": "Type",
+      "commander": "Commandant",
+      "promo": "Promo",
+      "sort": "Tri",
+      "all": "Tous",
+      "any": "Tous",
+      "yes": "Oui uniquement",
+      "no": "Non uniquement",
+      "sortNumber": "Numéro de carte",
+      "sortNewest": "Plus récentes",
+      "sortOldest": "Plus anciennes",
+      "searchGroup": "Recherche",
+      "catalogueGroup": "Catalogue",
+      "traitsGroup": "Caractéristiques",
+      "sortGroup": "Organisation",
+      "apply": "Afficher les résultats",
+      "clearAll": "Réinitialiser les filtres",
+      "active": "Filtres actifs",
+      "remove": "Retirer le filtre {filter}"
+    },
+    "results": {
+      "title": "Cartes",
+      "loaded": "{count, plural, =0 {Aucune carte chargée} =1 {1 carte chargée} other {# cartes chargées}}",
+      "filteredOnPage": "{count, plural, =0 {Aucun résultat sur cette page} =1 {1 résultat sur cette page} other {# résultats sur cette page}}",
+      "moreAvailable": "D’autres cartes sont disponibles.",
+      "loadMore": "Charger les 24 cartes suivantes",
+      "searchNote": "La recherche porte sur la page actuellement chargée.",
+      "emptyTitle": "Aucune carte ne correspond à ces filtres.",
+      "emptyDescription": "Modifiez votre recherche ou réinitialisez les filtres pour retrouver le catalogue.",
+      "reset": "Réinitialiser les filtres"
+    },
+    "display": {
+      "label": "Mode d’affichage",
+      "grid": "Grille",
+      "list": "Liste compacte"
+    },
+    "detail": {
+      "back": "Retour au Codex",
+      "metadataTitle": "{name} — Codex Safir",
+      "metadataFallback": "Découvrez cette carte dans le Codex Safir.",
+      "noDescription": "Aucune description n’est disponible pour cette carte.",
+      "gallery": "Galerie d’illustrations",
+      "glossaryDefinition": "Définition de {term}"
+    },
+    "loading": {
+      "catalogue": "Chargement du Codex",
+      "detail": "Chargement de la carte"
     }
   }
 }

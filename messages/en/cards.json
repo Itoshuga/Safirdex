@@ -1,14 +1,92 @@
 {
   "Cards": {
+    "metadata": {
+      "title": "Card Codex — Safirdex",
+      "description": "Explore every Safir card by season, set, rarity and type."
+    },
+    "hero": {
+      "eyebrow": "Official catalogue",
+      "title": "Codex",
+      "description": "Explore every card from the world of Safir across all seasons, sets and rarities."
+    },
     "stats": {
       "attack": "Attack",
+      "attackShort": "ATK",
       "value": "Value",
-      "defense": "Defense"
+      "valueShort": "VAL",
+      "defense": "Defense",
+      "defenseShort": "DEF"
     },
     "labels": {
       "commander": "Commander",
       "promo": "Promo",
-      "fallbackName": "Card #{number}"
+      "fallbackName": "Card #{number}",
+      "number": "#{number}",
+      "season": "Season",
+      "set": "Set",
+      "rarity": "Rarity",
+      "types": "Types",
+      "description": "Description",
+      "alternativeArtworks": "Alternative artworks",
+      "mainArtwork": "Main artwork",
+      "unknownRelation": "Information unavailable"
+    },
+    "filters": {
+      "title": "Filters",
+      "description": "Refine the catalogue without loading extra data for each card.",
+      "open": "Open filters",
+      "search": "Search cards…",
+      "searchLabel": "Search by name or number",
+      "season": "Season",
+      "set": "Set",
+      "rarity": "Rarity",
+      "type": "Type",
+      "commander": "Commander",
+      "promo": "Promo",
+      "sort": "Sort",
+      "all": "All",
+      "any": "Any",
+      "yes": "Yes only",
+      "no": "No only",
+      "sortNumber": "Card number",
+      "sortNewest": "Newest",
+      "sortOldest": "Oldest",
+      "searchGroup": "Search",
+      "catalogueGroup": "Catalogue",
+      "traitsGroup": "Characteristics",
+      "sortGroup": "Organisation",
+      "apply": "Show results",
+      "clearAll": "Clear all filters",
+      "active": "Active filters",
+      "remove": "Remove {filter} filter"
+    },
+    "results": {
+      "title": "Cards",
+      "loaded": "{count, plural, =0 {No cards loaded} =1 {1 card loaded} other {# cards loaded}}",
+      "filteredOnPage": "{count, plural, =0 {No results on this page} =1 {1 result on this page} other {# results on this page}}",
+      "moreAvailable": "More cards are available.",
+      "loadMore": "Load the next 24 cards",
+      "searchNote": "Search runs against the currently loaded page.",
+      "emptyTitle": "No cards match these filters.",
+      "emptyDescription": "Change your search or clear the filters to return to the catalogue.",
+      "reset": "Clear all filters"
+    },
+    "display": {
+      "label": "Display mode",
+      "grid": "Grid",
+      "list": "Compact list"
+    },
+    "detail": {
+      "back": "Back to the Codex",
+      "metadataTitle": "{name} — Safir Codex",
+      "metadataFallback": "Discover this card in the Safir Codex.",
+      "noDescription": "No description is available for this card.",
+      "gallery": "Artwork gallery",
+      "glossaryDefinition": "Definition of {term}"
+    },
+    "loading": {
+      "catalogue": "Loading the Codex",
+      "detail": "Loading card"
     }
   }
 }

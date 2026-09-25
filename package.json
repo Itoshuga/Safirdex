@@ -13,6 +13,7 @@
     "test:firebase-config": "tsx scripts/verify-firebase-config.ts",
     "firebase:seed": "tsx scripts/seed-firestore.ts",
     "firebase:seed:dry-run": "tsx scripts/seed-firestore.ts --dry-run",
+    "firebase:backfill-card-display": "tsx scripts/backfill-card-display.ts",
     "admin:set": "tsx scripts/set-admin.ts",
     "firebase:seed:emulator": "npx firebase-tools@15.31.0 emulators:exec --only firestore \"npm run firebase:seed\"",
     "firebase:emulators": "npx firebase-tools@15.31.0 emulators:start --only auth,firestore,storage"

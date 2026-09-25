@@ -7,6 +7,7 @@ import type {
 export interface RarityVisual {
   color?: string;
   iconStoragePath?: string;
+  iconUrl?: string;
 }
 
 export interface Rarity extends FirestoreEntity {

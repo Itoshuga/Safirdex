@@ -7,6 +7,7 @@ import type {
 export interface CardTypeVisual {
   color?: string;
   iconStoragePath?: string;
+  iconUrl?: string;
 }
 
 export interface CardType extends FirestoreEntity {

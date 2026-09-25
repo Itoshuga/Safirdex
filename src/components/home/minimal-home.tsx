@@ -1,11 +1,7 @@
-import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { CodexSearch } from "@/components/home/codex-search";
-import { LanguageSwitcher } from "@/components/language-switcher";
-import { SafirLogo } from "@/components/layout/safir-logo";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { Link } from "@/i18n/navigation";
+import { SiteHeader } from "@/components/layout/site-header";
 import type { CardPreviewData } from "@/types/card-preview";
 
 export function MinimalHome({
@@ -16,7 +12,6 @@ export function MinimalHome({
   signedIn: boolean;
 }) {
   const t = useTranslations("Home");
-  const nav = useTranslations("Navigation");
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-background">
@@ -25,27 +20,7 @@ export function MinimalHome({
         <div className="absolute top-[-28rem] left-1/2 h-[38rem] w-[58rem] -translate-x-1/2 rotate-[-8deg] bg-safir/9 blur-[100px]" />
       </div>
 
-      <header className="relative z-40 mx-auto flex h-20 w-full max-w-[90rem] items-center justify-between border-b border-border/55 px-5 sm:px-8 lg:px-12">
-        <Link
-          href="/"
-          className="group inline-flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-          aria-label={t("brandHome")}
-        >
-          <SafirLogo className="size-8" />
-          <span className="font-heading text-sm font-semibold tracking-[-0.02em]">Safirdex</span>
-        </Link>
-        <div className="flex items-center gap-1">
-          <LanguageSwitcher />
-          <ThemeToggle />
-          <Link
-            href={signedIn ? "/account" : "/login"}
-            className="ml-2 inline-flex h-9 items-center gap-1.5 border-l pl-4 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
-          >
-            <span>{signedIn ? nav("account") : nav("login")}</span>
-            <ArrowUpRight className="size-3.5" />
-          </Link>
-        </div>
-      </header>
+      <SiteHeader signedIn={signedIn} />
 
       <main className="relative z-10 mx-auto flex min-h-[calc(100svh-10rem)] w-full max-w-5xl flex-col items-center px-5 pt-[12svh] text-center sm:px-8 sm:pt-[14svh]">
         <div className="inline-flex items-center gap-2.5 text-[0.68rem] font-semibold tracking-[0.12em] text-safir uppercase">

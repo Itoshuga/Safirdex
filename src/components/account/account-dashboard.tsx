@@ -80,6 +80,13 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
         <div className="flex items-center gap-1">
           <LanguageSwitcher />
           <ThemeToggle />
+          <Link
+            href="/cards"
+            className="ml-1 inline-flex h-9 items-center gap-1.5 px-2 text-xs font-semibold text-muted-foreground transition hover:text-foreground sm:px-3"
+          >
+            <BookOpen className="size-3.5" />
+            <span className="hidden sm:inline">{nav("cards")}</span>
+          </Link>
           <Button
             type="button"
             variant="ghost"
@@ -133,7 +140,7 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
               </p>
               <Button
                 nativeButton={false}
-                render={<Link href="/" />}
+                render={<Link href="/cards" />}
                 className="mt-7 h-10"
               >
                 {t("explore")} <ArrowRight />

@@ -14,6 +14,7 @@ import {
   getAdminCollection,
   getTypedAdminCollection,
 } from "@/lib/firebase/firestore";
+import { getFirebaseAdminFirestore } from "@/lib/firebase/admin";
 import {
   EntityNotFoundError,
   RepositoryValidationError,
@@ -129,6 +130,24 @@ export function createFirestoreRepository<
     getAll: runQuery,
     getById,
     getByIdOrThrow,
+    getManyByIds: async (ids: string[]) => {
+      const uniqueIds = [...new Set(ids)];
+      if (uniqueIds.length === 0) return [];
+
+      const references = uniqueIds.map((id) => typedCollection().doc(id));
+      const snapshots = await getFirebaseAdminFirestore().getAll(...references);
+      const byId = new Map(
+        snapshots
+          .map((snapshot) => snapshot.data())
+          .filter((entity): entity is TEntity => Boolean(entity))
+          .map((entity) => [entity.id, entity]),
+      );
+
+      return uniqueIds.flatMap((id) => {
+        const entity = byId.get(id);
+        return entity ? [entity] : [];
+      });
+    },
     findOne: async (options: QueryOptions<TEntity>) => {
       const [entity] = await runQuery({ ...options, limit: 1 });
       return entity ?? null;

@@ -46,6 +46,34 @@ export const cardArtworkSchema = z.object({
   translations: translationsSchema(artworkTranslationSchema).optional(),
 });
 
+const displayNameTranslationsSchema = translationsSchema(
+  z.object({ name: requiredStringSchema }),
+);
+
+const cardDisplayEntitySchema = z.object({
+  id: requiredStringSchema,
+  slug: slugSchema,
+  translations: displayNameTranslationsSchema,
+});
+
+const cardDisplayVisualEntitySchema = cardDisplayEntitySchema.extend({
+  visual: z
+    .object({
+      color: z.string().trim().max(32).optional(),
+      iconUrl: z.url().optional(),
+    })
+    .optional(),
+});
+
+export const cardDisplaySnapshotSchema = z.object({
+  season: cardDisplayEntitySchema,
+  set: cardDisplayEntitySchema.optional(),
+  rarity: cardDisplayVisualEntitySchema.extend({
+    order: z.number().int().nonnegative(),
+  }),
+  types: z.array(cardDisplayVisualEntitySchema).max(20),
+});
+
 export const cardStatSchema = z.number().int().min(0).max(9);
 
 export const createCardSchema = z.object({
@@ -64,6 +92,7 @@ export const createCardSchema = z.object({
   translations: translationsSchema(requiredNameDescriptionTranslationSchema),
   artwork: cardArtworkSchema,
   alternativeArtworks: z.array(cardArtworkSchema).max(30),
+  display: cardDisplaySnapshotSchema.optional(),
 });
 
 export const updateCardSchema = nonEmptyUpdate(createCardSchema);
@@ -105,6 +134,7 @@ const visualSchema = z.object({
     .regex(/^#[0-9a-fA-F]{3,8}$/, "Use a hexadecimal color.")
     .optional(),
   iconStoragePath: storagePathSchema.optional(),
+  iconUrl: z.url().optional(),
 });
 
 export const createRaritySchema = z.object({

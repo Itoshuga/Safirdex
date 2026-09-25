@@ -305,6 +305,16 @@ function buildCardInput(
   cardId: string,
   references: SeedReferences,
 ): CreateCardInput {
+  const rarity = rarityDefinitions.find(
+    (entry) => entry.slug === definition.rarity,
+  );
+  const types = definition.types.map((slug) => {
+    const type = typeDefinitions.find((entry) => entry.slug === slug);
+    if (!type) throw new Error(`Unknown seed card type: ${slug}`);
+    return type;
+  });
+  if (!rarity) throw new Error(`Unknown seed rarity: ${definition.rarity}`);
+
   return {
     number: definition.number,
     slug: definition.slug,
@@ -342,6 +352,52 @@ function buildCardInput(
           },
         ]
       : [],
+    display: {
+      season: {
+        id: references.seasonId,
+        slug: seasonDefinition.slug,
+        translations: Object.fromEntries(
+          Object.entries(seasonDefinition.translations).map(
+            ([locale, translation]) => [locale, { name: translation.name }],
+          ),
+        ),
+      },
+      ...(definition.withoutSet
+        ? {}
+        : {
+            set: {
+              id: references.setId,
+              slug: setDefinition.slug,
+              translations: Object.fromEntries(
+                Object.entries(setDefinition.translations).map(
+                  ([locale, translation]) => [locale, { name: translation.name }],
+                ),
+              ),
+            },
+          }),
+      rarity: {
+        id: references.rarityIds[rarity.slug],
+        slug: rarity.slug,
+        order: rarity.order,
+        visual: { color: rarity.visual.color },
+        translations: Object.fromEntries(
+          Object.entries(rarity.translations).map(([locale, translation]) => [
+            locale,
+            { name: translation.name },
+          ]),
+        ),
+      },
+      types: types.map((type) => ({
+        id: references.typeIds[type.slug],
+        slug: type.slug,
+        translations: Object.fromEntries(
+          Object.entries(type.translations).map(([locale, translation]) => [
+            locale,
+            { name: translation.name },
+          ]),
+        ),
+      })),
+    },
   };
 }
 
