@@ -11,6 +11,7 @@ import type {
   CodexFilterOptions,
   CodexPageData,
   CodexQueryState,
+  HomeCardSearchItem,
 } from "@/features/cards/types";
 import { tokenizeGlossaryContent } from "@/lib/glossary/references";
 import {
@@ -241,6 +242,42 @@ const getCachedPage = unstable_cache(
   ["codex-card-pages-v1"],
   { tags: [CODEX_CACHE_TAGS.cards], revalidate: 300 },
 );
+
+const getCachedHomeCards = unstable_cache(
+  async (locale: string): Promise<HomeCardSearchItem[]> => {
+    logCacheMiss(`home card search (${locale})`);
+    const cards = await cardsRepository.getAll();
+
+    return cards.map((card) => {
+      const translation = getTranslation(card.translations, locale);
+      return {
+        id: card.id,
+        slug: card.slug,
+        number: card.number,
+        name: translation?.name ?? `#${card.number}`,
+        description: translation?.description ?? "",
+        attack: card.attack,
+        value: card.value,
+        defense: card.defense,
+        isCommander: card.isCommander,
+        isPromo: card.isPromo,
+        rarityName: card.display?.rarity
+          ? getLocalizedName(card.display.rarity.translations, locale)
+          : "",
+        typeNames:
+          card.display?.types.map((type) =>
+            getLocalizedName(type.translations, locale),
+          ) ?? [],
+      };
+    });
+  },
+  ["codex-home-card-search-v1"],
+  { tags: [CODEX_CACHE_TAGS.cards], revalidate: 3_600 },
+);
+
+export async function getHomeCodexCards(locale: string) {
+  return getCachedHomeCards(locale);
+}
 
 function parseQuery(searchParams: RawSearchParams, options: CodexFilterOptions) {
   const parsed = rawQuerySchema.parse(

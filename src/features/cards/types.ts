@@ -11,6 +11,21 @@ export interface CodexVisualEntityItem extends CodexEntityItem {
   iconUrl?: string;
 }
 
+export interface HomeCardSearchItem {
+  id: string;
+  slug: string;
+  number: number;
+  name: string;
+  description: string;
+  attack: number;
+  value: number;
+  defense: number;
+  isCommander: boolean;
+  isPromo: boolean;
+  rarityName: string;
+  typeNames: string[];
+}
+
 export interface CardListItem {
   id: string;
   number: number;

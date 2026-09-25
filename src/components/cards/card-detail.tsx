@@ -18,16 +18,28 @@ function Artwork({
   orientation: "vertical" | "horizontal";
   priority?: boolean;
 }) {
+  const isHorizontal = orientation === "horizontal";
+
   return (
-    <div className="relative aspect-[5/7] overflow-hidden rounded-2xl border bg-[radial-gradient(circle_at_50%_25%,color-mix(in_oklch,var(--safir)_15%,transparent),transparent_62%)]">
+    <div
+      className={`relative overflow-hidden rounded-2xl border bg-[radial-gradient(circle_at_50%_25%,color-mix(in_oklch,var(--safir)_15%,transparent),transparent_62%)] ${
+        isHorizontal ? "aspect-[7/5]" : "aspect-[5/7]"
+      }`}
+    >
       {url ? (
         <Image
           src={url}
           alt={alt}
           fill
-          priority={priority}
-          className={orientation === "horizontal" ? "object-contain p-4" : "object-cover"}
-          sizes="(max-width: 767px) 100vw, 42vw"
+          preload={priority}
+          className="object-cover"
+          sizes={
+            priority
+              ? isHorizontal
+                ? "(max-width: 1023px) 100vw, 62vw"
+                : "(max-width: 767px) 100vw, 42vw"
+              : "(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 25vw"
+          }
         />
       ) : (
         <div className="grid h-full place-items-center text-muted-foreground/45">
@@ -42,14 +54,21 @@ export function CardDetail({ card }: { card: CardDetailItem }) {
   const labels = useTranslations("Cards.labels");
   const stats = useTranslations("Cards.stats");
   const detail = useTranslations("Cards.detail");
+  const isHorizontal = card.artwork.orientation === "horizontal";
 
   return (
     <main className="site-container py-8 sm:py-12">
       <Link href="/cards" className="mb-7 inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition hover:text-foreground">
         <ArrowLeft className="size-4" /> {detail("back")}
       </Link>
-      <article className="grid gap-8 lg:grid-cols-[minmax(20rem,0.82fr)_minmax(0,1.18fr)] lg:gap-14">
-        <div className="mx-auto w-full max-w-[34rem]">
+      <article
+        className={`grid gap-8 ${
+          isHorizontal
+            ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)] lg:items-center lg:gap-12"
+            : "lg:grid-cols-[minmax(20rem,0.82fr)_minmax(0,1.18fr)] lg:gap-14"
+        }`}
+      >
+        <div className={`mx-auto w-full ${isHorizontal ? "max-w-3xl" : "max-w-[34rem]"}`}>
           <Artwork {...card.artwork} priority />
         </div>
         <div className="flex min-w-0 flex-col justify-center">

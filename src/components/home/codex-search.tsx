@@ -9,14 +9,12 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
+import type { HomeCardSearchItem } from "@/features/cards/types";
 import { Link } from "@/i18n/navigation";
-import { getLocalizedValue } from "@/lib/i18n/get-localized-value";
-import type { AppLocale } from "@/lib/i18n/locales";
 import { cn } from "@/lib/utils";
-import type { CardPreviewData } from "@/types/card-preview";
 
 function normalize(value: string) {
   return value
@@ -29,9 +27,8 @@ function normalize(value: string) {
 export function CodexSearch({
   cards,
 }: {
-  cards: CardPreviewData[];
+  cards: HomeCardSearchItem[];
 }) {
-  const locale = useLocale() as AppLocale;
   const t = useTranslations("Home.search");
   const stats = useTranslations("Cards.stats");
   const labels = useTranslations("Cards.labels");
@@ -73,22 +70,23 @@ export function CodexSearch({
     const normalizedQuery = normalize(query);
     return cards.filter((card) => {
       if (!normalizedQuery) return true;
-      const translation = getLocalizedValue(card.translations, locale);
       const searchable = normalize(
         [
-          translation?.name,
-          translation?.description,
+          card.name,
+          card.description,
           card.number,
           card.attack,
           card.value,
           card.defense,
+          card.rarityName,
+          ...card.typeNames,
         ]
           .filter((value) => value !== undefined)
           .join(" "),
       );
       return searchable.includes(normalizedQuery);
     });
-  }, [cards, locale, query]);
+  }, [cards, query]);
 
   function clearSearch() {
     setQuery("");
@@ -188,12 +186,11 @@ export function CodexSearch({
           <div className="max-h-[min(24rem,55svh)] overflow-y-auto p-1.5">
             {results.length ? (
               results.map((card) => {
-                const translation = getLocalizedValue(card.translations, locale);
-                const rarity = getLocalizedValue(card.rarity, locale) ?? "";
-                const types = getLocalizedValue(card.types, locale) ?? [];
                 return (
-                  <article
+                  <Link
                     key={card.id}
+                    href={`/cards/${card.slug}`}
+                    prefetch={false}
                     className="group flex items-center gap-3 rounded-lg px-3 py-3 transition hover:bg-muted/65 sm:px-4"
                   >
                     <span className="grid size-10 shrink-0 place-items-center rounded-lg border bg-background font-mono text-[0.65rem] font-semibold text-safir">
@@ -202,13 +199,13 @@ export function CodexSearch({
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
                         <p className="truncate text-sm font-medium">
-                          {translation?.name ?? `#${card.number}`}
+                          {card.name}
                         </p>
                         {card.isCommander ? <Badge className="hidden sm:inline-flex" variant="secondary">{labels("commander")}</Badge> : null}
                         {card.isPromo ? <Badge className="hidden sm:inline-flex" variant="outline">{labels("promo")}</Badge> : null}
                       </div>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                        #{String(card.number).padStart(3, "0")} · {[rarity, ...types].filter(Boolean).join(" · ")}
+                        #{String(card.number).padStart(3, "0")} · {[card.rarityName, ...card.typeNames].filter(Boolean).join(" · ")}
                       </p>
                     </div>
                     <dl className="hidden shrink-0 grid-cols-3 gap-1.5 sm:grid">
@@ -223,7 +220,7 @@ export function CodexSearch({
                         </div>
                       ))}
                     </dl>
-                  </article>
+                  </Link>
                 );
               })
             ) : (

@@ -2,13 +2,13 @@ import { useTranslations } from "next-intl";
 
 import { CodexSearch } from "@/components/home/codex-search";
 import { SiteHeader } from "@/components/layout/site-header";
-import type { CardPreviewData } from "@/types/card-preview";
+import type { HomeCardSearchItem } from "@/features/cards/types";
 
 export function MinimalHome({
   cards,
   signedIn,
 }: {
-  cards: CardPreviewData[];
+  cards: HomeCardSearchItem[];
   signedIn: boolean;
 }) {
   const t = useTranslations("Home");

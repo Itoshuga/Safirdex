@@ -25,6 +25,12 @@ The look-ahead document is an intentional pagination trade-off. It avoids a coun
 
 Season, set, rarity, types, main artwork, and alternative artworks are already embedded in the card document. A warm detail-cache request should not reach Firestore.
 
+## Home search target
+
+The home page performs one collection query on a cold `codex-home-card-search` cache and builds a lightweight localized index in memory. That cache lives for one hour and shares the `codex:cards` tag, so every card mutation expires it immediately. Warm home requests perform no Firestore reads, and the counter is the index length rather than a second count query.
+
+This deliberately trades one cold read of each card for complete client-side home search. It performs no relation queries because the searchable rarity and type names come from each card's `display` snapshot.
+
 ## Filter strategy
 
 The repository executes one bounded query. It never fetches the complete collection and never uses `offset`. One selective server predicate limits the candidate page; additional filters and text search operate on those 24 candidates server-side. This caps ordinary catalogue reads at 25 even for complex filter URLs.

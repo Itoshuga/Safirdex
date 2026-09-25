@@ -1,12 +1,22 @@
 import { MinimalHome } from "@/components/home/minimal-home";
-import { mockCards } from "@/constants/mock-cards";
+import { getHomeCodexCards } from "@/features/cards/server/codex-service";
 import { getUserSession } from "@/lib/auth/user-session";
-export default async function HomePage() {
-  const session = await getUserSession();
+import type { AppLocale } from "@/lib/i18n/locales";
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: AppLocale }>;
+}) {
+  const { locale } = await params;
+  const [session, cards] = await Promise.all([
+    getUserSession(),
+    getHomeCodexCards(locale),
+  ]);
 
   return (
     <MinimalHome
-      cards={mockCards}
+      cards={cards}
       signedIn={Boolean(session)}
     />
   );

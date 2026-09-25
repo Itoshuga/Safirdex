@@ -20,6 +20,8 @@ Filters live in a left-hand drawer on every breakpoint instead of permanently re
 
 Two URL-backed presentation modes are available: the image-first grid (`view=grid`, omitted by default) and a compact list (`view=list`). Switching modes preserves filters, sorting, search, and the current cursor without issuing additional Firestore queries.
 
+The home search and its “cards in the Codex” counter use the real `cards` collection. A localized, lightweight search DTO is built on the server, so the browser receives names, slugs, flags and statistics rather than complete Firestore documents. Search results link directly to `/cards/{slug}`; the former mock-card source has been removed.
+
 ## Read model
 
 Reference IDs (`seasonId`, `setId`, `rarityId`, and `typeIds`) remain canonical. Each card also stores a `display` snapshot containing the localized names and visual information required by the public UI.
