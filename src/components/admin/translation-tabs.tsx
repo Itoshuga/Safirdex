@@ -2,6 +2,7 @@
 
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 import {
@@ -23,11 +24,12 @@ export function TranslationTabs({
   fields: { key: string; label: string; multiline?: boolean; placeholder?: string }[];
   requiredField: string;
 }) {
+  const t = useTranslations("Admin.forms");
   const [activeLocale, setActiveLocale] = useState<AppLocale>(SUPPORTED_LOCALES[0]);
 
   return (
     <div>
-      <div className="mb-5 flex gap-1 border-b" role="tablist" aria-label="Translations">
+      <div className="mb-5 flex gap-1 border-b" role="tablist" aria-label={t("translations")}>
         {SUPPORTED_LOCALES.map((locale) => {
           const complete = Boolean(value[locale]?.[requiredField]?.trim());
           return (

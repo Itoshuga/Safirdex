@@ -1,0 +1,55 @@
+{
+  "Common": {
+    "actions": {
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting…",
+      "edit": "Edit",
+      "create": "Create",
+      "add": "Add",
+      "close": "Close",
+      "confirm": "Confirm",
+      "back": "Back",
+      "continue": "Continue",
+      "search": "Search",
+      "filter": "Filter",
+      "clear": "Clear",
+      "duplicate": "Duplicate",
+      "dismiss": "Dismiss notification",
+      "viewAll": "View all",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "states": {
+      "loading": "Loading…",
+      "error": "Something went wrong",
+      "empty": "No results",
+      "active": "Active",
+      "inactive": "Inactive",
+      "unknown": "Unknown",
+      "notSet": "Not set"
+      ,"untitled": "Untitled"
+    },
+    "theme": {
+      "light": "Switch to light mode",
+      "dark": "Switch to dark mode"
+    },
+    "pagination": {
+      "range": "{first}–{last} of {total}",
+      "page": "Page {page} / {pages}",
+      "items": "{count, plural, =0 {0 items} =1 {1 item} other {# items}}"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you requested does not exist or has moved.",
+      "backHome": "Back to home"
+    },
+    "errors": {
+      "title": "Something went wrong",
+      "description": "The page could not be loaded.",
+      "retry": "Try again"
+    }
+  }
+}

@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 import { useSyncExternalStore } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 const emptySubscribe = () => () => undefined;
 
 export function ThemeToggle() {
+  const t = useTranslations("Common.theme");
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -17,7 +19,7 @@ export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
 
   const isDark = mounted ? resolvedTheme === "dark" : true;
-  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
+  const label = isDark ? t("light") : t("dark");
 
   return (
     <Button

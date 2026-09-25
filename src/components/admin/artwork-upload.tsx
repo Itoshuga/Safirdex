@@ -2,6 +2,7 @@
 
 import { ImagePlus, RefreshCw, Trash2, UploadCloud } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { StorageImage } from "@/components/admin/storage-image";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export function ArtworkUpload({
   onFileChange?: (hasFile: boolean) => void;
   compact?: boolean;
 }) {
+  const t = useTranslations("Admin.forms");
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState("");
@@ -71,14 +73,14 @@ export function ArtworkUpload({
               className={cn("rounded-xl border bg-muted bg-contain bg-center bg-no-repeat", frameClass)}
               style={{ backgroundImage: `url(${JSON.stringify(preview)})` }}
               role="img"
-              aria-label="Selected artwork preview"
+              aria-label={t("selectedArtworkPreview")}
             />
           ) : (
-            <StorageImage storagePath={storagePath} url={sourceUrl} alt="Artwork preview" className={cn("rounded-xl border", frameClass)} />
+            <StorageImage storagePath={storagePath} url={sourceUrl} alt={t("artworkPreview")} className={cn("rounded-xl border", frameClass)} />
           )}
           <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}><RefreshCw /> Replace</Button>
-            {onRemove ? <Button type="button" variant="destructive" size="sm" onClick={clear}><Trash2 /> Remove</Button> : null}
+            <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}><RefreshCw /> {t("replace")}</Button>
+            {onRemove ? <Button type="button" variant="destructive" size="sm" onClick={clear}><Trash2 /> {t("remove")}</Button> : null}
           </div>
         </div>
       ) : (
@@ -104,13 +106,13 @@ export function ArtworkUpload({
         >
           <span>
             <span className="mx-auto mb-3 grid size-10 place-items-center rounded-xl bg-safir/10 text-safir"><UploadCloud className="size-5" /></span>
-            <span className="block text-sm font-medium">Drop artwork here or choose a file</span>
-            <span className="mt-1 block text-xs text-muted-foreground">JPG, PNG, WebP or AVIF · up to 15 MB</span>
+            <span className="block text-sm font-medium">{t("dropArtwork")}</span>
+            <span className="mt-1 block text-xs text-muted-foreground">{t("artworkLimits")}</span>
           </span>
         </label>
       )}
       {!preview && !storagePath && !sourceUrl && compact ? (
-        <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}><ImagePlus /> Select artwork</Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}><ImagePlus /> {t("selectArtwork")}</Button>
       ) : null}
     </div>
   );

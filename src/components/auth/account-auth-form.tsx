@@ -24,10 +24,11 @@ import {
   RotateCw,
   UserRound,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 import { cn } from "@/lib/utils";
 
@@ -41,34 +42,42 @@ interface ApiResponse {
   message?: string;
 }
 
-function getAuthMessage(error: unknown) {
+type AuthErrorKey =
+  | "errors.emailInUse"
+  | "errors.invalidEmail"
+  | "errors.weakPassword"
+  | "errors.invalidCredential"
+  | "errors.tooManyRequests"
+  | "errors.network"
+  | "errors.unavailable"
+  | "errors.unexpected";
+
+function getAuthMessage(error: unknown, translate: (key: AuthErrorKey) => string) {
   if (error instanceof FirebaseError) {
     switch (error.code) {
       case "auth/email-already-in-use":
-        return "Un compte utilise déjà cette adresse e-mail.";
+        return translate("errors.emailInUse");
       case "auth/invalid-email":
-        return "Cette adresse e-mail n’est pas valide.";
+        return translate("errors.invalidEmail");
       case "auth/weak-password":
-        return "Le mot de passe n’est pas assez robuste.";
+        return translate("errors.weakPassword");
       case "auth/invalid-credential":
       case "auth/user-not-found":
       case "auth/wrong-password":
-        return "L’adresse e-mail ou le mot de passe est incorrect.";
+        return translate("errors.invalidCredential");
       case "auth/too-many-requests":
-        return "Trop de tentatives. Réessaie dans quelques minutes.";
+        return translate("errors.tooManyRequests");
       case "auth/network-request-failed":
-        return "La connexion au service est impossible. Vérifie ton réseau.";
+        return translate("errors.network");
       default:
-        return "L’authentification est momentanément indisponible.";
+        return translate("errors.unavailable");
     }
   }
 
-  return error instanceof Error
-    ? error.message
-    : "Une erreur inattendue est survenue.";
+  return error instanceof Error ? error.message : translate("errors.unexpected");
 }
 
-async function initializeAccount(user: User) {
+async function initializeAccount(user: User, fallbackMessage: string) {
   const idToken = await user.getIdToken(true);
   const response = await fetch("/api/auth/onboarding", {
     method: "POST",
@@ -77,12 +86,13 @@ async function initializeAccount(user: User) {
   });
 
   if (!response.ok) {
-    const body = (await response.json()) as ApiResponse;
-    throw new Error(body.message ?? "Le compte n’a pas pu être initialisé.");
+    throw new Error(fallbackMessage);
   }
 }
 
 export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
+  const t = useTranslations("Auth");
+  const locale = useLocale();
   const router = useRouter();
   const authActionRunning = useRef(false);
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -117,14 +127,14 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
         return "profile";
       }
       if (!response.ok) {
-        throw new Error(body.message ?? "La session n’a pas pu être créée.");
+        throw new Error(t("errors.sessionCreation"));
       }
 
       router.replace(body.isAdmin ? "/admin" : "/account");
       router.refresh();
       return "redirected";
     },
-    [router],
+    [router, t],
   );
 
   useEffect(() => {
@@ -135,7 +145,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
       setPending(true);
       setAccountEmail(user.email ?? "");
 
-      void initializeAccount(user)
+      void initializeAccount(user, t("errors.accountInitialization"))
         .then(async () => {
           if (!user.emailVerified) {
             setMode("signup");
@@ -144,13 +154,15 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
           }
           await establishSession(user);
         })
-        .catch((authError: unknown) => setError(getAuthMessage(authError)))
+        .catch((authError: unknown) =>
+          setError(getAuthMessage(authError, (key) => t(key))),
+        )
         .finally(() => {
           authActionRunning.current = false;
           setPending(false);
         });
     });
-  }, [establishSession]);
+  }, [establishSession, t]);
 
   async function selectMode(nextMode: AuthMode) {
     if (mode === nextMode && signupStep === "credentials") return;
@@ -186,21 +198,21 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
         !/[0-9]/.test(password))
     ) {
       setError(
-        "Choisis un mot de passe d’au moins 8 caractères avec une lettre et un chiffre.",
+        t("validation.weakPassword"),
       );
       setPending(false);
       authActionRunning.current = false;
       return;
     }
     if (mode === "signup" && password !== passwordConfirmation) {
-      setError("Les deux mots de passe ne correspondent pas.");
+      setError(t("validation.passwordMismatch"));
       setPending(false);
       authActionRunning.current = false;
       return;
     }
 
     const auth = getFirebaseAuth();
-    auth.languageCode = "fr";
+    auth.languageCode = locale;
 
     try {
       const credential =
@@ -208,13 +220,13 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
           ? await createUserWithEmailAndPassword(auth, email, password)
           : await signInWithEmailAndPassword(auth, email, password);
 
-      await initializeAccount(credential.user);
+      await initializeAccount(credential.user, t("errors.accountInitialization"));
       setAccountEmail(credential.user.email ?? email);
 
       if (mode === "signup") {
         await sendEmailVerification(credential.user);
         setSignupStep("verification");
-        setNotice("L’e-mail de validation a bien été envoyé.");
+        setNotice(t("notices.verificationSent"));
       } else if (!credential.user.emailVerified) {
         setMode("signup");
         setSignupStep("verification");
@@ -222,7 +234,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
         await establishSession(credential.user);
       }
     } catch (authError) {
-      setError(getAuthMessage(authError));
+      setError(getAuthMessage(authError, (key) => t(key)));
     } finally {
       setPending(false);
       authActionRunning.current = false;
@@ -233,7 +245,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
     const user = getFirebaseAuth().currentUser;
 
     if (!user) {
-      setError("La session a expiré. Reconnecte-toi pour continuer.");
+      setError(t("errors.sessionExpired"));
       return;
     }
 
@@ -246,16 +258,16 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
       await reload(user);
       if (!user.emailVerified) {
         setError(
-          "L’adresse n’est pas encore validée. Clique d’abord sur le lien reçu par e-mail.",
+          t("errors.emailNotVerified"),
         );
         return;
       }
 
       await user.getIdToken(true);
-      await initializeAccount(user);
+      await initializeAccount(user, t("errors.accountInitialization"));
       await establishSession(user);
     } catch (authError) {
-      setError(getAuthMessage(authError));
+      setError(getAuthMessage(authError, (key) => t(key)));
     } finally {
       setPending(false);
       authActionRunning.current = false;
@@ -264,11 +276,11 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
 
   async function resendVerificationEmail() {
     const auth = getFirebaseAuth();
-    auth.languageCode = "fr";
+    auth.languageCode = locale;
     const user = auth.currentUser;
 
     if (!user) {
-      setError("La session a expiré. Reconnecte-toi pour continuer.");
+      setError(t("errors.sessionExpired"));
       return;
     }
 
@@ -278,9 +290,9 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
 
     try {
       await sendEmailVerification(user);
-      setNotice("Un nouvel e-mail de validation vient d’être envoyé.");
+      setNotice(t("notices.verificationResent"));
     } catch (authError) {
-      setError(getAuthMessage(authError));
+      setError(getAuthMessage(authError, (key) => t(key)));
     } finally {
       setPending(false);
     }
@@ -291,7 +303,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
     const user = getFirebaseAuth().currentUser;
 
     if (!user) {
-      setError("La session a expiré. Reconnecte-toi pour continuer.");
+      setError(t("errors.sessionExpired"));
       return;
     }
 
@@ -308,7 +320,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
       await reload(user);
       if (!user.emailVerified) {
         setSignupStep("verification");
-        setError("L’adresse e-mail doit d’abord être validée.");
+        setError(t("errors.emailRequired"));
         return;
       }
 
@@ -326,22 +338,22 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
       const body = (await response.json()) as ApiResponse;
 
       if (body.code === "PSEUDONYM_TAKEN") {
-        setError("Ce pseudonyme est déjà utilisé.");
+        setError(t("errors.pseudonymTaken"));
         return;
       }
       if (body.code === "DISPLAY_NAME_TAKEN") {
-        setError("Ce nom d’affichage est déjà utilisé.");
+        setError(t("errors.displayNameTaken"));
         return;
       }
       if (!response.ok) {
-        throw new Error(body.message ?? "Le profil n’a pas pu être enregistré.");
+        throw new Error(t("errors.profileSave"));
       }
 
       await reload(user);
       await user.getIdToken(true);
       await establishSession(user);
     } catch (authError) {
-      setError(getAuthMessage(authError));
+      setError(getAuthMessage(authError, (key) => t(key)));
     } finally {
       setPending(false);
       authActionRunning.current = false;
@@ -352,7 +364,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
     const email = String(new FormData(form).get("email") ?? "").trim();
 
     if (!email) {
-      setError("Saisis ton adresse e-mail avant de continuer.");
+      setError(t("validation.emailRequiredForReset"));
       return;
     }
 
@@ -362,13 +374,11 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
 
     try {
       const auth = getFirebaseAuth();
-      auth.languageCode = "fr";
+      auth.languageCode = locale;
       await sendPasswordResetEmail(auth, email);
-      setNotice(
-        "Si un compte correspond à cette adresse, un lien de réinitialisation vient d’être envoyé.",
-      );
+      setNotice(t("notices.passwordReset"));
     } catch (resetError) {
-      setError(getAuthMessage(resetError));
+      setError(getAuthMessage(resetError, (key) => t(key)));
     } finally {
       setPending(false);
     }
@@ -376,31 +386,31 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
 
   const title =
     mode === "signin"
-      ? "Connecte-toi"
+      ? t("headings.signinTitle")
       : signupStep === "credentials"
-        ? "Crée ton compte"
+        ? t("headings.signupTitle")
         : signupStep === "verification"
-          ? "Vérifie ton e-mail"
-          : "Finalise ton profil";
+          ? t("headings.verificationTitle")
+          : t("headings.profileTitle");
   const description =
     mode === "signin"
-      ? "Retrouve ta collection Safir sur tous tes appareils."
+      ? t("headings.signinDescription")
       : signupStep === "credentials"
-        ? "Commence avec ton adresse e-mail et un mot de passe sécurisé."
+        ? t("headings.signupDescription")
         : signupStep === "verification"
-          ? `Nous avons envoyé un lien de validation à ${accountEmail}.`
-          : "Choisis les informations publiques qui apparaîtront dans Safirdex.";
+          ? t("headings.verificationDescription", { email: accountEmail })
+          : t("headings.profileDescription");
 
   return (
     <div>
       <div
         className="grid grid-cols-2 border-b"
         role="tablist"
-        aria-label="Choisir le mode d’authentification"
+        aria-label={t("tabs.label")}
       >
         {([
-          ["signin", "Connexion"],
-          ["signup", "Créer un compte"],
+          ["signin", t("tabs.signin")],
+          ["signup", t("tabs.signup")],
         ] as const).map(([value, label]) => (
           <button
             key={value}
@@ -421,11 +431,11 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
 
       <div className="p-6 sm:p-8">
         {mode === "signup" ? (
-          <div className="mb-7 grid grid-cols-3 gap-2" aria-label="Étapes d’inscription">
+          <div className="mb-7 grid grid-cols-3 gap-2" aria-label={t("steps.label")}>
             {[
-              ["credentials", "Identifiants"],
-              ["verification", "Validation"],
-              ["profile", "Profil"],
+              ["credentials", t("steps.credentials")],
+              ["verification", t("steps.verification")],
+              ["profile", t("steps.profile")],
             ].map(([step, label], index) => {
               const steps: SignupStep[] = [
                 "credentials",
@@ -458,7 +468,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
 
         <div className="mb-7">
           <p className="mb-2 text-xs font-semibold tracking-[0.08em] text-safir uppercase">
-            {mode === "signin" ? "Heureux de te revoir" : "Rejoins le Codex"}
+            {mode === "signin" ? t("headings.signinEyebrow") : t("headings.signupEyebrow")}
           </p>
           <h1 className="font-heading text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
             {title}
@@ -475,8 +485,8 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                 <span className="mx-auto mb-3 grid size-10 place-items-center rounded-lg bg-safir/10 text-safir">
                   <MailCheck className="size-5" />
                 </span>
-                <p className="text-sm font-semibold">Consulte ta boîte de réception</p>
-                <p className="mt-1 text-xs text-muted-foreground">Pense aussi à vérifier tes courriers indésirables.</p>
+                <p className="text-sm font-semibold">{t("verification.inbox")}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("verification.spam")}</p>
               </div>
             </div>
             <Button
@@ -486,7 +496,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
               onClick={confirmEmailVerification}
             >
               {pending ? <LoaderCircle className="animate-spin" /> : <Check />}
-              J’ai validé mon compte
+              {t("actions.verified")}
             </Button>
             <Button
               type="button"
@@ -495,14 +505,14 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
               disabled={pending}
               onClick={resendVerificationEmail}
             >
-              <RotateCw /> Renvoyer le mail
+              <RotateCw /> {t("actions.resend")}
             </Button>
           </div>
         ) : mode === "signup" && signupStep === "profile" ? (
           <form className="space-y-4" onSubmit={completeProfile}>
             <div className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor="pseudonym">
-                Pseudonyme
+                {t("fields.pseudonym")}
               </label>
               <div className="relative">
                 <AtSign className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -516,16 +526,16 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                   pattern="[A-Za-zÀ-ÿ0-9._-]+"
                   required
                   disabled={pending}
-                  placeholder="safir_player"
+                  placeholder={t("fields.pseudonymPlaceholder")}
                 />
               </div>
               <p className="text-[0.68rem] leading-5 text-muted-foreground">
-                3 à 24 caractères, sans espace. Il doit être unique.
+                {t("fields.pseudonymHelp")}
               </p>
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor="displayName">
-                Nom d’affichage
+                {t("fields.displayName")}
               </label>
               <div className="relative">
                 <UserRound className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -538,23 +548,23 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                   maxLength={40}
                   required
                   disabled={pending}
-                  placeholder="Nom visible dans Safirdex"
+                  placeholder={t("fields.displayNamePlaceholder")}
                 />
               </div>
               <p className="text-[0.68rem] leading-5 text-muted-foreground">
-                Ce nom public doit lui aussi être unique.
+                {t("fields.displayNameHelp")}
               </p>
             </div>
             <Button className="mt-2 h-11 w-full" type="submit" disabled={pending}>
               {pending ? <LoaderCircle className="animate-spin" /> : <ArrowRight />}
-              Terminer mon inscription
+              {t("actions.complete")}
             </Button>
           </form>
         ) : (
           <form className="space-y-4" onSubmit={handleCredentials}>
             <div className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor="email">
-                Adresse e-mail
+                {t("fields.email")}
               </label>
               <div className="relative">
                 <Mail className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -566,7 +576,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                   autoComplete="email"
                   required
                   disabled={pending}
-                  placeholder="nom@exemple.fr"
+                  placeholder={t("fields.emailPlaceholder")}
                 />
               </div>
             </div>
@@ -574,7 +584,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-4">
                 <label className="text-sm font-medium" htmlFor="password">
-                  Mot de passe
+                  {t("fields.password")}
                 </label>
                 {mode === "signin" ? (
                   <button
@@ -583,7 +593,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                     onClick={(event) => handlePasswordReset(event.currentTarget.form!)}
                     className="text-xs font-medium text-safir hover:underline disabled:pointer-events-none disabled:opacity-50"
                   >
-                    Mot de passe oublié ?
+                    {t("actions.forgotPassword")}
                   </button>
                 ) : null}
               </div>
@@ -604,7 +614,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
                   className="absolute top-1/2 right-2.5 grid size-7 -translate-y-1/2 place-items-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  aria-label={showPassword ? t("fields.hidePassword") : t("fields.showPassword")}
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -615,7 +625,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
               <>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium" htmlFor="passwordConfirmation">
-                    Confirmer le mot de passe
+                    {t("fields.passwordConfirmation")}
                   </label>
                   <div className="relative">
                     <Check className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -633,7 +643,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                   </div>
                 </div>
                 <p className="text-xs leading-5 text-muted-foreground">
-                  8 caractères minimum, avec au moins une lettre et un chiffre.
+                  {t("fields.passwordHelp")}
                 </p>
               </>
             ) : null}
@@ -641,10 +651,10 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
             <Button className="mt-2 h-11 w-full" type="submit" disabled={pending}>
               {pending ? <LoaderCircle className="animate-spin" /> : <ArrowRight />}
               {pending
-                ? "Un instant…"
+                ? t("actions.pending")
                 : mode === "signin"
-                  ? "Se connecter"
-                  : "Recevoir mon e-mail de validation"}
+                  ? t("actions.signin")
+                  : t("actions.signup")}
             </Button>
           </form>
         )}
@@ -664,7 +674,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
 
         {mode === "signup" ? (
           <p className="mt-5 text-center text-[0.68rem] leading-5 text-muted-foreground">
-            Tes identifiants sont protégés et gérés par Firebase Authentication.
+            {t("securityNote")}
           </p>
         ) : null}
       </div>

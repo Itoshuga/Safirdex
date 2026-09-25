@@ -1,0 +1,20 @@
+{
+  "Navigation": {
+    "home": "Accueil",
+    "codex": "Codex",
+    "seasons": "Saisons",
+    "collection": "Collection",
+    "account": "Mon espace",
+    "dashboard": "Tableau de bord",
+    "login": "Connexion",
+    "register": "Créer un compte",
+    "logout": "Déconnexion",
+    "admin": "Administration",
+    "language": "Langue",
+    "changeLanguage": "Changer de langue",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "quickAccess": "Accès rapide",
+    "breadcrumb": "Fil d’Ariane"
+  }
+}

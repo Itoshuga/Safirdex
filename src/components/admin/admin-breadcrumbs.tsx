@@ -1,23 +1,14 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-const labels: Record<string, string> = {
-  admin: "Admin",
-  cards: "Cards",
-  seasons: "Seasons",
-  sets: "Sets",
-  rarities: "Rarities",
-  types: "Types",
-  glossary: "Glossary",
-  settings: "Settings",
-  new: "New",
-};
+import { Link, usePathname } from "@/i18n/navigation";
 
 export function AdminBreadcrumbs() {
+  const t = useTranslations("Admin.navigation");
+  const nav = useTranslations("Navigation");
   const pathname = usePathname();
   const [customTitle, setCustomTitle] = useState({ pathname: "", title: "" });
 
@@ -32,13 +23,18 @@ export function AdminBreadcrumbs() {
   const segments = pathname.split("/").filter(Boolean);
 
   return (
-    <nav className="min-w-0" aria-label="Breadcrumb">
+    <nav className="min-w-0" aria-label={nav("breadcrumb")}>
       <ol className="flex min-w-0 items-center gap-1.5 text-sm">
         {segments.map((segment, index) => {
           const href = `/${segments.slice(0, index + 1).join("/")}`;
           const last = index === segments.length - 1;
           const pageTitle = customTitle.pathname === pathname ? customTitle.title : "";
-          const label = labels[segment] ?? (last ? pageTitle || "Edit" : segment);
+          const knownSegments = ["admin", "cards", "seasons", "sets", "rarities", "types", "glossary", "settings", "new"] as const;
+          const label = knownSegments.includes(segment as (typeof knownSegments)[number])
+            ? t(segment as (typeof knownSegments)[number])
+            : last
+              ? pageTitle || t("edit")
+              : segment;
 
           return (
             <li className="flex min-w-0 items-center gap-1.5" key={href}>

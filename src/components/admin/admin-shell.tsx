@@ -1,12 +1,12 @@
 "use client";
 
 import { LogOut, Menu, ShieldCheck } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs";
-import { AdminLocaleSwitcher } from "@/components/admin/admin-locale-switcher";
 import { AdminNavigation } from "@/components/admin/admin-navigation";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,17 +17,16 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { getFirebaseAuth } from "@/lib/firebase/client";
-import type { AppLocale } from "@/lib/i18n/locales";
+import { useRouter } from "@/i18n/navigation";
 
 export function AdminShell({
   children,
   email,
-  locale,
 }: {
   children: React.ReactNode;
   email: string;
-  locale: AppLocale;
 }) {
+  const t = useTranslations("Admin.shell");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -50,23 +49,23 @@ export function AdminShell({
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger render={<Button variant="outline" size="icon" className="md:hidden" />}>
               <Menu />
-              <span className="sr-only">Open navigation</span>
+              <span className="sr-only">{t("openNavigation")}</span>
             </SheetTrigger>
             <SheetContent side="left" className="w-[17rem] p-0" showCloseButton={false}>
-              <SheetTitle className="sr-only">Administration navigation</SheetTitle>
-              <SheetDescription className="sr-only">Navigate through Safir administration.</SheetDescription>
+              <SheetTitle className="sr-only">{t("navigationTitle")}</SheetTitle>
+              <SheetDescription className="sr-only">{t("navigationDescription")}</SheetDescription>
               <AdminNavigation onNavigate={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
           <AdminBreadcrumbs />
         </div>
         <div className="flex items-center gap-1.5">
-          <AdminLocaleSwitcher locale={locale} />
+          <LanguageSwitcher compact />
           <ThemeToggle />
           <div className="hidden items-center gap-2 border-l pl-3 sm:flex">
             <span className="grid size-8 place-items-center rounded-lg bg-safir/12 text-safir"><ShieldCheck className="size-4" /></span>
             <div className="hidden max-w-36 lg:block">
-              <p className="truncate text-xs font-semibold">Administrator</p>
+              <p className="truncate text-xs font-semibold">{t("administrator")}</p>
               <p className="truncate text-[10px] text-muted-foreground">{email}</p>
             </div>
           </div>
@@ -76,8 +75,8 @@ export function AdminShell({
             size="icon"
             disabled={signingOut}
             onClick={handleSignOut}
-            aria-label="Sign out"
-            title="Sign out"
+            aria-label={t("signOut")}
+            title={t("signOut")}
           >
             <LogOut />
           </Button>

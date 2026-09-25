@@ -10,14 +10,15 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { SafirLogo } from "@/components/layout/safir-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link, useRouter } from "@/i18n/navigation";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 
 interface AccountDashboardProps {
@@ -32,6 +33,9 @@ interface AccountDashboardProps {
 }
 
 export function AccountDashboard({ user }: AccountDashboardProps) {
+  const t = useTranslations("Account");
+  const nav = useTranslations("Navigation");
+  const locale = useLocale();
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("");
@@ -46,20 +50,20 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
 
   async function resendVerification() {
     const auth = getFirebaseAuth();
-    auth.languageCode = "fr";
+    auth.languageCode = locale;
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
-      setNotice("Reconnecte-toi pour renvoyer l’e-mail de vérification.");
+      setNotice(t("notices.signInAgain"));
       return;
     }
 
     setPending(true);
     try {
       await sendEmailVerification(currentUser);
-      setNotice("Un nouvel e-mail de vérification vient d’être envoyé.");
+      setNotice(t("notices.verificationSent"));
     } catch {
-      setNotice("L’e-mail ne peut pas être renvoyé pour le moment.");
+      setNotice(t("notices.verificationFailed"));
     } finally {
       setPending(false);
     }
@@ -74,6 +78,7 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
           Safirdex
         </Link>
         <div className="flex items-center gap-1">
+          <LanguageSwitcher />
           <ThemeToggle />
           <Button
             type="button"
@@ -82,7 +87,7 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
             onClick={handleSignOut}
             className="ml-1 text-muted-foreground"
           >
-            <LogOut /> Déconnexion
+            <LogOut /> {nav("logout")}
           </Button>
         </div>
       </header>
@@ -98,17 +103,17 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
         <div className="flex flex-col justify-between gap-6 border-b pb-8 sm:flex-row sm:items-end">
           <div>
             <p className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-safir uppercase">
-              <span className="size-1.5 bg-safir" /> Mon espace
+              <span className="size-1.5 bg-safir" /> {t("eyebrow")}
             </p>
             <h1 className="font-heading text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">
-              Bonjour, {user.displayName}
+              {t("welcome", { name: user.displayName })}
             </h1>
             <p className="mt-3 text-sm text-muted-foreground">
-              Ta collection Safir commence ici.
+              {t("subtitle")}
             </p>
           </div>
           <Badge variant="secondary" className="h-7 gap-2 px-2.5">
-            <Sparkles className="size-3.5" /> Collection en préparation
+            <Sparkles className="size-3.5" /> {t("collectionStatus")}
           </Badge>
         </div>
 
@@ -119,26 +124,26 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
               <span className="mb-8 grid size-11 place-items-center rounded-lg bg-safir/10 text-safir">
                 <BookOpen className="size-5" />
               </span>
-              <p className="font-mono text-xs text-muted-foreground">000 CARTE</p>
+              <p className="font-mono text-xs text-muted-foreground">{t("collectionCount", { count: 0 })}</p>
               <h2 className="mt-3 font-heading text-3xl font-semibold tracking-[-0.04em]">
-                Ta collection est prête à être remplie.
+                {t("emptyTitle")}
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                L’espace personnel et sa structure sécurisée sont en place. La prochaine étape permettra d’ajouter une carte directement depuis sa fiche.
+                {t("emptyDescription")}
               </p>
               <Button
                 nativeButton={false}
                 render={<Link href="/" />}
                 className="mt-7 h-10"
               >
-                Explorer le Codex <ArrowRight />
+                {t("explore")} <ArrowRight />
               </Button>
             </div>
           </section>
 
           <aside className="rounded-xl border bg-card p-5">
             <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-              Mon compte
+              {t("panelTitle")}
             </p>
             <div className="mt-5 flex items-center gap-3">
               <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-safir text-sm font-bold text-safir-foreground">
@@ -151,9 +156,9 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
             </div>
 
             <div className="mt-4 flex items-center justify-between border-t pt-4 text-xs">
-              <span className="text-muted-foreground">Rôle</span>
+              <span className="text-muted-foreground">{t("role")}</span>
               <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                {user.role === "admin" ? "Administrateur" : "Utilisateur"}
+                {user.role === "admin" ? t("roles.admin") : t("roles.user")}
               </Badge>
             </div>
 
@@ -164,12 +169,12 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
                 {user.emailVerified ? (
                   <>
                     <BadgeCheck className="size-4 text-emerald-500" />
-                    <span>Adresse vérifiée</span>
+                    <span>{t("emailVerified")}</span>
                   </>
                 ) : (
                   <>
                     <MailCheck className="size-4 text-amber-500" />
-                    <span>Adresse à vérifier</span>
+                    <span>{t("emailUnverified")}</span>
                   </>
                 )}
               </div>
@@ -180,7 +185,7 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
                   onClick={resendVerification}
                   className="mt-3 text-xs font-semibold text-safir hover:underline disabled:opacity-50"
                 >
-                  Renvoyer l’e-mail
+                  {t("resendEmail")}
                 </button>
               ) : null}
             </div>
@@ -190,7 +195,7 @@ export function AccountDashboard({ user }: AccountDashboardProps) {
                 href="/admin"
                 className="mt-5 flex items-center gap-2 border-t pt-5 text-xs font-semibold text-safir hover:underline"
               >
-                <ShieldCheck className="size-4" /> Ouvrir l’administration
+                <ShieldCheck className="size-4" /> {t("openAdmin")}
               </Link>
             ) : null}
           </aside>

@@ -1,0 +1,34 @@
+{
+  "Account": {
+    "metadata": {
+      "title": "My account | Safirdex",
+      "description": "Manage your account and Safir collection."
+    },
+    "eyebrow": "My account",
+    "welcome": "Welcome, {name}",
+    "subtitle": "Your Safir collection starts here.",
+    "collectionStatus": "Collection coming soon",
+    "collectionCount": "{count, plural, =0 {000 CARDS} =1 {001 CARD} other {# CARDS}}",
+    "emptyTitle": "Your collection is ready to grow.",
+    "emptyDescription": "Your secure personal space is ready. Next, you will be able to add cards directly from their detail pages.",
+    "explore": "Explore the Codex",
+    "panelTitle": "My account",
+    "role": "Role",
+    "roles": {
+      "admin": "Administrator",
+      "user": "User"
+    },
+    "emailVerified": "Email verified",
+    "emailUnverified": "Email verification required",
+    "resendEmail": "Resend email",
+    "openAdmin": "Open administration",
+    "fallbackPlayer": "Player",
+    "fallbackPseudonym": "player",
+    "emailUnavailable": "Email unavailable",
+    "notices": {
+      "signInAgain": "Sign in again to resend the verification email.",
+      "verificationSent": "A new verification email has just been sent.",
+      "verificationFailed": "The email cannot be sent again right now."
+    }
+  }
+}

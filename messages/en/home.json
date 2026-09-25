@@ -1,0 +1,26 @@
+{
+  "Home": {
+    "metadata": {
+      "title": "Safir Codex — Discover every Safir card",
+      "description": "Explore Safir cards, rules, and lore in the official Codex."
+    },
+    "hero": {
+      "eyebrow": "The official Safir Codex",
+      "title": "Safirdex",
+      "description": "Find a card, a rule, or a fragment from the world of Safir."
+    },
+    "search": {
+      "placeholder": "Search for a card…",
+      "label": "Search the Codex",
+      "cards": "Cards",
+      "decks": "Decks",
+      "community": "Community",
+      "results": "Codex cards",
+      "noResults": "No cards match this search.",
+      "clear": "Clear search",
+      "count": "{count, plural, =0 {0 cards} =1 {1 card} other {# cards}} in the Codex"
+    },
+    "footer": "Safirdex",
+    "brandHome": "Safirdex — Home"
+  }
+}

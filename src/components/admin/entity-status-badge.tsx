@@ -1,15 +1,17 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export function EntityStatusBadge({
   active,
-  activeLabel = "Active",
-  inactiveLabel = "Inactive",
+  activeLabel,
+  inactiveLabel,
 }: {
   active: boolean;
   activeLabel?: string;
   inactiveLabel?: string;
 }) {
+  const t = useTranslations("Common.states");
   return (
     <Badge
       variant="outline"
@@ -20,7 +22,7 @@ export function EntityStatusBadge({
       )}
     >
       <span className={cn("size-1.5 rounded-full", active ? "bg-emerald-500" : "bg-muted-foreground/45")} />
-      {active ? activeLabel : inactiveLabel}
+      {active ? activeLabel ?? t("active") : inactiveLabel ?? t("inactive")}
     </Badge>
   );
 }

@@ -1,0 +1,55 @@
+{
+  "Common": {
+    "actions": {
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleting": "Suppression…",
+      "edit": "Modifier",
+      "create": "Créer",
+      "add": "Ajouter",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "back": "Retour",
+      "continue": "Continuer",
+      "search": "Rechercher",
+      "filter": "Filtrer",
+      "clear": "Effacer",
+      "duplicate": "Dupliquer",
+      "dismiss": "Fermer la notification",
+      "viewAll": "Tout voir",
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "states": {
+      "loading": "Chargement…",
+      "error": "Une erreur est survenue",
+      "empty": "Aucun résultat",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "unknown": "Inconnu",
+      "notSet": "Non renseigné"
+      ,"untitled": "Sans titre"
+    },
+    "theme": {
+      "light": "Passer au thème clair",
+      "dark": "Passer au thème sombre"
+    },
+    "pagination": {
+      "range": "{first}–{last} sur {total}",
+      "page": "Page {page} / {pages}",
+      "items": "{count, plural, =0 {0 élément} =1 {1 élément} other {# éléments}}"
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "La page demandée n’existe pas ou a été déplacée.",
+      "backHome": "Retour à l’accueil"
+    },
+    "errors": {
+      "title": "Une erreur est survenue",
+      "description": "La page n’a pas pu être chargée.",
+      "retry": "Réessayer"
+    }
+  }
+}

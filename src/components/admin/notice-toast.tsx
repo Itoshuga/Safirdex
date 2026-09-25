@@ -2,10 +2,12 @@
 
 import { CheckCircle2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 
 export function NoticeToast({ message }: { message?: string }) {
+  const t = useTranslations("Common.actions");
   const [dismissedMessage, setDismissedMessage] = useState("");
   useEffect(() => {
     if (!message) return;
@@ -17,7 +19,7 @@ export function NoticeToast({ message }: { message?: string }) {
     <div className="fixed right-4 bottom-4 z-50 flex max-w-sm items-center gap-3 rounded-xl border bg-card px-4 py-3 text-sm shadow-2xl" role="status">
       <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
       <span className="flex-1">{message}</span>
-      <Button variant="ghost" size="icon-xs" onClick={() => setDismissedMessage(message)} aria-label="Dismiss"><X /></Button>
+      <Button variant="ghost" size="icon-xs" onClick={() => setDismissedMessage(message)} aria-label={t("dismiss")}><X /></Button>
     </div>
   );
 }

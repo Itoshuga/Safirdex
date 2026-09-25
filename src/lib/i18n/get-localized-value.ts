@@ -1,4 +1,7 @@
-import { FALLBACK_LOCALE } from "@/lib/i18n/locales";
+import {
+  DEFAULT_LOCALE,
+  FALLBACK_LOCALE,
+} from "@/lib/i18n/locales";
 import type { Translations } from "@/types/translation";
 
 function normalizeLocale(locale: string) {
@@ -14,8 +17,10 @@ function getLocaleCandidates(locale: string, fallbackLocale: string) {
   return [
     normalizedLocale,
     language,
+    normalizeLocale(DEFAULT_LOCALE),
     normalizedFallback,
     fallbackLanguage,
+    "en",
   ].filter((candidate, index, candidates) => {
     return Boolean(candidate) && candidates.indexOf(candidate) === index;
   });

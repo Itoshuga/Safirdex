@@ -1,0 +1,14 @@
+{
+  "Cards": {
+    "stats": {
+      "attack": "Attack",
+      "value": "Value",
+      "defense": "Defense"
+    },
+    "labels": {
+      "commander": "Commander",
+      "promo": "Promo",
+      "fallbackName": "Card #{number}"
+    }
+  }
+}

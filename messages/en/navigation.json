@@ -1,0 +1,20 @@
+{
+  "Navigation": {
+    "home": "Home",
+    "codex": "Codex",
+    "seasons": "Seasons",
+    "collection": "Collection",
+    "account": "My account",
+    "dashboard": "Dashboard",
+    "login": "Sign in",
+    "register": "Create account",
+    "logout": "Sign out",
+    "admin": "Administration",
+    "language": "Language",
+    "changeLanguage": "Change language",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "quickAccess": "Quick access",
+    "breadcrumb": "Breadcrumb"
+  }
+}

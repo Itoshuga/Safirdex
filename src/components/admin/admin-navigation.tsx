@@ -10,31 +10,31 @@ import {
   Shapes,
   Sparkles,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { SafirLogo } from "@/components/layout/safir-logo";
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 const sections = [
   {
-    label: "Overview",
-    items: [{ href: "/admin", label: "Dashboard", icon: CircleGauge }],
+    label: "overview",
+    items: [{ href: "/admin", label: "dashboard", icon: CircleGauge }],
   },
   {
-    label: "Content",
+    label: "content",
     items: [
-      { href: "/admin/cards", label: "Cards", icon: Layers3 },
-      { href: "/admin/seasons", label: "Seasons", icon: Sparkles },
-      { href: "/admin/sets", label: "Sets", icon: Boxes },
-      { href: "/admin/rarities", label: "Rarities", icon: Diamond },
-      { href: "/admin/types", label: "Types", icon: Shapes },
-      { href: "/admin/glossary", label: "Glossary", icon: BookOpenText },
+      { href: "/admin/cards", label: "cards", icon: Layers3 },
+      { href: "/admin/seasons", label: "seasons", icon: Sparkles },
+      { href: "/admin/sets", label: "sets", icon: Boxes },
+      { href: "/admin/rarities", label: "rarities", icon: Diamond },
+      { href: "/admin/types", label: "types", icon: Shapes },
+      { href: "/admin/glossary", label: "glossary", icon: BookOpenText },
     ],
   },
   {
-    label: "System",
-    items: [{ href: "/admin/settings", label: "Settings", icon: Settings }],
+    label: "system",
+    items: [{ href: "/admin/settings", label: "settings", icon: Settings }],
   },
 ] as const;
 
@@ -45,6 +45,7 @@ function isActive(pathname: string, href: string) {
 }
 
 export function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
+  const t = useTranslations("Admin.navigation");
   const pathname = usePathname();
 
   return (
@@ -57,14 +58,14 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
         <SafirLogo className="size-9" />
         <span>
           <span className="block font-heading text-lg leading-5 font-semibold tracking-[-0.03em]">Safirdex</span>
-          <span className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">Administration</span>
+          <span className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">{t("admin")}</span>
         </span>
       </Link>
-      <nav className="flex-1 overflow-y-auto px-3 py-5" aria-label="Admin navigation">
+      <nav className="flex-1 overflow-y-auto px-3 py-5" aria-label={t("label")}>
         {sections.map((section) => (
           <div className="mb-6" key={section.label}>
             <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground/75 uppercase">
-              {section.label}
+              {t(section.label)}
             </p>
             <div className="space-y-1">
               {section.items.map((item) => {
@@ -83,7 +84,7 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
                   >
                     {active ? <span className="absolute inset-y-2 left-0 w-0.5 bg-safir" /> : null}
                     <Icon className="size-4" />
-                    {item.label}
+                    {t(item.label)}
                   </Link>
                 );
               })}

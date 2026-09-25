@@ -9,24 +9,13 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { getLocalizedValue } from "@/lib/i18n/get-localized-value";
 import type { AppLocale } from "@/lib/i18n/locales";
 import { cn } from "@/lib/utils";
 import type { CardPreviewData } from "@/types/card-preview";
-
-export interface CodexSearchCopy {
-  placeholder: string;
-  searchLabel: string;
-  cards: string;
-  decks: string;
-  community: string;
-  results: string;
-  noResults: string;
-  clear: string;
-  stats: { attack: string; value: string; defense: string };
-}
 
 function normalize(value: string) {
   return value
@@ -38,13 +27,14 @@ function normalize(value: string) {
 
 export function CodexSearch({
   cards,
-  locale,
-  copy,
 }: {
   cards: CardPreviewData[];
-  locale: AppLocale;
-  copy: CodexSearchCopy;
 }) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("Home.search");
+  const stats = useTranslations("Cards.stats");
+  const labels = useTranslations("Cards.labels");
+  const nav = useTranslations("Navigation");
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
@@ -105,9 +95,9 @@ export function CodexSearch({
   }
 
   const quickLinks = [
-    { id: "cards", label: copy.cards, icon: BookOpen },
-    { id: "decks", label: copy.decks, icon: Layers3 },
-    { id: "community", label: copy.community, icon: Users },
+    { id: "cards", label: t("cards"), icon: BookOpen },
+    { id: "decks", label: t("decks"), icon: Layers3 },
+    { id: "community", label: t("community"), icon: Users },
   ];
 
   return (
@@ -121,7 +111,7 @@ export function CodexSearch({
         }}
       >
         <label className="sr-only" htmlFor="codex-search">
-          {copy.searchLabel}
+          {t("label")}
         </label>
         <div
           className={cn(
@@ -137,7 +127,7 @@ export function CodexSearch({
             type="search"
             autoComplete="off"
             value={query}
-            placeholder={copy.placeholder}
+            placeholder={t("placeholder")}
             onFocus={() => setOpen(true)}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -149,7 +139,7 @@ export function CodexSearch({
               type="button"
               onClick={clearSearch}
               className="grid size-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
-              aria-label={copy.clear}
+              aria-label={t("clear")}
             >
               <X className="size-4" />
             </button>
@@ -161,7 +151,7 @@ export function CodexSearch({
         </div>
       </form>
 
-      <nav className="mt-5 grid overflow-hidden rounded-xl border border-border/80 bg-card/55 text-left sm:grid-cols-3" aria-label="Quick access">
+      <nav className="mt-5 grid overflow-hidden rounded-xl border border-border/80 bg-card/55 text-left sm:grid-cols-3" aria-label={nav("quickAccess")}>
         {quickLinks.map(({ id, label, icon: Icon }, index) => {
           return (
             <span
@@ -181,7 +171,7 @@ export function CodexSearch({
         <section className="absolute inset-x-0 top-16 z-50 mt-3 overflow-hidden rounded-xl border border-foreground/12 bg-card/98 text-left shadow-[0_28px_80px_-30px_rgba(10,20,30,0.45)] backdrop-blur-xl sm:top-[4.5rem]">
           <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5">
             <p className="text-[0.68rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-              {copy.results}
+              {t("results")}
             </p>
             <span className="text-xs tabular-nums text-muted-foreground">
               {results.length}
@@ -206,8 +196,8 @@ export function CodexSearch({
                         <p className="truncate text-sm font-medium">
                           {translation?.name ?? `#${card.number}`}
                         </p>
-                        {card.isCommander ? <Badge className="hidden sm:inline-flex" variant="secondary">CMD</Badge> : null}
-                        {card.isPromo ? <Badge className="hidden sm:inline-flex" variant="outline">Promo</Badge> : null}
+                        {card.isCommander ? <Badge className="hidden sm:inline-flex" variant="secondary">{labels("commander")}</Badge> : null}
+                        {card.isPromo ? <Badge className="hidden sm:inline-flex" variant="outline">{labels("promo")}</Badge> : null}
                       </div>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">
                         #{String(card.number).padStart(3, "0")} · {[rarity, ...types].filter(Boolean).join(" · ")}
@@ -215,9 +205,9 @@ export function CodexSearch({
                     </div>
                     <dl className="hidden shrink-0 grid-cols-3 gap-1.5 sm:grid">
                       {[
-                        [copy.stats.attack, card.attack],
-                        [copy.stats.value, card.value],
-                        [copy.stats.defense, card.defense],
+                        [stats("attack"), card.attack],
+                        [stats("value"), card.value],
+                        [stats("defense"), card.defense],
                       ].map(([label, value]) => (
                         <div className="min-w-9 rounded-lg bg-muted/60 px-2 py-1 text-center" key={label} title={String(label)}>
                           <dt className="text-[0.55rem] font-semibold text-muted-foreground uppercase">{String(label).slice(0, 1)}</dt>
@@ -232,7 +222,7 @@ export function CodexSearch({
               <div className="grid min-h-40 place-items-center px-6 text-center">
                 <div>
                   <Search className="mx-auto mb-3 size-5 text-muted-foreground/55" />
-                  <p className="text-sm text-muted-foreground">{copy.noResults}</p>
+                  <p className="text-sm text-muted-foreground">{t("noResults")}</p>
                 </div>
               </div>
             )}

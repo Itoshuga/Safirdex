@@ -1,0 +1,34 @@
+{
+  "Account": {
+    "metadata": {
+      "title": "Mon espace | Safirdex",
+      "description": "Gérez votre compte et votre collection Safir."
+    },
+    "eyebrow": "Mon espace",
+    "welcome": "Bonjour, {name}",
+    "subtitle": "Ta collection Safir commence ici.",
+    "collectionStatus": "Collection en préparation",
+    "collectionCount": "{count, plural, =0 {000 CARTE} =1 {001 CARTE} other {# CARTES}}",
+    "emptyTitle": "Ta collection est prête à être remplie.",
+    "emptyDescription": "L’espace personnel et sa structure sécurisée sont en place. La prochaine étape permettra d’ajouter une carte directement depuis sa fiche.",
+    "explore": "Explorer le Codex",
+    "panelTitle": "Mon compte",
+    "role": "Rôle",
+    "roles": {
+      "admin": "Administrateur",
+      "user": "Utilisateur"
+    },
+    "emailVerified": "Adresse vérifiée",
+    "emailUnverified": "Adresse à vérifier",
+    "resendEmail": "Renvoyer l’e-mail",
+    "openAdmin": "Ouvrir l’administration",
+    "fallbackPlayer": "Joueur",
+    "fallbackPseudonym": "joueur",
+    "emailUnavailable": "Adresse non disponible",
+    "notices": {
+      "signInAgain": "Reconnecte-toi pour renvoyer l’e-mail de vérification.",
+      "verificationSent": "Un nouvel e-mail de vérification vient d’être envoyé.",
+      "verificationFailed": "L’e-mail ne peut pas être renvoyé pour le moment."
+    }
+  }
+}

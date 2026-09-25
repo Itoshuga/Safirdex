@@ -4,6 +4,7 @@ import type { DecodedIdToken } from "firebase-admin/auth";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { hasAdminClaim } from "@/lib/auth/claims";
+import type { AppLocale } from "@/lib/i18n/locales";
 import {
   getFirebaseAdminAuth,
   getFirebaseAdminFirestore,
@@ -19,6 +20,7 @@ export interface StoredUserProfile {
   role: "user" | "admin";
   roles: string[];
   onboardingCompleted: boolean;
+  preferredLocale: AppLocale | null;
 }
 
 function uniqueRoles(value: unknown, isAdmin: boolean) {
@@ -67,6 +69,7 @@ export async function ensureUserProfile(decoded: DecodedIdToken) {
       role,
       roles,
       onboardingCompleted: false,
+      preferredLocale: null,
       createdAt: now,
       updatedAt: now,
       lastLoginAt: null,
@@ -84,6 +87,7 @@ export async function ensureUserProfile(decoded: DecodedIdToken) {
         role,
         roles,
         onboardingCompleted: existing.onboardingCompleted === true,
+        preferredLocale: existing.preferredLocale ?? null,
         createdAt: snapshot.get("createdAt") ?? now,
         lastLoginAt: snapshot.get("lastLoginAt") ?? null,
         updatedAt: now,
