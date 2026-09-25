@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
+  <title id="title">Echoes of the Veil season artwork placeholder</title>
+  <desc id="description">Layered abstract arches in deep sapphire, mineral green, and muted gold.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0f1824"/>
+      <stop offset=".5" stop-color="#1e3846"/>
+      <stop offset="1" stop-color="#11181d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="66%" cy="40%" r="48%">
+      <stop stop-color="#9dbeb4" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#476b73" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+  <circle cx="1050" cy="385" r="480" fill="url(#glow)"/>
+  <path d="M760 880V464c0-247 160-422 360-422s360 175 360 422v416" fill="none" stroke="#a7c3ba" stroke-opacity=".2" stroke-width="20"/>
+  <path d="M862 880V480c0-172 113-298 258-298s258 126 258 298v400" fill="#0c1720" fill-opacity=".55" stroke="#bfd3c9" stroke-opacity=".38" stroke-width="7"/>
+  <path d="m1120 245 93 305-93 226-93-226Z" fill="#becfc2" fill-opacity=".72"/>
+  <path d="m1120 245 93 305-93-74-93 74Z" fill="#618b8e" fill-opacity=".75"/>
+  <path d="M0 740 290 502l232 154 214-259 185 483H0Z" fill="#0b1318" fill-opacity=".7"/>
+  <path d="M0 805 328 630l245 126 201-130 127 254H0Z" fill="#4e665d" fill-opacity=".28"/>
+  <text x="74" y="105" fill="#dae5de" fill-opacity=".55" font-family="Arial, sans-serif" font-size="21" letter-spacing="7">SEASON ARTWORK PLACEHOLDER</text>
+</svg>
