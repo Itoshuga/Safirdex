@@ -148,6 +148,20 @@ export function createFirestoreRepository<
 
       return getByIdOrThrow(reference.id);
     },
+    createWithId: async (id: string, data: TCreate) => {
+      const validData = stripUndefined(
+        parseInput(createSchema, data, entityName),
+      );
+      const reference = rawCollection().doc(id);
+
+      await reference.create({
+        ...(validData as object),
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      return getByIdOrThrow(id);
+    },
     update: async (id: string, data: TUpdate) => {
       await getByIdOrThrow(id);
       const validData = stripUndefined(

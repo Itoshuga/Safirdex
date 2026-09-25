@@ -17,6 +17,8 @@ erDiagram
     CARD_TYPE }o--o{ CARD : categorizes
     CARD ||--o{ ARTWORK : presents
     GLOSSARY_ENTRY }o--o{ CARD : referenced_by
+    USER ||--o{ COLLECTION_ENTRY : owns
+    CARD ||--o{ COLLECTION_ENTRY : tracked_as
 ```
 
 ## Collections
@@ -49,6 +51,14 @@ Types are referenced from cards through `typeIds`. A card may have zero, one, or
 
 `key` is a stable, language-independent identifier such as `silence`, `move`, or `on-play`. `slug` is kept separately for future URLs. Labels and definitions are localized.
 
+### `users/{userId}`
+
+User document IDs match Firebase Authentication UIDs. A profile stores the verified account email, display name, verification status, creation/update timestamps, and last login timestamp. The server initializes and refreshes this document whenever it creates a public user session.
+
+### `users/{userId}/collection/{cardId}`
+
+Each collection entry uses the card ID as its document ID and stores the same ID in `cardId` for explicit validation. `quantity` is an integer from 1 through 999, `isFavorite` supports a personal shortlist, and timestamps track when the card entered or changed in the collection.
+
 ## Translations
 
 Localized fields use an open record:
@@ -74,13 +84,13 @@ Translation resolution follows:
 
 ## Glossary references
 
-The canonical inline syntax is:
+The canonical inline syntax used by the administration panel is:
 
 ```txt
-[[glossary:silence]]
+[[silence]]
 ```
 
-The stored key is independent of the displayed language. `extractGlossaryReferences`, `getGlossaryKeys`, and `tokenizeGlossaryContent` identify these references without imposing a React rendering strategy. Legacy strings such as `|Déplacer|` should be migrated to `[[glossary:move]]` before becoming functional references.
+The stored key is independent of the displayed language. `extractGlossaryReferences`, `getGlossaryKeys`, and `tokenizeGlossaryContent` identify these references without imposing a React rendering strategy. The longer `[[glossary:silence]]` form remains supported for backward compatibility.
 
 ## Artwork and Storage
 
@@ -89,14 +99,14 @@ Firestore persists `storagePath` as the source of truth. A cached `url` is optio
 Path conventions:
 
 ```txt
-cards/{cardId}/main/artwork.webp
-cards/{cardId}/alternatives/{artworkId}.webp
-seasons/{seasonId}/cover.webp
-rarities/{rarityId}/icon.svg
-card-types/{cardTypeId}/icon.svg
+cards/{cardId}/main/artwork.{ext}
+cards/{cardId}/alternatives/{artworkId}.{ext}
+seasons/{seasonId}/cover.{ext}
+rarities/{rarityId}/icon.{ext}
+card-types/{cardTypeId}/icon.{ext}
 ```
 
-Artwork orientation describes presentation (`vertical` or `horizontal`), not necessarily the physical orientation of a complete card.
+Artwork orientation describes presentation (`vertical` or `horizontal`), not necessarily the physical orientation of a complete card. Alternative artworks carry a stable ID and an explicit numeric `order`.
 
 ## Repositories and converters
 
@@ -124,9 +134,9 @@ Firestore is not used as a full-text search engine. Advanced name/description se
 
 ## Security
 
-`firestore.rules` permits public reads only for the six Codex collections and denies every client write. `storage.rules` permits reads only below the documented public asset roots and denies every client upload. Admin writes bypass rules and must stay in trusted server scripts or future protected admin routes.
+`firestore.rules` permits public reads only for the six Codex collections. Writes to those collections require an authenticated Firebase token carrying either `admin == true` or a `roles` list containing `admin`. Users may read their own profile and read or mutate only their own collection entries; collection writes also validate the referenced card and document shape. `storage.rules` applies the admin write policy below the documented public asset roots. Every other path is denied.
 
-These rules must be extended with custom claims or another role system before the admin dashboard writes from an application flow.
+The web admin uses a verified Firebase session cookie and repeats authorization inside every Server Action. Trusted Admin SDK code still bypasses Firebase Security Rules by design, making those server checks mandatory.
 
 ## Seed behavior
 

@@ -40,57 +40,57 @@
 }
 
 :root {
-  --background: oklch(0.975 0.008 86);
-  --foreground: oklch(0.205 0.025 245);
-  --card: oklch(0.995 0.004 86);
-  --card-foreground: oklch(0.205 0.025 245);
-  --popover: oklch(0.995 0.004 86);
-  --popover-foreground: oklch(0.205 0.025 245);
-  --primary: oklch(0.35 0.07 225);
-  --primary-foreground: oklch(0.985 0.008 86);
-  --secondary: oklch(0.935 0.015 90);
-  --secondary-foreground: oklch(0.255 0.03 235);
-  --muted: oklch(0.94 0.012 88);
-  --muted-foreground: oklch(0.49 0.028 240);
-  --accent: oklch(0.9 0.035 190);
-  --accent-foreground: oklch(0.275 0.045 220);
-  --destructive: oklch(0.57 0.19 27);
-  --border: oklch(0.84 0.02 210 / 68%);
-  --input: oklch(0.84 0.02 210 / 72%);
-  --ring: oklch(0.58 0.08 205);
-  --safir: oklch(0.46 0.095 218);
-  --safir-foreground: oklch(0.985 0.008 86);
-  --safir-soft: oklch(0.88 0.045 198);
-  --mineral: oklch(0.56 0.055 175);
-  --ember: oklch(0.66 0.07 78);
-  --radius: 0.75rem;
+  --background: oklch(0.985 0.003 264);
+  --foreground: oklch(0.155 0.012 264);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.155 0.012 264);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.155 0.012 264);
+  --primary: oklch(0.56 0.22 263);
+  --primary-foreground: oklch(0.985 0.004 260);
+  --secondary: oklch(0.95 0.006 264);
+  --secondary-foreground: oklch(0.23 0.014 264);
+  --muted: oklch(0.955 0.005 264);
+  --muted-foreground: oklch(0.49 0.02 264);
+  --accent: oklch(0.925 0.035 264);
+  --accent-foreground: oklch(0.32 0.16 263);
+  --destructive: oklch(0.58 0.21 27);
+  --border: oklch(0.88 0.01 264 / 78%);
+  --input: oklch(0.83 0.015 264 / 78%);
+  --ring: oklch(0.58 0.2 263);
+  --safir: oklch(0.56 0.22 263);
+  --safir-foreground: oklch(0.985 0.004 260);
+  --safir-soft: oklch(0.9 0.055 264);
+  --mineral: oklch(0.61 0.19 296);
+  --ember: oklch(0.7 0.16 64);
+  --radius: 0.625rem;
   color-scheme: light;
 }
 
 .dark {
-  --background: oklch(0.13 0.022 238);
-  --foreground: oklch(0.93 0.012 92);
-  --card: oklch(0.17 0.026 235);
-  --card-foreground: oklch(0.94 0.012 92);
-  --popover: oklch(0.18 0.028 235);
-  --popover-foreground: oklch(0.94 0.012 92);
-  --primary: oklch(0.72 0.065 188);
-  --primary-foreground: oklch(0.145 0.025 235);
-  --secondary: oklch(0.205 0.025 235);
-  --secondary-foreground: oklch(0.9 0.014 92);
-  --muted: oklch(0.195 0.022 235);
-  --muted-foreground: oklch(0.69 0.025 210);
-  --accent: oklch(0.25 0.048 205);
-  --accent-foreground: oklch(0.94 0.012 92);
-  --destructive: oklch(0.7 0.165 25);
-  --border: oklch(0.65 0.035 210 / 22%);
-  --input: oklch(0.65 0.035 210 / 28%);
-  --ring: oklch(0.71 0.07 190);
-  --safir: oklch(0.68 0.075 205);
-  --safir-foreground: oklch(0.13 0.022 238);
-  --safir-soft: oklch(0.38 0.06 204);
-  --mineral: oklch(0.65 0.06 173);
-  --ember: oklch(0.73 0.075 81);
+  --background: oklch(0.125 0.01 264);
+  --foreground: oklch(0.965 0.004 264);
+  --card: oklch(0.165 0.012 264);
+  --card-foreground: oklch(0.965 0.004 264);
+  --popover: oklch(0.18 0.014 264);
+  --popover-foreground: oklch(0.965 0.004 264);
+  --primary: oklch(0.68 0.18 258);
+  --primary-foreground: oklch(0.985 0.003 260);
+  --secondary: oklch(0.21 0.013 264);
+  --secondary-foreground: oklch(0.925 0.006 264);
+  --muted: oklch(0.205 0.012 264);
+  --muted-foreground: oklch(0.68 0.018 264);
+  --accent: oklch(0.255 0.055 263);
+  --accent-foreground: oklch(0.94 0.008 260);
+  --destructive: oklch(0.69 0.18 25);
+  --border: oklch(0.43 0.018 264 / 45%);
+  --input: oklch(0.5 0.022 264 / 46%);
+  --ring: oklch(0.68 0.18 258);
+  --safir: oklch(0.68 0.18 258);
+  --safir-foreground: oklch(0.985 0.003 260);
+  --safir-soft: oklch(0.34 0.09 263);
+  --mineral: oklch(0.7 0.16 296);
+  --ember: oklch(0.76 0.14 69);
   color-scheme: dark;
 }
 
@@ -105,9 +105,8 @@
 
   body {
     @apply min-h-screen bg-background text-foreground antialiased;
-    background-image:
-      radial-gradient(circle at 12% 4%, color-mix(in oklch, var(--safir) 10%, transparent), transparent 31rem),
-      radial-gradient(circle at 90% 24%, color-mix(in oklch, var(--mineral) 8%, transparent), transparent 26rem);
+    font-family: var(--font-interface), ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-rendering: optimizeLegibility;
   }
 
   ::selection {
@@ -127,24 +126,44 @@
   }
 
   .eyebrow {
-    @apply flex items-center gap-3 text-[0.68rem] font-semibold tracking-[0.24em] text-safir uppercase;
+    @apply flex items-center gap-2.5 text-[0.7rem] font-semibold tracking-[0.12em] text-safir uppercase;
   }
 
   .eyebrow::before {
     content: "";
-    @apply h-px w-7 bg-safir/70;
+    @apply size-1.5 bg-safir;
   }
 
   .surface-grid {
     background-image:
       linear-gradient(to right, color-mix(in oklch, var(--border) 52%, transparent) 1px, transparent 1px),
       linear-gradient(to bottom, color-mix(in oklch, var(--border) 52%, transparent) 1px, transparent 1px);
-    background-size: 3.5rem 3.5rem;
+    background-size: 4rem 4rem;
     mask-image: linear-gradient(to bottom, black, transparent 88%);
   }
 
   .mineral-glow {
-    background: radial-gradient(circle, color-mix(in oklch, var(--safir) 18%, transparent), transparent 68%);
+    background: linear-gradient(135deg, color-mix(in oklch, var(--safir) 16%, transparent), transparent 72%);
+  }
+
+  .admin-input {
+    @apply h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none transition placeholder:text-muted-foreground/60 focus:border-ring focus:ring-3 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-55;
+  }
+
+  .admin-textarea {
+    @apply min-h-28 w-full resize-y rounded-lg border bg-background px-3 py-2.5 text-sm leading-6 outline-none transition placeholder:text-muted-foreground/60 focus:border-ring focus:ring-3 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-55;
+  }
+
+  .admin-label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .admin-help {
+    @apply text-xs leading-5 text-muted-foreground;
+  }
+
+  .admin-error {
+    @apply text-xs font-medium text-destructive;
   }
 }
 

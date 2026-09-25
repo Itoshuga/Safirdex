@@ -1,12 +1,57 @@
-import { CardsSection } from "@/components/home/cards-section";
-import { CollectionPreview } from "@/components/home/collection-preview";
-import { Hero } from "@/components/home/hero";
-import { SeasonFeature } from "@/components/home/season-feature";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
+import {
+  MinimalHome,
+  type MinimalHomeCopy,
+} from "@/components/home/minimal-home";
 import { mockCards } from "@/constants/mock-cards";
-import { resolveLocale } from "@/lib/i18n/locales";
-import { messages } from "@/lib/i18n/messages";
+import { getUserSession } from "@/lib/auth/user-session";
+import { resolveLocale, type AppLocale } from "@/lib/i18n/locales";
+
+const homeCopy: Record<AppLocale, MinimalHomeCopy> = {
+  fr: {
+    eyebrow: "Le Codex officiel de Safir",
+    title: "Safirdex",
+    description:
+      "Retrouvez une carte, une règle ou un fragment de l’univers Safir.",
+    language: "Langue",
+    signIn: "Connexion",
+    account: "Mon espace",
+    footer: "Safirdex",
+    catalogue: "cartes dans le Codex",
+    search: {
+      placeholder: "Rechercher une carte…",
+      searchLabel: "Rechercher dans le Codex",
+      allCards: "Toutes les cartes",
+      commanders: "Commandants",
+      promos: "Promos",
+      results: "Cartes du Codex",
+      noResults: "Aucune carte ne correspond à cette recherche.",
+      clear: "Effacer la recherche",
+      stats: { attack: "Attaque", value: "Valeur", defense: "Défense" },
+    },
+  },
+  en: {
+    eyebrow: "The official Safir Codex",
+    title: "Safirdex",
+    description:
+      "Find a card, a rule, or a fragment from the world of Safir.",
+    language: "Language",
+    signIn: "Sign in",
+    account: "My account",
+    footer: "Safirdex",
+    catalogue: "cards in the Codex",
+    search: {
+      placeholder: "Search for a card…",
+      searchLabel: "Search the Codex",
+      allCards: "All cards",
+      commanders: "Commanders",
+      promos: "Promos",
+      results: "Codex cards",
+      noResults: "No cards match this search.",
+      clear: "Clear search",
+      stats: { attack: "Attack", value: "Value", defense: "Defense" },
+    },
+  },
+};
 
 interface HomePageProps {
   searchParams: Promise<{
@@ -15,25 +60,18 @@ interface HomePageProps {
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const params = await searchParams;
+  const [params, session] = await Promise.all([
+    searchParams,
+    getUserSession(),
+  ]);
   const locale = resolveLocale(params.lang);
-  const copy = messages[locale];
 
   return (
-    <div lang={locale} className="min-h-screen overflow-x-clip">
-      <Header locale={locale} copy={copy.header} />
-      <main>
-        <Hero locale={locale} copy={copy.hero} cards={mockCards} />
-        <CardsSection
-          locale={locale}
-          copy={copy.cards}
-          statLabels={copy.stats}
-          cards={mockCards}
-        />
-        <SeasonFeature copy={copy.season} />
-        <CollectionPreview copy={copy.collection} />
-      </main>
-      <Footer copy={copy.footer} navigation={copy.header} />
-    </div>
+    <MinimalHome
+      locale={locale}
+      copy={homeCopy[locale]}
+      cards={mockCards}
+      signedIn={Boolean(session)}
+    />
   );
 }

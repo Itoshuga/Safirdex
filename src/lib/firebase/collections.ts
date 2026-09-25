@@ -5,6 +5,7 @@ export const FIRESTORE_COLLECTIONS = {
   rarities: "rarities",
   cardTypes: "cardTypes",
   glossaryEntries: "glossaryEntries",
+  users: "users",
 } as const;
 
 export type FirestoreCollectionName =

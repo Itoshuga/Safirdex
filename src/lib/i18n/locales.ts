@@ -5,6 +5,14 @@ export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
 export const DEFAULT_LOCALE: AppLocale = "fr";
 export const FALLBACK_LOCALE: AppLocale = "en";
 
+export const LOCALE_CONFIG: Record<
+  AppLocale,
+  { label: string; shortLabel: string; dateLocale: string }
+> = {
+  fr: { label: "Français", shortLabel: "FR", dateLocale: "fr-FR" },
+  en: { label: "English", shortLabel: "EN", dateLocale: "en-GB" },
+};
+
 // Lowercase aliases keep existing imports readable while the uppercase exports
 // remain the canonical configuration.
 export const supportedLocales = SUPPORTED_LOCALES;

@@ -1,6 +1,6 @@
 # Safir Codex
 
-The official card archive for Safir. The project includes a responsive landing page and a typed, server-first Firestore architecture for the future Codex and administration tools.
+The official card archive for Safir. The project includes a responsive landing page, a typed Firestore architecture, and a secure administration panel for managing the TCG catalogue.
 
 ## Local development
 
@@ -14,6 +14,38 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). Add `?lang=fr` or `?lang=en` to preview a locale.
 
+## Administration
+
+The back-office is available at [http://localhost:3000/admin](http://localhost:3000/admin). Unauthenticated visitors and Firebase users without an administrator claim are redirected to `/login`.
+
+The login flow is server-aware:
+
+1. Firebase Authentication validates the email and password in the browser.
+2. The Firebase ID token is sent to the same-origin session endpoint.
+3. Firebase Admin verifies the token and its custom claims.
+4. The server returns a signed, `httpOnly`, `sameSite=lax` session cookie.
+5. The `/admin` layout and every Server Action verify that session again.
+
+Create an Email/Password user in Firebase Authentication, then grant the first administrator claim locally with one of these commands:
+
+```bash
+npm run admin:set -- --uid=FIREBASE_UID
+npm run admin:set -- --email=admin@example.com
+```
+
+This script uses Firebase Admin directly and is never exposed through a public API. The user must sign out and sign in again after a claim change so Firebase issues a fresh token. Both `{ admin: true }` and `{ roles: ["admin"] }` are accepted by the app and security rules.
+
+The panel currently provides real create, read, update, delete, duplication, filtering, localized forms, and artwork upload workflows for:
+
+- Cards
+- Seasons
+- Sets
+- Rarities
+- Card Types
+- Glossary Entries
+
+Card search loads the current administrative catalogue and filters it on the server by translated name, number, and slug. This is intentionally documented as a first-version limit; cursor-based Firestore pagination and a dedicated full-text service should replace it when the dataset becomes large.
+
 ## Firebase Emulator Suite
 
 Install a compatible Java runtime before starting the Firestore emulator.
@@ -25,6 +57,8 @@ npm run firebase:emulators
 ```
 
 Set `NEXT_PUBLIC_USE_FIREBASE_EMULATORS=true` in `.env.local` to route browser SDK calls to the configured local ports. Server-side Firestore code uses the standard `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080` environment variable.
+
+Create an Email/Password user in the Emulator UI, then run `npm run admin:set -- --uid=<uid>` while `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099` is set. The Admin SDK and browser SDK must target the same emulator project.
 
 Validate the development seed without connecting to Firebase:
 
@@ -59,10 +93,40 @@ npm run build
 - `src/lib/firebase`: lazy client and server-only Admin SDK access
 - `src/lib/i18n`: locale registry, messages, and fallback helpers
 - `src/repositories`: validated, server-only Firestore CRUD/query APIs
-- `src/features`: application services consumed by future pages
+- `src/features`: application services, admin form mapping, and presentation helpers
+- `src/app/admin`: protected App Router pages and Server Actions
+- `src/lib/auth`: custom-claim checks and Firebase session verification
 - `src/types`: Firestore-ready entities and create/update DTOs
 - `src/validation`: Zod schemas for reads and writes
 - `scripts`: development seed and focused domain checks
 - `docs/data-model.md`: collections, relationships, paths, security, and indexes
 
 The service-account JSON is intentionally kept outside the repository and ignored by Git.
+
+## Security rules
+
+The six public catalogue collections remain publicly readable. Firestore writes and Storage writes require an authenticated token with the administrator claim. The fallback rules deny every other path. UI visibility is never treated as the security boundary.
+
+Deploy rules and indexes through the Firebase CLI after reviewing the target project:
+
+```bash
+npx firebase-tools@15.31.0 deploy --only firestore:rules,firestore:indexes,storage
+```
+
+## Storage and artwork handling
+
+Firestore stores canonical Storage paths, not download URLs. Current conventions include:
+
+```txt
+cards/{cardId}/main/artwork.{ext}
+cards/{cardId}/alternatives/{artworkId}.{ext}
+seasons/{seasonId}/cover.{ext}
+rarities/{rarityId}/icon.{ext}
+card-types/{cardTypeId}/icon.{ext}
+```
+
+The admin accepts JPG, PNG, WebP, and AVIF card/season artwork up to 15 MB per file. Icons may also be SVG. Images are preserved in their original format and quality; automatic WebP conversion is intentionally deferred rather than silently degrading source artwork. The Server Action body limit is 64 MB for multi-artwork submissions.
+
+Deleting cards and visual entities removes their Firestore document and then their associated Storage prefix. These are separate services, so a network failure can leave orphaned assets after a successful document deletion; the UI reports the failure and operators can retry or clean up the prefix manually.
+
+Alternative artworks use stable UUID-derived IDs and persist an explicit `order`. Card descriptions accept both the concise `[[move]]` syntax and the legacy `[[glossary:move]]` syntax; the admin inserts the concise form.

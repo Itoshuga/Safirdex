@@ -1,0 +1,191 @@
+"use client";
+
+import { sendEmailVerification, signOut } from "firebase/auth";
+import {
+  ArrowRight,
+  BadgeCheck,
+  BookOpen,
+  LogOut,
+  MailCheck,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getFirebaseAuth } from "@/lib/firebase/client";
+
+interface AccountDashboardProps {
+  user: {
+    displayName: string;
+    email: string;
+    emailVerified: boolean;
+    isAdmin: boolean;
+  };
+  welcome: boolean;
+}
+
+export function AccountDashboard({ user, welcome }: AccountDashboardProps) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [notice, setNotice] = useState(
+    welcome
+      ? "Ton compte est prêt. Un e-mail de vérification vient de t’être envoyé."
+      : "",
+  );
+
+  async function handleSignOut() {
+    setPending(true);
+    await fetch("/api/auth/user-session", { method: "DELETE" });
+    await signOut(getFirebaseAuth()).catch(() => undefined);
+    router.replace("/");
+    router.refresh();
+  }
+
+  async function resendVerification() {
+    const currentUser = getFirebaseAuth().currentUser;
+
+    if (!currentUser) {
+      setNotice("Reconnecte-toi pour renvoyer l’e-mail de vérification.");
+      return;
+    }
+
+    setPending(true);
+    try {
+      await sendEmailVerification(currentUser);
+      setNotice("Un nouvel e-mail de vérification vient d’être envoyé.");
+    } catch {
+      setNotice("L’e-mail ne peut pas être renvoyé pour le moment.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      <div className="surface-grid pointer-events-none absolute inset-0 opacity-35 dark:opacity-15" />
+      <header className="relative z-10 mx-auto flex h-20 max-w-[90rem] items-center justify-between border-b border-border/55 px-5 sm:px-8 lg:px-12">
+        <Link href="/" className="group inline-flex items-center gap-3 text-sm font-semibold">
+          <span className="relative block size-8 overflow-hidden bg-foreground" aria-hidden="true">
+            <span className="absolute -right-2 -bottom-2 size-6 rotate-45 bg-safir transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </span>
+          Safirdex
+        </Link>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={pending}
+            onClick={handleSignOut}
+            className="ml-1 text-muted-foreground"
+          >
+            <LogOut /> Déconnexion
+          </Button>
+        </div>
+      </header>
+
+      <main className="relative z-10 mx-auto w-full max-w-6xl px-5 py-10 sm:px-8 sm:py-14 lg:px-12">
+        {notice ? (
+          <div className="mb-7 flex items-start gap-3 rounded-lg border border-safir/20 bg-safir/[0.06] px-4 py-3 text-sm text-foreground">
+            <MailCheck className="mt-0.5 size-4 shrink-0 text-safir" />
+            <p className="leading-5">{notice}</p>
+          </div>
+        ) : null}
+
+        <div className="flex flex-col justify-between gap-6 border-b pb-8 sm:flex-row sm:items-end">
+          <div>
+            <p className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-safir uppercase">
+              <span className="size-1.5 bg-safir" /> Mon espace
+            </p>
+            <h1 className="font-heading text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">
+              Bonjour, {user.displayName}
+            </h1>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Ta collection Safir commence ici.
+            </p>
+          </div>
+          <Badge variant="secondary" className="h-7 gap-2 px-2.5">
+            <Sparkles className="size-3.5" /> Collection en préparation
+          </Badge>
+        </div>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
+          <section className="relative overflow-hidden rounded-xl border bg-card p-6 sm:p-8">
+            <div className="absolute top-0 right-0 size-44 translate-x-16 -translate-y-16 rotate-45 bg-safir/[0.06]" />
+            <div className="relative max-w-xl">
+              <span className="mb-8 grid size-11 place-items-center rounded-lg bg-safir/10 text-safir">
+                <BookOpen className="size-5" />
+              </span>
+              <p className="font-mono text-xs text-muted-foreground">000 CARTE</p>
+              <h2 className="mt-3 font-heading text-3xl font-semibold tracking-[-0.04em]">
+                Ta collection est prête à être remplie.
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                L’espace personnel et sa structure sécurisée sont en place. La prochaine étape permettra d’ajouter une carte directement depuis sa fiche.
+              </p>
+              <Button render={<Link href="/" />} className="mt-7 h-10">
+                Explorer le Codex <ArrowRight />
+              </Button>
+            </div>
+          </section>
+
+          <aside className="rounded-xl border bg-card p-5">
+            <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+              Mon compte
+            </p>
+            <div className="mt-5 flex items-center gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-safir text-sm font-bold text-safir-foreground">
+                {user.displayName.slice(0, 1).toUpperCase()}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{user.displayName}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              </div>
+            </div>
+
+            <div className="mt-5 border-t pt-5">
+              <div className="flex items-center gap-2 text-xs">
+                {user.emailVerified ? (
+                  <>
+                    <BadgeCheck className="size-4 text-emerald-500" />
+                    <span>Adresse vérifiée</span>
+                  </>
+                ) : (
+                  <>
+                    <MailCheck className="size-4 text-amber-500" />
+                    <span>Adresse à vérifier</span>
+                  </>
+                )}
+              </div>
+              {!user.emailVerified ? (
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={resendVerification}
+                  className="mt-3 text-xs font-semibold text-safir hover:underline disabled:opacity-50"
+                >
+                  Renvoyer l’e-mail
+                </button>
+              ) : null}
+            </div>
+
+            {user.isAdmin ? (
+              <Link
+                href="/admin"
+                className="mt-5 flex items-center gap-2 border-t pt-5 text-xs font-semibold text-safir hover:underline"
+              >
+                <ShieldCheck className="size-4" /> Ouvrir l’administration
+              </Link>
+            ) : null}
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}
+

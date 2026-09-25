@@ -1,7 +1,7 @@
-export const GLOSSARY_REFERENCE_FORMAT = "[[glossary:key]]";
+export const GLOSSARY_REFERENCE_FORMAT = "[[key]]";
 
 const GLOSSARY_REFERENCE_SOURCE =
-  String.raw`\[\[glossary:([a-z0-9]+(?:-[a-z0-9]+)*)\]\]`;
+  String.raw`\[\[(?:glossary:)?([a-z0-9]+(?:-[a-z0-9]+)*)\]\]`;
 
 export interface GlossaryReference {
   key: string;

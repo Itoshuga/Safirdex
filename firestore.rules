@@ -2,34 +2,90 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        (request.auth.token.roles is list && request.auth.token.roles.hasAny(['admin']))
+      );
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isValidCollectionEntry(cardId) {
+      return request.resource.data.keys().hasOnly([
+        'cardId',
+        'quantity',
+        'isFavorite',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      request.resource.data.cardId == cardId &&
+      request.resource.data.quantity is int &&
+      request.resource.data.quantity >= 1 &&
+      request.resource.data.quantity <= 999 &&
+      request.resource.data.isFavorite is bool &&
+      request.resource.data.createdAt is timestamp &&
+      request.resource.data.updatedAt is timestamp;
+    }
+
     match /cards/{cardId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     match /seasons/{seasonId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     match /sets/{setId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     match /rarities/{rarityId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     match /cardTypes/{cardTypeId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     match /glossaryEntries/{entryId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+        request.resource.data.keys().hasOnly([
+          'email',
+          'displayName',
+          'emailVerified',
+          'createdAt',
+          'updatedAt',
+          'lastLoginAt'
+        ]) &&
+        request.resource.data.email == request.auth.token.email;
+      allow update: if isOwner(userId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'displayName',
+          'updatedAt'
+        ]);
+      allow delete: if false;
+
+      match /collection/{cardId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          exists(/databases/$(database)/documents/cards/$(cardId)) &&
+          isValidCollectionEntry(cardId);
+        allow delete: if isOwner(userId);
+      }
     }
 
     match /{document=**} {

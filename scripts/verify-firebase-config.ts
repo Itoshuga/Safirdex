@@ -28,6 +28,12 @@ async function main() {
   assert.doesNotMatch(firestoreRules, /allow\s+read\s*,\s*write\s*:\s*if\s+true/);
   assert.doesNotMatch(storageRules, /allow\s+write\s*:\s*if\s+true/);
   assert.doesNotMatch(storageRules, /allow\s+read\s*,\s*write\s*:\s*if\s+true/);
+  assert.match(firestoreRules, /function isAdmin\(\)/);
+  assert.match(storageRules, /function isAdmin\(\)/);
+  assert.match(firestoreRules, /request\.auth != null/);
+  assert.match(storageRules, /request\.auth != null/);
+  assert.match(firestoreRules, /allow write: if isAdmin\(\)/);
+  assert.match(storageRules, /allow write: if isAdmin\(\)/);
 
   for (const collection of publicCollections) {
     assert.match(firestoreRules, new RegExp(`match /${collection}/\\{`));

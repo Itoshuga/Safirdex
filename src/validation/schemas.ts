@@ -41,6 +41,7 @@ export const cardArtworkSchema = z.object({
   storagePath: storagePathSchema,
   url: z.url().optional(),
   orientation: cardOrientationSchema,
+  order: z.number().int().nonnegative().optional(),
   isPrimary: z.boolean().optional(),
   translations: translationsSchema(artworkTranslationSchema).optional(),
 });

@@ -12,6 +12,7 @@ export interface CardArtwork {
   storagePath: string;
   url?: string;
   orientation: CardOrientation;
+  order?: number;
   isPrimary?: boolean;
   translations?: Translations<ArtworkTranslation>;
 }

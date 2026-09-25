@@ -37,7 +37,7 @@ export function LanguageMenu({
           <Button
             variant="ghost"
             size="lg"
-            className="rounded-full px-3 text-xs tracking-[0.12em] text-muted-foreground hover:text-foreground"
+            className="rounded-lg px-3 text-xs font-semibold tracking-[0.08em] text-muted-foreground hover:text-foreground"
           />
         }
         aria-label={label}

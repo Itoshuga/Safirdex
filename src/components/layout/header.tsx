@@ -40,7 +40,7 @@ export function Header({ locale, copy }: HeaderProps) {
               href={link.href}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
-                "rounded-full px-4 text-sm text-muted-foreground hover:text-foreground",
+                "rounded-lg px-4 text-sm text-muted-foreground hover:text-foreground",
               )}
             >
               {link.label}
@@ -58,7 +58,7 @@ export function Header({ locale, copy }: HeaderProps) {
                 type="button"
                 disabled
                 variant="outline"
-                className="rounded-full px-5"
+                className="rounded-lg px-5"
               >
                 {copy.signIn}
               </Button>
