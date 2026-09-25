@@ -34,9 +34,9 @@ export function AdminShell({
 
   async function handleSignOut() {
     setSigningOut(true);
-    await fetch("/api/auth/session", { method: "DELETE" });
+    await fetch("/api/auth/user-session", { method: "DELETE" });
     await getFirebaseAuth().signOut().catch(() => undefined);
-    router.replace("/admin/login");
+    router.replace("/");
     router.refresh();
   }
 

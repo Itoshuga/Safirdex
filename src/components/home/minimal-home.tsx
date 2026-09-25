@@ -6,6 +6,7 @@ import {
   type CodexSearchCopy,
 } from "@/components/home/codex-search";
 import { LanguageMenu } from "@/components/layout/language-menu";
+import { SafirLogo } from "@/components/layout/safir-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import type { AppLocale } from "@/lib/i18n/locales";
 import type { CardPreviewData } from "@/types/card-preview";
@@ -49,9 +50,7 @@ export function MinimalHome({
           className="group inline-flex items-center gap-3 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
           aria-label="Safirdex — Home"
         >
-          <span className="relative block size-8 overflow-hidden bg-foreground" aria-hidden="true">
-            <span className="absolute -right-2 -bottom-2 size-6 rotate-45 bg-safir transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </span>
+          <SafirLogo className="size-8" />
           <span className="font-heading text-sm font-semibold tracking-[-0.02em]">Safirdex</span>
         </Link>
         <div className="flex items-center gap-1">

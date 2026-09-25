@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { SafirLogo } from "@/components/layout/safir-logo";
 import { cn } from "@/lib/utils";
 
 const sections = [
@@ -53,9 +54,7 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
         className="flex h-16 items-center gap-3 border-b px-5"
         onClick={onNavigate}
       >
-        <span className="relative block size-9 overflow-hidden bg-foreground" aria-hidden="true">
-          <span className="absolute -right-2.5 -bottom-2.5 size-7 rotate-45 bg-safir" />
-        </span>
+        <SafirLogo className="size-9" />
         <span>
           <span className="block font-heading text-lg leading-5 font-semibold tracking-[-0.03em]">Safirdex</span>
           <span className="text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">Administration</span>

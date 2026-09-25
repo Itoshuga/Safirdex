@@ -53,7 +53,11 @@ Types are referenced from cards through `typeIds`. A card may have zero, one, or
 
 ### `users/{userId}`
 
-User document IDs match Firebase Authentication UIDs. A profile stores the verified account email, display name, verification status, creation/update timestamps, and last login timestamp. The server initializes and refreshes this document whenever it creates a public user session.
+User document IDs match Firebase Authentication UIDs. A profile is created as soon as Firebase Authentication creates the account, before e-mail verification. It stores the account email, verification and onboarding status, unique pseudonym and display name, creation/update timestamps, last login timestamp, and authorization data. New accounts receive the stable `user` role in both their Firebase custom claims and Firestore profile. Administrators keep `user` and `admin` in `roles`, with `admin` as their primary `role`.
+
+### `pseudonyms/{normalizedPseudonym}` and `displayNames/{normalizedDisplayName}`
+
+These private reservation collections enforce case- and accent-insensitive uniqueness. Onboarding claims both names and updates the user profile in one Firestore transaction, preventing two simultaneous registrations from receiving the same public identity. Clients cannot read or write these reservations directly.
 
 ### `users/{userId}/collection/{cardId}`
 
@@ -134,7 +138,7 @@ Firestore is not used as a full-text search engine. Advanced name/description se
 
 ## Security
 
-`firestore.rules` permits public reads only for the six Codex collections. Writes to those collections require an authenticated Firebase token carrying either `admin == true` or a `roles` list containing `admin`. Users may read their own profile and read or mutate only their own collection entries; collection writes also validate the referenced card and document shape. `storage.rules` applies the admin write policy below the documented public asset roots. Every other path is denied.
+`firestore.rules` permits public reads only for the six Codex collections. Writes to those collections require an authenticated Firebase token carrying either `admin == true` or a `roles` list containing `admin`. Users may read their own server-managed profile and read or mutate only their own collection entries; collection writes also validate the referenced card and document shape. Name reservations and profile writes stay server-only. `storage.rules` applies the admin write policy below the documented public asset roots. Every other path is denied.
 
 The web admin uses a verified Firebase session cookie and repeats authorization inside every Server Action. Trusted Admin SDK code still bypasses Firebase Security Rules by design, making those server checks mandatory.
 

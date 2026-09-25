@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AccountAuthForm } from "@/components/auth/account-auth-form";
+import { SafirLogo } from "@/components/layout/safir-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { getUserSession } from "@/lib/auth/user-session";
 
@@ -35,9 +36,7 @@ export default async function LoginPage({
           href="/"
           className="group inline-flex items-center gap-3 text-sm font-semibold"
         >
-          <span className="relative block size-8 overflow-hidden bg-foreground" aria-hidden="true">
-            <span className="absolute -right-2 -bottom-2 size-6 rotate-45 bg-safir transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </span>
+          <SafirLogo className="size-8" />
           Safirdex
         </Link>
         <div className="flex items-center gap-3">
@@ -95,12 +94,6 @@ export default async function LoginPage({
 
         <section className="overflow-hidden rounded-xl border bg-card/95 shadow-[0_32px_90px_-44px_rgba(15,23,42,0.55)] backdrop-blur-xl">
           <AccountAuthForm initialMode={initialMode} />
-          <div className="border-t bg-muted/35 px-6 py-3 text-center text-[0.68rem] text-muted-foreground sm:px-8">
-            Accès équipe ?{" "}
-            <Link className="font-semibold text-foreground hover:underline" href="/admin/login">
-              Ouvrir l’administration
-            </Link>
-          </div>
         </section>
       </div>
     </main>

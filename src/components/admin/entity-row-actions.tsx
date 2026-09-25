@@ -38,7 +38,13 @@ export function EntityRowActions({
 
   return (
     <div className="flex items-center justify-end gap-0.5">
-      <Button variant="ghost" size="icon-sm" render={<Link href={editHref} />} aria-label={`Edit ${entityName}`}>
+      <Button
+        nativeButton={false}
+        variant="ghost"
+        size="icon-sm"
+        render={<Link href={editHref} />}
+        aria-label={`Edit ${entityName}`}
+      >
         <Pencil />
       </Button>
       {duplicateAction ? (

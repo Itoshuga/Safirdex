@@ -62,22 +62,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId) &&
-        request.resource.data.keys().hasOnly([
-          'email',
-          'displayName',
-          'emailVerified',
-          'createdAt',
-          'updatedAt',
-          'lastLoginAt'
-        ]) &&
-        request.resource.data.email == request.auth.token.email;
-      allow update: if isOwner(userId) &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'displayName',
-          'updatedAt'
-        ]);
-      allow delete: if false;
+      allow write: if false;
 
       match /collection/{cardId} {
         allow read: if isOwner(userId);
@@ -86,6 +71,14 @@ service cloud.firestore {
           isValidCollectionEntry(cardId);
         allow delete: if isOwner(userId);
       }
+    }
+
+    match /pseudonyms/{key} {
+      allow read, write: if false;
+    }
+
+    match /displayNames/{key} {
+      allow read, write: if false;
     }
 
     match /{document=**} {

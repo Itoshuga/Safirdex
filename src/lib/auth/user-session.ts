@@ -16,12 +16,16 @@ export async function getUserSession(): Promise<DecodedIdToken | null> {
   }
 
   try {
-    return await getFirebaseAdminAuth().verifySessionCookie(
+    const decoded = await getFirebaseAdminAuth().verifySessionCookie(
       sessionCookie,
       true,
     );
+
+    return decoded.email_verified === true &&
+      decoded.onboardingCompleted === true
+      ? decoded
+      : null;
   } catch {
     return null;
   }
 }
-

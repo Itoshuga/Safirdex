@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { SafirLogo } from "@/components/layout/safir-logo";
 import { cn } from "@/lib/utils";
 
 interface BrandProps {
@@ -17,12 +18,7 @@ export function Brand({ compact = false, className }: BrandProps) {
       )}
       aria-label="Safirdex — Home"
     >
-      <span
-        aria-hidden="true"
-        className="relative block size-9 overflow-hidden bg-foreground"
-      >
-        <span className="absolute -right-2.5 -bottom-2.5 size-7 rotate-45 bg-safir transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-      </span>
+      <SafirLogo className="size-9" />
       <span className={cn("leading-none", compact && "hidden sm:block")}>
         <span className="block font-heading text-lg font-semibold tracking-[-0.03em]">Safirdex</span>
         <span className="mt-1 block text-[0.58rem] font-medium tracking-[0.12em] text-muted-foreground uppercase">Card index</span>

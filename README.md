@@ -16,15 +16,16 @@ Open [http://localhost:3000](http://localhost:3000). Add `?lang=fr` or `?lang=en
 
 ## Administration
 
-The back-office is available at [http://localhost:3000/admin](http://localhost:3000/admin). Unauthenticated visitors and Firebase users without an administrator claim are redirected to `/login`.
+The back-office is available at [http://localhost:3000/admin](http://localhost:3000/admin). There is no separate administrator login: every account uses `/login`, and only a verified, fully onboarded Firebase user carrying an administrator claim can open the dashboard. Other authenticated users are sent to their personal space.
 
-The login flow is server-aware:
+The unified account flow is server-aware:
 
-1. Firebase Authentication validates the email and password in the browser.
-2. The Firebase ID token is sent to the same-origin session endpoint.
-3. Firebase Admin verifies the token and its custom claims.
-4. The server returns a signed, `httpOnly`, `sameSite=lax` session cookie.
-5. The `/admin` layout and every Server Action verify that session again.
+1. Registration creates the Firebase Authentication account and immediately initializes a Firestore profile with the `user` role.
+2. The user must verify the email address before continuing.
+3. Onboarding reserves a unique pseudonym and display name in one Firestore transaction.
+4. The Firebase ID token is sent to the same-origin session endpoint.
+5. Firebase Admin verifies email, onboarding state, and custom claims before returning a signed, `httpOnly`, `sameSite=lax` session cookie.
+6. The `/admin` layout and every Server Action accept that same session only when it carries the administrator claim.
 
 Create an Email/Password user in Firebase Authentication, then grant the first administrator claim locally with one of these commands:
 
@@ -33,7 +34,7 @@ npm run admin:set -- --uid=FIREBASE_UID
 npm run admin:set -- --email=admin@example.com
 ```
 
-This script uses Firebase Admin directly and is never exposed through a public API. The user must sign out and sign in again after a claim change so Firebase issues a fresh token. Both `{ admin: true }` and `{ roles: ["admin"] }` are accepted by the app and security rules.
+This script uses Firebase Admin directly, updates both the Auth claims and Firestore profile, and is never exposed through a public API. The user must sign out and sign in again after a role change so Firebase issues a fresh token. Both `{ admin: true }` and `{ roles: ["admin"] }` are accepted by the app and security rules.
 
 The panel currently provides real create, read, update, delete, duplication, filtering, localized forms, and artwork upload workflows for:
 
@@ -105,7 +106,7 @@ The service-account JSON is intentionally kept outside the repository and ignore
 
 ## Security rules
 
-The six public catalogue collections remain publicly readable. Firestore writes and Storage writes require an authenticated token with the administrator claim. The fallback rules deny every other path. UI visibility is never treated as the security boundary.
+The six catalogue collections remain publicly readable, while their writes and all Storage writes require an administrator claim. Users can read only their own server-managed profile and mutate only their own validated collection entries. Pseudonym and display-name reservations remain private and server-only. The fallback rules deny every other path; UI visibility is never treated as the security boundary.
 
 Deploy rules and indexes through the Firebase CLI after reviewing the target project:
 

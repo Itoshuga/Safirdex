@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AccountDashboard } from "@/components/account/account-dashboard";
 import { hasAdminClaim } from "@/lib/auth/claims";
+import { getFirebaseAdminFirestore } from "@/lib/firebase/admin";
 import { getUserSession } from "@/lib/auth/user-session";
 
 export const metadata: Metadata = {
@@ -11,28 +12,32 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ welcome?: string }>;
-}) {
-  const [session, params] = await Promise.all([
-    getUserSession(),
-    searchParams,
-  ]);
+export default async function AccountPage() {
+  const session = await getUserSession();
 
   if (!session) {
     redirect("/login");
   }
 
+  const profile = (
+    await getFirebaseAdminFirestore().collection("users").doc(session.uid).get()
+  ).data();
+
   return (
     <AccountDashboard
-      welcome={params.welcome === "1"}
       user={{
-        displayName: session.name ?? session.email?.split("@")[0] ?? "Joueur",
+        displayName:
+          (profile?.displayName as string | undefined) ??
+          session.name ??
+          session.email?.split("@")[0] ??
+          "Joueur",
+        pseudonym: (profile?.pseudonym as string | undefined) ?? "joueur",
         email: session.email ?? "Adresse non disponible",
         emailVerified: session.email_verified ?? false,
         isAdmin: hasAdminClaim(session),
+        role:
+          (profile?.role as "user" | "admin" | undefined) ??
+          (hasAdminClaim(session) ? "admin" : "user"),
       }}
     />
   );

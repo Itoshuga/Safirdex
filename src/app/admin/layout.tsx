@@ -6,7 +6,7 @@ import { getAdminSession } from "@/lib/auth/admin-session";
 import { getAdminLocale } from "@/lib/i18n/admin-locale";
 
 export const metadata: Metadata = {
-  title: { default: "Admin | Safir Codex", template: "%s | Safir Admin" },
+  title: { default: "Administration | Safirdex", template: "%s | Safirdex" },
   robots: { index: false, follow: false, nocache: true },
 };
 
@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   ]);
 
   if (!session) {
-    redirect("/admin/login");
+    redirect("/login");
   }
 
   return (

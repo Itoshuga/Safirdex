@@ -6,14 +6,11 @@ import {
   USER_SESSION_COOKIE,
   USER_SESSION_MAX_AGE,
 } from "@/lib/auth/user-session";
-import {
-  getFirebaseAdminAuth,
-  getFirebaseAdminFirestore,
-} from "@/lib/firebase/admin";
+import { ensureUserProfile } from "@/lib/auth/user-profile";
+import { getFirebaseAdminAuth } from "@/lib/firebase/admin";
 
 const requestSchema = z.object({
   idToken: z.string().min(1),
-  displayName: z.string().trim().min(2).max(80).optional(),
 });
 
 export async function POST(request: Request) {
@@ -21,23 +18,30 @@ export async function POST(request: Request) {
     const body = requestSchema.parse(await request.json());
     const auth = getFirebaseAdminAuth();
     const decoded = await auth.verifyIdToken(body.idToken, true);
-    const user = await auth.getUser(decoded.uid);
-    const displayName = body.displayName ?? user.displayName ?? null;
-    const email = user.email ?? decoded.email ?? null;
-    const profileRef = getFirebaseAdminFirestore()
-      .collection("users")
-      .doc(decoded.uid);
-    const profile = await profileRef.get();
-    const now = FieldValue.serverTimestamp();
+    const account = await ensureUserProfile(decoded);
 
-    await profileRef.set(
+    if (!account.user.emailVerified || decoded.email_verified !== true) {
+      return NextResponse.json(
+        { code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 },
+      );
+    }
+
+    if (
+      account.profile.onboardingCompleted !== true ||
+      decoded.onboardingCompleted !== true
+    ) {
+      return NextResponse.json(
+        { code: "ONBOARDING_REQUIRED" },
+        { status: 409 },
+      );
+    }
+
+    await account.profileRef.set(
       {
-        email,
-        displayName,
-        emailVerified: user.emailVerified,
-        updatedAt: now,
-        lastLoginAt: now,
-        ...(profile.exists ? {} : { createdAt: now }),
+        emailVerified: true,
+        lastLoginAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true },
     );
@@ -45,7 +49,7 @@ export async function POST(request: Request) {
     const sessionCookie = await auth.createSessionCookie(body.idToken, {
       expiresIn: USER_SESSION_MAX_AGE * 1000,
     });
-    const response = NextResponse.json({ ok: true });
+    const response = NextResponse.json({ ok: true, isAdmin: account.isAdmin });
 
     response.cookies.set(USER_SESSION_COOKIE, sessionCookie, {
       httpOnly: true,
@@ -75,4 +79,3 @@ export async function DELETE() {
   });
   return response;
 }
-

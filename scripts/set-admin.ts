@@ -6,6 +6,7 @@ import {
   initializeApp,
 } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { FieldValue, getFirestore } from "firebase-admin/firestore";
 
 loadEnvConfig(process.cwd());
 
@@ -43,11 +44,33 @@ async function main() {
   const user = uidArgument
     ? await auth.getUser(uidArgument)
     : await auth.getUserByEmail(emailArgument!);
+  const roles = Array.from(
+    new Set([
+      "user",
+      ...(Array.isArray(user.customClaims?.roles)
+        ? user.customClaims.roles.filter(
+            (role): role is string => typeof role === "string",
+          )
+        : []),
+      "admin",
+    ]),
+  );
 
   await auth.setCustomUserClaims(user.uid, {
     ...(user.customClaims ?? {}),
     admin: true,
+    role: "admin",
+    roles,
   });
+
+  await getFirestore().collection("users").doc(user.uid).set(
+    {
+      role: "admin",
+      roles,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true },
+  );
 
   console.info(`Administrator claim granted to ${user.email ?? user.uid}.`);
   console.info("The user must sign in again to refresh their token.");

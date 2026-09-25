@@ -1,12 +1,11 @@
 "use client";
 
 import {
-  Check,
+  BookOpen,
   Command,
-  Crown,
   Layers3,
   Search,
-  Ticket,
+  Users,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -17,14 +16,12 @@ import type { AppLocale } from "@/lib/i18n/locales";
 import { cn } from "@/lib/utils";
 import type { CardPreviewData } from "@/types/card-preview";
 
-type QuickFilter = "all" | "commander" | "promo" | null;
-
 export interface CodexSearchCopy {
   placeholder: string;
   searchLabel: string;
-  allCards: string;
-  commanders: string;
-  promos: string;
+  cards: string;
+  decks: string;
+  community: string;
   results: string;
   noResults: string;
   clear: string;
@@ -51,7 +48,6 @@ export function CodexSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<QuickFilter>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -85,8 +81,6 @@ export function CodexSearch({
   const results = useMemo(() => {
     const normalizedQuery = normalize(query);
     return cards.filter((card) => {
-      if (filter === "commander" && !card.isCommander) return false;
-      if (filter === "promo" && !card.isPromo) return false;
       if (!normalizedQuery) return true;
       const translation = getLocalizedValue(card.translations, locale);
       const searchable = normalize(
@@ -103,29 +97,23 @@ export function CodexSearch({
       );
       return searchable.includes(normalizedQuery);
     });
-  }, [cards, filter, locale, query]);
-
-  function selectFilter(nextFilter: Exclude<QuickFilter, null>) {
-    setFilter((current) => (current === nextFilter ? null : nextFilter));
-    setOpen(true);
-    inputRef.current?.focus();
-  }
+  }, [cards, locale, query]);
 
   function clearSearch() {
     setQuery("");
-    setFilter(null);
     inputRef.current?.focus();
   }
 
   const quickLinks = [
-    { id: "all" as const, label: copy.allCards, icon: Layers3 },
-    { id: "commander" as const, label: copy.commanders, icon: Crown },
-    { id: "promo" as const, label: copy.promos, icon: Ticket },
+    { id: "cards", label: copy.cards, icon: BookOpen },
+    { id: "decks", label: copy.decks, icon: Layers3 },
+    { id: "community", label: copy.community, icon: Users },
   ];
 
   return (
     <div ref={rootRef} className="relative mx-auto mt-10 w-full max-w-3xl sm:mt-12">
       <form
+        className="relative z-40"
         role="search"
         onSubmit={(event) => {
           event.preventDefault();
@@ -156,7 +144,7 @@ export function CodexSearch({
               setOpen(true);
             }}
           />
-          {query || filter ? (
+          {query ? (
             <button
               type="button"
               onClick={clearSearch}
@@ -175,28 +163,22 @@ export function CodexSearch({
 
       <nav className="mt-5 grid overflow-hidden rounded-xl border border-border/80 bg-card/55 text-left sm:grid-cols-3" aria-label="Quick access">
         {quickLinks.map(({ id, label, icon: Icon }, index) => {
-          const active = filter === id;
           return (
-            <button
-              type="button"
+            <span
               key={id}
-              onClick={() => selectFilter(id)}
-              aria-pressed={active}
-              className={cn(
-                "group flex min-h-14 items-center gap-3 border-b px-4 text-xs font-medium text-muted-foreground transition last:border-b-0 hover:bg-muted/65 hover:text-foreground sm:border-r sm:border-b-0 sm:last:border-r-0",
-                active && "bg-safir/[0.07] text-safir",
-              )}
+              aria-disabled="true"
+              className="flex min-h-14 cursor-default items-center gap-3 border-b px-4 text-xs font-medium text-muted-foreground last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0"
             >
               <span className="font-mono text-[0.62rem] text-muted-foreground/55">0{index + 1}</span>
-              {active ? <Check className="size-3.5" /> : <Icon className="size-3.5" />}
+              <Icon className="size-3.5" />
               <span>{label}</span>
-            </button>
+            </span>
           );
         })}
       </nav>
 
       {open ? (
-        <section className="absolute inset-x-0 top-full z-30 mt-3 overflow-hidden rounded-xl border border-foreground/12 bg-card/98 text-left shadow-[0_28px_80px_-30px_rgba(10,20,30,0.45)] backdrop-blur-xl">
+        <section className="absolute inset-x-0 top-16 z-50 mt-3 overflow-hidden rounded-xl border border-foreground/12 bg-card/98 text-left shadow-[0_28px_80px_-30px_rgba(10,20,30,0.45)] backdrop-blur-xl sm:top-[4.5rem]">
           <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5">
             <p className="text-[0.68rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
               {copy.results}

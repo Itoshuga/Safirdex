@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { SafirLogo } from "@/components/layout/safir-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,21 +23,18 @@ import { getFirebaseAuth } from "@/lib/firebase/client";
 interface AccountDashboardProps {
   user: {
     displayName: string;
+    pseudonym: string;
     email: string;
     emailVerified: boolean;
     isAdmin: boolean;
+    role: "user" | "admin";
   };
-  welcome: boolean;
 }
 
-export function AccountDashboard({ user, welcome }: AccountDashboardProps) {
+export function AccountDashboard({ user }: AccountDashboardProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [notice, setNotice] = useState(
-    welcome
-      ? "Ton compte est prêt. Un e-mail de vérification vient de t’être envoyé."
-      : "",
-  );
+  const [notice, setNotice] = useState("");
 
   async function handleSignOut() {
     setPending(true);
@@ -47,7 +45,9 @@ export function AccountDashboard({ user, welcome }: AccountDashboardProps) {
   }
 
   async function resendVerification() {
-    const currentUser = getFirebaseAuth().currentUser;
+    const auth = getFirebaseAuth();
+    auth.languageCode = "fr";
+    const currentUser = auth.currentUser;
 
     if (!currentUser) {
       setNotice("Reconnecte-toi pour renvoyer l’e-mail de vérification.");
@@ -70,9 +70,7 @@ export function AccountDashboard({ user, welcome }: AccountDashboardProps) {
       <div className="surface-grid pointer-events-none absolute inset-0 opacity-35 dark:opacity-15" />
       <header className="relative z-10 mx-auto flex h-20 max-w-[90rem] items-center justify-between border-b border-border/55 px-5 sm:px-8 lg:px-12">
         <Link href="/" className="group inline-flex items-center gap-3 text-sm font-semibold">
-          <span className="relative block size-8 overflow-hidden bg-foreground" aria-hidden="true">
-            <span className="absolute -right-2 -bottom-2 size-6 rotate-45 bg-safir transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </span>
+          <SafirLogo className="size-8" />
           Safirdex
         </Link>
         <div className="flex items-center gap-1">
@@ -128,7 +126,11 @@ export function AccountDashboard({ user, welcome }: AccountDashboardProps) {
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
                 L’espace personnel et sa structure sécurisée sont en place. La prochaine étape permettra d’ajouter une carte directement depuis sa fiche.
               </p>
-              <Button render={<Link href="/" />} className="mt-7 h-10">
+              <Button
+                nativeButton={false}
+                render={<Link href="/" />}
+                className="mt-7 h-10"
+              >
                 Explorer le Codex <ArrowRight />
               </Button>
             </div>
@@ -144,11 +146,20 @@ export function AccountDashboard({ user, welcome }: AccountDashboardProps) {
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{user.displayName}</p>
-                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                <p className="truncate text-xs text-muted-foreground">@{user.pseudonym}</p>
               </div>
             </div>
 
-            <div className="mt-5 border-t pt-5">
+            <div className="mt-4 flex items-center justify-between border-t pt-4 text-xs">
+              <span className="text-muted-foreground">Rôle</span>
+              <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                {user.role === "admin" ? "Administrateur" : "Utilisateur"}
+              </Badge>
+            </div>
+
+            <p className="mt-4 truncate text-xs text-muted-foreground">{user.email}</p>
+
+            <div className="mt-4 border-t pt-4">
               <div className="flex items-center gap-2 text-xs">
                 {user.emailVerified ? (
                   <>
@@ -188,4 +199,3 @@ export function AccountDashboard({ user, welcome }: AccountDashboardProps) {
     </div>
   );
 }
-

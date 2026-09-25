@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   title: "Safirdex",
   description: "The official card and rules Codex for Safir.",
   applicationName: "Safirdex",
+  icons: {
+    icon: "/brand/safir-logo.webp",
+  },
   openGraph: {
     title: "Safirdex",
     description: "The official card and rules Codex for Safir.",
