@@ -17,6 +17,7 @@ const namespaces = [
   "admin",
   "community",
   "profile",
+  "decks",
 ] as const;
 
 async function loadMessages(locale: string) {

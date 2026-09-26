@@ -32,11 +32,13 @@ import { glossaryRepository } from "@/repositories/glossary.repository";
 import { raritiesRepository } from "@/repositories/rarities.repository";
 import { seasonsRepository } from "@/repositories/seasons.repository";
 import { setsRepository } from "@/repositories/sets.repository";
+import { factionsRepository } from "@/repositories/factions.repository";
 import type { CreateCardSetInput } from "@/types/card-set";
 import type { CreateCardTypeInput } from "@/types/card-type";
 import type { CreateCardInput } from "@/types/card";
 import type { CreateRarityInput } from "@/types/rarity";
 import type { CreateSeasonInput } from "@/types/season";
+import type { CreateFactionInput } from "@/types/faction";
 import {
   createCardSchema,
   createCardSetSchema,
@@ -44,6 +46,7 @@ import {
   createGlossaryEntrySchema,
   createRaritySchema,
   createSeasonSchema,
+  createFactionSchema,
 } from "@/validation/schemas";
 
 const allowedImageTypes = new Map([
@@ -153,7 +156,7 @@ async function failure(error: unknown): Promise<AdminActionState> {
   };
 }
 
-type EntityKey = "card" | "season" | "set" | "rarity" | "type" | "glossaryEntry";
+type EntityKey = "card" | "season" | "set" | "rarity" | "type" | "faction" | "glossaryEntry";
 
 function invalidateReferenceCache(entity: EntityKey) {
   const tag = {
@@ -161,6 +164,7 @@ function invalidateReferenceCache(entity: EntityKey) {
     set: CODEX_CACHE_TAGS.sets,
     rarity: CODEX_CACHE_TAGS.rarities,
     type: CODEX_CACHE_TAGS.types,
+    faction: CODEX_CACHE_TAGS.factions,
     glossaryEntry: CODEX_CACHE_TAGS.glossary,
     card: CODEX_CACHE_TAGS.cards,
   }[entity];
@@ -418,6 +422,8 @@ export async function duplicateCardAction(id: string): Promise<AdminActionState>
       setId: original.setId,
       rarityId: original.rarityId,
       typeIds: original.typeIds,
+      gameplayKind: original.gameplayKind,
+      factionIds: original.factionIds,
       attack: original.attack,
       value: original.value,
       defense: original.defense,
@@ -641,27 +647,63 @@ export async function deleteTypeAction(id: string): Promise<AdminActionState> {
   return deleteEntity(id, "type", cardTypesRepository.remove, `card-types/${id}/`);
 }
 
-async function saveVisualEntity<T extends CreateRarityInput | CreateCardTypeInput>(
-  kind: "rarity" | "type",
+function factionPayload(payload: Record<string, unknown>) {
+  return createFactionSchema.parse(withoutEmptyTranslations(payload));
+}
+
+export async function createFactionAction(
+  _state: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  return saveVisualEntity<CreateFactionInput>("faction", formData);
+}
+
+export async function updateFactionAction(
+  id: string,
+  _state: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  return saveVisualEntity<CreateFactionInput>("faction", formData, id);
+}
+
+export async function deleteFactionAction(id: string): Promise<AdminActionState> {
+  const referenced = await getFirebaseAdminFirestore()
+    .collection(FIRESTORE_COLLECTIONS.cards)
+    .where("factionIds", "array-contains", id)
+    .limit(1)
+    .get();
+  if (!referenced.empty) {
+    return {
+      status: "error",
+      message: (await getTranslations("Admin.feedback"))("factionInUse"),
+    };
+  }
+  return deleteEntity(id, "faction", factionsRepository.remove, `factions/${id}/`);
+}
+
+async function saveVisualEntity<T extends CreateRarityInput | CreateCardTypeInput | CreateFactionInput>(
+  kind: "rarity" | "type" | "faction",
   formData: FormData,
   id?: string,
 ): Promise<AdminActionState> {
   try {
     await requireAdminSession();
-    const repository = kind === "rarity" ? raritiesRepository : cardTypesRepository;
+    const repository = kind === "rarity" ? raritiesRepository : kind === "faction" ? factionsRepository : cardTypesRepository;
     const payload = jsonPayload(formData);
     const entityId = id ?? getFirebaseAdminFirestore().collection(
-      kind === "rarity" ? FIRESTORE_COLLECTIONS.rarities : FIRESTORE_COLLECTIONS.cardTypes,
+      kind === "rarity" ? FIRESTORE_COLLECTIONS.rarities : kind === "faction" ? FIRESTORE_COLLECTIONS.factions : FIRESTORE_COLLECTIONS.cardTypes,
     ).doc().id;
     const file = optionalFile(formData, "icon");
     if (file) {
       const extension = validateImage(file, true);
       const iconStoragePath = kind === "rarity"
         ? storagePaths.rarityIcon(entityId, extension)
-        : storagePaths.cardTypeIcon(entityId, extension);
+        : kind === "faction"
+          ? storagePaths.factionIcon(entityId, extension)
+          : storagePaths.cardTypeIcon(entityId, extension);
       payload.visual = { ...(payload.visual as object ?? {}), iconStoragePath };
     }
-    const data = (kind === "rarity" ? rarityPayload(payload) : typePayload(payload)) as T;
+    const data = (kind === "rarity" ? rarityPayload(payload) : kind === "faction" ? factionPayload(payload) : typePayload(payload)) as T;
     await assertUniqueSlug(data.slug, repository.getBySlug, id);
     if (file && data.visual?.iconStoragePath) {
       data.visual.iconUrl = await uploadFile(file, data.visual.iconStoragePath);
@@ -670,7 +712,7 @@ async function saveVisualEntity<T extends CreateRarityInput | CreateCardTypeInpu
       await repository.update(id, data as never);
       if (kind === "rarity") {
         await syncRaritySnapshots(id);
-      } else {
+      } else if (kind === "type") {
         await syncCardTypeSnapshots(id);
       }
     } else {
@@ -679,7 +721,7 @@ async function saveVisualEntity<T extends CreateRarityInput | CreateCardTypeInpu
     invalidateReferenceCache(kind);
     updateTag(CODEX_CACHE_TAGS.cards);
     revalidatePath("/[locale]/admin", "page");
-    revalidatePath(kind === "rarity" ? "/[locale]/admin/rarities" : "/[locale]/admin/types", "page");
+    revalidatePath(kind === "rarity" ? "/[locale]/admin/rarities" : kind === "faction" ? "/[locale]/admin/factions" : "/[locale]/admin/types", "page");
     return {
       status: "success",
       message: id

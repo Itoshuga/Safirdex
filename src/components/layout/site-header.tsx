@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpen, UserRound, Users } from "lucide-react";
+import { ArrowUpRight, BookOpen, Layers3, UserRound, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -36,6 +36,13 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
         >
           <Users className="size-3.5" />
           <span className="hidden md:inline">{navigation("community")}</span>
+        </Link>
+        <Link
+          href="/decks"
+          className="hidden h-9 items-center gap-1.5 px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground md:inline-flex"
+        >
+          <Layers3 className="size-3.5" />
+          <span>{navigation("decks")}</span>
         </Link>
         <Link
           href={signedIn ? "/account" : "/login"}

@@ -55,6 +55,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /factions/{factionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Deck reads and every deck mutation go through the authenticated server
+    // layer. This prevents private snapshots and author UIDs from leaking to
+    // untrusted clients; ownership and legality are rechecked server-side.
+    match /decks/{deckId} {
+      allow read, write: if false;
+    }
+
     match /glossaryEntries/{entryId} {
       allow read: if true;
       allow write: if isAdmin();

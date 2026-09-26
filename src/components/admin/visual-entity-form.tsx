@@ -18,7 +18,7 @@ type FormAction = (state: AdminActionState, formData: FormData) => Promise<Admin
 interface VisualFormValue { id?: string; slug: string; order?: number; translations: TranslationFormValue; visual?: { color?: string; iconStoragePath?: string }; createdAt?: string; updatedAt?: string }
 const emptyTranslations = () => Object.fromEntries(SUPPORTED_LOCALES.map((locale) => [locale, { name: "", description: "" }]));
 
-export function VisualEntityForm({ action, mode, kind, initial }: { action: FormAction; mode: "create" | "edit"; kind: "rarity" | "type"; initial?: VisualFormValue }) {
+export function VisualEntityForm({ action, mode, kind, initial }: { action: FormAction; mode: "create" | "edit"; kind: "rarity" | "type" | "faction"; initial?: VisualFormValue }) {
   const t = useTranslations("Admin.forms");
   const entities = useTranslations("Admin.entities");
   const router = useRouter();
@@ -27,9 +27,9 @@ export function VisualEntityForm({ action, mode, kind, initial }: { action: Form
   const [autoSlug, setAutoSlug] = useState(mode === "create");
   const [value, setValue] = useState<VisualFormValue>(initial ?? { slug: "", ...(kind === "rarity" ? { order: 0 } : {}), translations: emptyTranslations(), visual: { color: "#4D8FA8" } });
   useUnsavedChanges(dirty && !pending);
-  const plural = kind === "rarity" ? "rarities" : "types";
-  const title = kind === "rarity" ? entities("rarity") : entities("type");
-  useEffect(() => { if (state.status === "success") { router.push(`/admin/${plural}?notice=${encodeURIComponent(state.message ?? (kind === "rarity" ? t("saveRarity") : t("saveType")))}`); router.refresh(); } }, [kind, plural, router, state, t]);
+  const plural = kind === "rarity" ? "rarities" : kind === "faction" ? "factions" : "types";
+  const title = kind === "rarity" ? entities("rarity") : kind === "faction" ? entities("faction") : entities("type");
+  useEffect(() => { if (state.status === "success") { router.push(`/admin/${plural}?notice=${encodeURIComponent(state.message ?? (kind === "rarity" ? t("saveRarity") : kind === "faction" ? t("saveFaction") : t("saveType")))}`); router.refresh(); } }, [kind, plural, router, state, t]);
   function update(next: Partial<VisualFormValue>) { setDirty(true); setValue((current) => ({ ...current, ...next })); }
   function translationsChanged(translations: TranslationFormValue) { update({ translations, ...(autoSlug ? { slug: createSlug(translations.fr?.name ?? "") } : {}) }); }
   const color = value.visual?.color ?? "#4D8FA8";
@@ -60,7 +60,7 @@ export function VisualEntityForm({ action, mode, kind, initial }: { action: Form
           </FormSection>
         </aside>
       </div>
-      <FormActions cancelHref={`/admin/${plural}`} pending={pending} label={mode === "create" ? (kind === "rarity" ? t("saveRarity") : t("saveType")) : t("saveChanges")} />
+      <FormActions cancelHref={`/admin/${plural}`} pending={pending} label={mode === "create" ? (kind === "rarity" ? t("saveRarity") : kind === "faction" ? t("saveFaction") : t("saveType")) : t("saveChanges")} />
     </form>
   );
 }

@@ -146,6 +146,8 @@ export interface ProfileDeckItem {
   cardCount: number;
   commanderName?: string;
   artworkUrl?: string;
+  status?: "draft" | "published";
+  visibility?: "private" | "unlisted" | "public";
 }
 
 export interface ProfileCollectionItem {

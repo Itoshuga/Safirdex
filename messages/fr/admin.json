@@ -22,6 +22,7 @@
       "sets": "Éditions",
       "rarities": "Raretés",
       "types": "Types",
+      "factions": "Factions",
       "glossary": "Lexique",
       "settings": "Paramètres",
       "new": "Nouveau",
@@ -61,6 +62,8 @@
       "rarity": "rareté",
       "types": "Types de carte",
       "type": "type",
+      "factions": "Factions",
+      "faction": "faction",
       "glossary": "Lexique",
       "glossaryEntry": "entrée du lexique"
     },
@@ -180,6 +183,18 @@
       "editEyebrow": "Modifier le type",
       "editDescription": "Mettez à jour ce type sur toutes les cartes qui le référencent."
     },
+    "factions": {
+      "title": "Factions",
+      "description": "Gérez les factions utilisées par les règles de compatibilité des decks.",
+      "add": "Ajouter une faction",
+      "emptyTitle": "Aucune faction pour le moment.",
+      "emptyDescription": "Créez les factions avant de les affecter aux cartes.",
+      "createEyebrow": "Factions / Nouvelle",
+      "createTitle": "Créer une faction",
+      "createDescription": "Ajoutez une identité stable, traduite et réutilisable par les cartes.",
+      "editEyebrow": "Modifier la faction",
+      "editDescription": "Les cartes conservent son identifiant stable lors des modifications."
+    },
     "glossary": {
       "description": "Gérez les termes de règles, leurs clés stables et leurs définitions traduites.",
       "add": "Ajouter une entrée",
@@ -233,6 +248,15 @@
       "set": "Édition",
       "rarity": "Rareté",
       "types": "Types",
+      "gameplayKind": "Catégorie de jeu",
+      "gameplayKinds": {
+        "combatant": "Combattant",
+        "spell": "Sort",
+        "token": "Jeton",
+        "commander": "Commandant"
+      },
+      "factions": "Factions",
+      "noFactionConfigured": "Aucune faction n’est configurée.",
       "releaseDate": "Date de sortie",
       "selectSeason": "Sélectionner une saison",
       "selectRarity": "Sélectionner une rareté",
@@ -271,6 +295,7 @@
       "chooseImage": "Choisir une image ou un SVG",
       "saveRarity": "Enregistrer la rareté",
       "saveType": "Enregistrer le type",
+      "saveFaction": "Enregistrer la faction",
       "mainArtwork": "Illustration principale",
       "mainArtworkHelp": "L’image originale n’est jamais rognée dans l’administration.",
       "artworkRequired": "Une illustration principale est obligatoire.",
@@ -337,6 +362,7 @@
       "invalidField": "Cette valeur est invalide.",
       "operationFailed": "L’opération a échoué.",
       "sessionExpired": "Votre session administrateur a expiré."
+      ,"factionInUse": "Cette faction est encore utilisée par au moins une carte."
     }
   }
 }

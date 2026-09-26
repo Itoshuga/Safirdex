@@ -6,6 +6,12 @@ import type {
   Translations,
 } from "@/types/translation";
 
+export type GameplayCardKind =
+  | "combatant"
+  | "spell"
+  | "token"
+  | "commander";
+
 export interface Card extends FirestoreEntity {
   number: number;
   slug: string;
@@ -13,6 +19,8 @@ export interface Card extends FirestoreEntity {
   setId: string | null;
   rarityId: string;
   typeIds: string[];
+  gameplayKind: GameplayCardKind;
+  factionIds: string[];
   attack: number;
   value: number;
   defense: number;

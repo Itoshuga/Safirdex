@@ -98,11 +98,18 @@ async function createActivity({
   return activity;
 }
 
-export function recordDeckCreatedActivity(
+export async function recordDeckCreatedActivity(
   actorId: string,
   payload: DeckActivityPayload,
   visibility: CommunityActivityVisibility = "public",
 ) {
+  const existing = await getFirebaseAdminFirestore()
+    .collection("communityActivities")
+    .where("actorId", "==", actorId)
+    .where("entityKey", "==", `deck:${payload.deckId}`)
+    .limit(1)
+    .get();
+  if (!existing.empty) return null;
   return createActivity({
     actorId,
     type: "deck_created",
@@ -111,6 +118,48 @@ export function recordDeckCreatedActivity(
     payload,
     requiredSection: "decks",
   });
+}
+
+export async function setDeckActivityPublished(
+  actorId: string,
+  deckId: string,
+  deckIsPublic: boolean,
+) {
+  const [profile, activities] = await Promise.all([
+    publicProfilesRepository.getById(actorId),
+    getFirebaseAdminFirestore()
+      .collection("communityActivities")
+      .where("actorId", "==", actorId)
+      .where("entityKey", "==", `deck:${deckId}`)
+      .get(),
+  ]);
+  if (activities.empty) return;
+  const published = Boolean(
+    deckIsPublic &&
+    profile?.visibility.publicProfile &&
+    profile.visibility.activity === "public" &&
+    profile.visibility.decks === "public",
+  );
+  const firestore = getFirebaseAdminFirestore();
+  const followers = await firestore
+    .collection("users")
+    .doc(actorId)
+    .collection("followers")
+    .select()
+    .get();
+  const recipients = new Set([actorId, ...followers.docs.map((document) => document.id)]);
+  const operations: Array<(batch: FirebaseFirestore.WriteBatch) => void> = [];
+  for (const activity of activities.docs) {
+    operations.push((batch) => batch.update(activity.ref, { published }));
+    for (const userId of recipients) {
+      operations.push((batch) => batch.set(
+        firestore.collection("userFeeds").doc(userId).collection("items").doc(activity.id),
+        { published },
+        { merge: true },
+      ));
+    }
+  }
+  await writeInChunks(operations);
 }
 
 export function recordSignificantDeckUpdateActivity(

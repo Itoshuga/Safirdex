@@ -95,7 +95,7 @@ export function CodexSearch({
 
   const quickLinks = [
     { id: "cards", label: t("cards"), icon: BookOpen, href: "/cards" as const },
-    { id: "decks", label: t("decks"), icon: Layers3 },
+    { id: "decks", label: t("decks"), icon: Layers3, href: "/decks" as const },
     { id: "community", label: t("community"), icon: Users, href: "/community" as const },
   ];
 

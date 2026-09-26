@@ -29,6 +29,7 @@ const sections = [
       { href: "/admin/sets", label: "sets", icon: Boxes },
       { href: "/admin/rarities", label: "rarities", icon: Diamond },
       { href: "/admin/types", label: "types", icon: Shapes },
+      { href: "/admin/factions", label: "factions", icon: Sparkles },
       { href: "/admin/glossary", label: "glossary", icon: BookOpenText },
     ],
   },

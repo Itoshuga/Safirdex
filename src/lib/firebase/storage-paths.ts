@@ -15,6 +15,7 @@ export const STORAGE_ROOTS = {
   seasons: "seasons",
   rarities: "rarities",
   cardTypes: "card-types",
+  factions: "factions",
 } as const;
 
 export const storagePaths = {
@@ -40,5 +41,9 @@ export const storagePaths = {
 
   cardTypeIcon(cardTypeId: string, extension = "svg") {
     return `${STORAGE_ROOTS.cardTypes}/${assertStorageSegment(cardTypeId, "cardTypeId")}/icon.${assertStorageSegment(extension, "extension")}`;
+  },
+
+  factionIcon(factionId: string, extension = "svg") {
+    return `${STORAGE_ROOTS.factions}/${assertStorageSegment(factionId, "factionId")}/icon.${assertStorageSegment(extension, "extension")}`;
   },
 };

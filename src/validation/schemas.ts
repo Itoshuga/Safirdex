@@ -83,6 +83,10 @@ export const createCardSchema = z.object({
   setId: requiredStringSchema.nullable(),
   rarityId: requiredStringSchema,
   typeIds: z.array(requiredStringSchema).max(20),
+  gameplayKind: z
+    .enum(["combatant", "spell", "token", "commander"])
+    .default("combatant"),
+  factionIds: z.array(requiredStringSchema).max(20).default([]),
   attack: cardStatSchema,
   value: cardStatSchema,
   defense: cardStatSchema,
@@ -159,6 +163,16 @@ export const updateCardTypeSchema = nonEmptyUpdate(createCardTypeSchema);
 export const cardTypeSchema = createCardTypeSchema.extend(
   entityFieldsSchema.shape,
 );
+
+export const createFactionSchema = z.object({
+  slug: slugSchema,
+  visual: visualSchema.optional(),
+  translations: translationsSchema(nameDescriptionTranslationSchema),
+});
+
+export const updateFactionSchema = nonEmptyUpdate(createFactionSchema);
+
+export const factionSchema = createFactionSchema.extend(entityFieldsSchema.shape);
 
 export const glossaryKeySchema = slugSchema;
 

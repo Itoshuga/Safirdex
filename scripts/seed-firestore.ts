@@ -21,6 +21,7 @@ import type { CreateCardInput } from "@/types/card";
 import type { CreateGlossaryEntryInput } from "@/types/glossary";
 import type { CreateRarityInput } from "@/types/rarity";
 import type { CreateSeasonInput } from "@/types/season";
+import type { CreateFactionInput } from "@/types/faction";
 import {
   createCardSchema,
   createCardSetSchema,
@@ -28,6 +29,7 @@ import {
   createGlossaryEntrySchema,
   createRaritySchema,
   createSeasonSchema,
+  createFactionSchema,
 } from "@/validation/schemas";
 
 loadEnvConfig(process.cwd());
@@ -115,6 +117,17 @@ const typeDefinitions = [
   },
 ] satisfies CreateCardTypeInput[];
 
+const factionDefinitions = [
+  {
+    slug: "neutral",
+    visual: { color: "#4D8FA8" },
+    translations: {
+      fr: { name: "Neutre", description: "Faction commune des données de développement." },
+      en: { name: "Neutral", description: "Shared faction for development data." },
+    },
+  },
+] satisfies CreateFactionInput[];
+
 const glossaryDefinitions = [
   {
     key: "silence",
@@ -153,6 +166,7 @@ interface SeedReferences {
   setId: string;
   rarityIds: Record<string, string>;
   typeIds: Record<string, string>;
+  factionIds: Record<string, string>;
 }
 
 interface CardDefinition {
@@ -322,6 +336,8 @@ function buildCardInput(
     setId: definition.withoutSet ? null : references.setId,
     rarityId: references.rarityIds[definition.rarity],
     typeIds: definition.types.map((type) => references.typeIds[type]),
+    gameplayKind: definition.isCommander ? "commander" : "combatant",
+    factionIds: [references.factionIds.neutral],
     attack: definition.attack,
     value: definition.value,
     defense: definition.defense,
@@ -472,6 +488,9 @@ function validateSeedDefinitions() {
     typeIds: Object.fromEntries(
       typeDefinitions.map(({ slug }) => [slug, `seed-${slug}`]),
     ),
+    factionIds: Object.fromEntries(
+      factionDefinitions.map(({ slug }) => [slug, `seed-${slug}`]),
+    ),
   };
 
   createSeasonSchema.parse({
@@ -484,6 +503,7 @@ function validateSeedDefinitions() {
   });
   rarityDefinitions.forEach((rarity) => createRaritySchema.parse(rarity));
   typeDefinitions.forEach((type) => createCardTypeSchema.parse(type));
+  factionDefinitions.forEach((faction) => createFactionSchema.parse(faction));
   glossaryDefinitions.forEach((entry) =>
     createGlossaryEntrySchema.parse(entry),
   );
@@ -499,7 +519,7 @@ async function seed() {
 
   if (isDryRun) {
     console.info(
-      `Seed valid: 1 season, 1 set, ${rarityDefinitions.length} rarities, ${typeDefinitions.length} card types, ${glossaryDefinitions.length} glossary entries, and ${cardDefinitions.length} cards.`,
+      `Seed valid: 1 season, 1 set, ${rarityDefinitions.length} rarities, ${typeDefinitions.length} card types, ${factionDefinitions.length} factions, ${glossaryDefinitions.length} glossary entries, and ${cardDefinitions.length} cards.`,
     );
     return;
   }
@@ -575,6 +595,24 @@ async function seed() {
     typeIds[cardType.slug] = target.reference.id;
   }
 
+  const factionIds: Record<string, string> = {};
+  for (const factionDefinition of factionDefinitions) {
+    const target = await resolveReference(
+      FIRESTORE_COLLECTIONS.factions,
+      "slug",
+      factionDefinition.slug,
+    );
+    const faction = createFactionSchema.parse({
+      ...factionDefinition,
+      visual: {
+        ...factionDefinition.visual,
+        iconStoragePath: storagePaths.factionIcon(target.reference.id),
+      },
+    });
+    await writeSeedDocument(target.reference, target.exists, faction);
+    factionIds[faction.slug] = target.reference.id;
+  }
+
   for (const glossaryDefinition of glossaryDefinitions) {
     const target = await resolveReference(
       FIRESTORE_COLLECTIONS.glossaryEntries,
@@ -590,6 +628,7 @@ async function seed() {
     setId: setTarget.reference.id,
     rarityIds,
     typeIds,
+    factionIds,
   };
 
   for (const cardDefinition of cardDefinitions) {

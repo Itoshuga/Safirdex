@@ -131,7 +131,7 @@ export async function ensurePublicProfileForUser(userId: string) {
   const profileRef = publicProfilesRepository.reference(userId);
   const usernameRef = firestore.collection("usernames").doc(usernameNormalized);
   const [deckCountSnapshot, collectionCountSnapshot] = await Promise.all([
-    userRef.collection("decks").count().get(),
+    firestore.collection("decks").where("authorId", "==", userId).where("visibility", "==", "public").where("status", "==", "published").count().get(),
     userRef.collection("collection").count().get(),
   ]);
 
@@ -438,14 +438,14 @@ export function parseProfileTab(value: string | string[] | undefined): ProfileTa
 async function getDecks(
   profile: PublicUserProfileDocument,
   owner: boolean,
+  locale: AppLocale,
 ): Promise<ProfileDeckItem[]> {
   let query = getFirebaseAdminFirestore()
-    .collection("users")
-    .doc(profile.id)
     .collection("decks")
+    .where("authorId", "==", profile.id)
     .orderBy("updatedAt", "desc")
     .limit(12);
-  if (!owner) query = query.where("visibility", "==", "public");
+  if (!owner) query = query.where("visibility", "==", "public").where("status", "==", "published");
   const snapshot = await query.get();
   return snapshot.docs.map((document) => {
     const data = document.data();
@@ -453,9 +453,11 @@ async function getDecks(
       id: document.id,
       name: String(data.name ?? ""),
       slug: String(data.slug ?? document.id),
-      cardCount: Number(data.cardCount ?? 0),
-      ...(typeof data.commanderName === "string" ? { commanderName: data.commanderName } : {}),
-      ...(typeof data.artworkUrl === "string" ? { artworkUrl: data.artworkUrl } : {}),
+      cardCount: Number(data.stats?.cardCount ?? 0),
+      ...(data.preview?.commanderTranslations || typeof data.preview?.commanderName === "string" ? { commanderName: getLocalizedName(data.preview?.commanderTranslations, locale) || data.preview?.commanderName } : {}),
+      ...(typeof data.preview?.artworkUrl === "string" ? { artworkUrl: data.preview.artworkUrl } : {}),
+      ...(data.status === "draft" || data.status === "published" ? { status: data.status } : {}),
+      ...(data.visibility === "private" || data.visibility === "unlisted" || data.visibility === "public" ? { visibility: data.visibility } : {}),
     };
   });
 }
@@ -507,7 +509,7 @@ export async function getProfileTabContent({
       ? { tab, private: true, feed: { items: [] } }
       : { tab, private: true, items: [] };
   }
-  if (tab === "decks") return { tab, private: false, items: await getDecks(profile, owner) };
+  if (tab === "decks") return { tab, private: false, items: await getDecks(profile, owner, locale) };
   if (tab === "collection") {
     return { tab, private: false, items: await getCollection(profile, locale) };
   }

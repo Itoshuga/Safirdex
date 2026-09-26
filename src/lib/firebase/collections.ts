@@ -4,6 +4,8 @@ export const FIRESTORE_COLLECTIONS = {
   sets: "sets",
   rarities: "rarities",
   cardTypes: "cardTypes",
+  factions: "factions",
+  decks: "decks",
   glossaryEntries: "glossaryEntries",
   users: "users",
   publicProfiles: "publicProfiles",

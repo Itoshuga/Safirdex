@@ -27,6 +27,7 @@ export function ProfileTabContentView({
 }) {
   const t = useTranslations("Profile.sections");
   const tFeed = useTranslations("Community.feed");
+  const deckStatus = useTranslations("Decks.status");
   if (content.tab === "overview") {
     return (
       <div className="grid gap-4 md:grid-cols-3">
@@ -51,7 +52,7 @@ export function ProfileTabContentView({
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {content.items.map((deck) => (
-          <article key={deck.id} className="overflow-hidden rounded-2xl border bg-card">
+          <Link key={deck.id} href={`/decks/${deck.id}`} className="overflow-hidden rounded-2xl border bg-card transition hover:border-safir/40 hover:shadow-md">
             <div className="relative aspect-[16/9] bg-muted">
               {deck.artworkUrl ? <Image src={deck.artworkUrl} alt="" fill sizes="(max-width: 1023px) 50vw, 33vw" className="object-cover" /> : null}
             </div>
@@ -59,8 +60,10 @@ export function ProfileTabContentView({
               <h2 className="font-heading text-lg font-semibold">{deck.name}</h2>
               <p className="mt-1 text-xs text-muted-foreground">{t("decks.cardCount", { count: deck.cardCount })}</p>
               {deck.commanderName ? <Badge variant="secondary" className="mt-3">{deck.commanderName}</Badge> : null}
+              {deck.status ? <Badge variant="outline" className="mt-3 ml-2">{deckStatus(deck.status)}</Badge> : null}
+              {deck.visibility ? <Badge variant="outline" className="mt-3 ml-2">{deckStatus(deck.visibility)}</Badge> : null}
             </div>
-          </article>
+          </Link>
         ))}
       </div>
     );

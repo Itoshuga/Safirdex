@@ -71,6 +71,8 @@ function defaultCard(seasons: Option[], rarities: Option[]): CardFormInitial {
     setId: null,
     rarityId: rarities[0]?.id ?? "",
     typeIds: [],
+    gameplayKind: "combatant",
+    factionIds: [],
     attack: 0,
     value: 0,
     defense: 0,
@@ -195,6 +197,7 @@ export function CardForm({
   sets,
   rarities,
   types,
+  factions,
   glossary,
 }: {
   action: CardAction;
@@ -204,6 +207,7 @@ export function CardForm({
   sets: Option[];
   rarities: Option[];
   types: Option[];
+  factions: Option[];
   glossary: GlossaryOption[];
 }) {
   const t = useTranslations("Admin.forms");
@@ -363,6 +367,43 @@ export function CardForm({
                 </div>
                 {value.typeIds.length ? <div className="flex flex-wrap gap-1.5">{value.typeIds.map((id) => <Badge variant="secondary" key={id}>{types.find((type) => type.id === id)?.label ?? id}</Badge>)}</div> : <p className="admin-help">{t("noType")}</p>}
               </fieldset>
+              <div className="space-y-2">
+                <label className="admin-label" htmlFor="card-gameplay-kind">{t("gameplayKind")}</label>
+                <select
+                  id="card-gameplay-kind"
+                  className="admin-input"
+                  value={value.gameplayKind}
+                  onChange={(event) => {
+                    const gameplayKind = event.target.value as CardFormInitial["gameplayKind"];
+                    update("gameplayKind", gameplayKind);
+                    update("isCommander", gameplayKind === "commander");
+                  }}
+                >
+                  {(["combatant", "spell", "token", "commander"] as const).map((kind) => (
+                    <option key={kind} value={kind}>{t(`gameplayKinds.${kind}`)}</option>
+                  ))}
+                </select>
+              </div>
+              <fieldset className="space-y-3">
+                <legend className="admin-label">{t("factions")}</legend>
+                <div className="flex min-h-10 flex-wrap gap-2 rounded-lg border bg-background p-2">
+                  {factions.map((faction) => {
+                    const selected = value.factionIds.includes(faction.id);
+                    return (
+                      <button
+                        type="button"
+                        key={faction.id}
+                        onClick={() => update("factionIds", selected ? value.factionIds.filter((id) => id !== faction.id) : [...value.factionIds, faction.id])}
+                        className={cn("rounded-md border px-2.5 py-1 text-xs font-medium transition", selected ? "border-safir/40 bg-safir/10 text-safir" : "text-muted-foreground hover:bg-muted")}
+                        aria-pressed={selected}
+                      >
+                        {selected ? <CheckCircle2 className="mr-1 inline size-3" /> : null}{faction.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {factions.length === 0 ? <p className="admin-help">{t("noFactionConfigured")}</p> : null}
+              </fieldset>
             </div>
           </FormSection>
 
@@ -389,7 +430,7 @@ export function CardForm({
                 ["isFeatured", status("featured"), t("featuredCardHelp")],
               ].map(([key, label, description]) => (
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border p-4 hover:bg-muted/25" key={key}>
-                  <input className="mt-1 size-4 accent-safir" type="checkbox" checked={Boolean(value[key as keyof CardFormInitial])} onChange={(event) => update(key as "isCommander", event.target.checked)} />
+                  <input className="mt-1 size-4 accent-safir" type="checkbox" checked={Boolean(value[key as keyof CardFormInitial])} onChange={(event) => { update(key as "isCommander", event.target.checked); if (key === "isCommander") update("gameplayKind", event.target.checked ? "commander" : "combatant"); }} />
                   <span><span className="block text-sm font-medium">{label}</span><span className="mt-0.5 block text-xs leading-5 text-muted-foreground">{description}</span></span>
                 </label>
               ))}

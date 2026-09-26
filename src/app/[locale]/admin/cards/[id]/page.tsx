@@ -13,10 +13,11 @@ import { glossaryRepository } from "@/repositories/glossary.repository";
 import { raritiesRepository } from "@/repositories/rarities.repository";
 import { seasonsRepository } from "@/repositories/seasons.repository";
 import { setsRepository } from "@/repositories/sets.repository";
+import { factionsRepository } from "@/repositories/factions.repository";
 
 export default async function EditCardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [t, locale, card, seasons, sets, rarities, types, glossary] = await Promise.all([getTranslations("Admin.cards"), getAdminLocale(), cardsRepository.getById(id), seasonsRepository.getAll(), setsRepository.getAll(), raritiesRepository.getAll(), cardTypesRepository.getAll(), glossaryRepository.getAll()]);
+  const [t, locale, card, seasons, sets, rarities, types, factions, glossary] = await Promise.all([getTranslations("Admin.cards"), getAdminLocale(), cardsRepository.getById(id), seasonsRepository.getAll(), setsRepository.getAll(), raritiesRepository.getAll(), cardTypesRepository.getAll(), factionsRepository.getAll(), glossaryRepository.getAll()]);
   if (!card) notFound();
   const name = localizedLabel(card.translations, locale);
   const initial = { ...card, createdAt: formatTimestamp(card.createdAt, locale, true), updatedAt: formatTimestamp(card.updatedAt, locale, true) };
@@ -24,7 +25,7 @@ export default async function EditCardPage({ params }: { params: Promise<{ id: s
     <>
       <AdminBreadcrumbTitle title={name} />
       <AdminPageHeader eyebrow={t("editEyebrow")} title={`#${String(card.number).padStart(3, "0")} — ${name}`} description={t("editDescription")} />
-      <CardForm action={updateCardAction.bind(null, id)} mode="edit" initial={initial} seasons={seasons.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale) }))} sets={sets.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale), seasonId: entry.seasonId }))} rarities={rarities.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale), color: entry.visual?.color }))} types={types.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale), color: entry.visual?.color }))} glossary={glossary.map(({ id: entryId, key, translations }) => ({ id: entryId, key, translations }))} />
+      <CardForm action={updateCardAction.bind(null, id)} mode="edit" initial={initial} seasons={seasons.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale) }))} sets={sets.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale), seasonId: entry.seasonId }))} rarities={rarities.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale), color: entry.visual?.color }))} types={types.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale), color: entry.visual?.color }))} factions={factions.map((entry) => ({ id: entry.id, label: localizedLabel(entry.translations, locale), color: entry.visual?.color }))} glossary={glossary.map(({ id: entryId, key, translations }) => ({ id: entryId, key, translations }))} />
     </>
   );
 }

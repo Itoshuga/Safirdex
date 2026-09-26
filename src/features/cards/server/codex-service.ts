@@ -146,6 +146,10 @@ function localizeReferences(
   };
 }
 
+export async function getCodexFilterOptions(locale: string) {
+  return localizeReferences(locale, await getReferenceSources());
+}
+
 async function getReferenceSources() {
   const [seasons, sets, rarities, types] = await Promise.all([
     getCachedSeasons(),
