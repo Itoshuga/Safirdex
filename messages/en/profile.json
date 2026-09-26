@@ -1,0 +1,131 @@
+{
+  "Profile": {
+    "metadata": {
+      "account": {
+        "title": "My profile",
+        "description": "Manage your public Safirdex profile."
+      },
+      "public": {
+        "title": "{name} (@{username})",
+        "description": "{name}'s Safirdex profile.",
+        "notFound": "Profile not found"
+      }
+    },
+    "actions": { "edit": "Edit profile" },
+    "emptyBio": "This member has not added a bio yet.",
+    "joined": "Member since {date}",
+    "stats": {
+      "followers": "Followers",
+      "following": "Following",
+      "decks": "Decks",
+      "collection": "Cards"
+    },
+    "tabs": {
+      "label": "Profile content",
+      "overview": "Overview",
+      "decks": "Decks",
+      "collection": "Collection",
+      "activity": "Activity"
+    },
+    "sections": {
+      "privateTitle": "Private content",
+      "privateDescription": "This member has chosen not to make this section public.",
+      "decks": {
+        "title": "Public decks",
+        "overview": "Latest decks",
+        "emptyTitle": "No public decks",
+        "emptyDescription": "This member's public decks will appear here.",
+        "cardCount": "{count, plural, one {# card} other {# cards}}"
+      },
+      "collection": {
+        "title": "Public collection",
+        "overview": "Collection preview",
+        "emptyTitle": "Empty collection",
+        "emptyDescription": "This member's public cards will appear here."
+      },
+      "activity": {
+        "title": "Public activity",
+        "overview": "Recent activity",
+        "emptyTitle": "No recent activity",
+        "emptyDescription": "Future public activity will appear here."
+      }
+    },
+    "account": {
+      "title": "My account",
+      "admin": "Administration",
+      "logout": "Sign out"
+    },
+    "editor": {
+      "eyebrow": "Customization",
+      "title": "Edit profile",
+      "displayName": "Display name",
+      "username": "Username",
+      "usernameHelp": "3 to 24 characters: letters, numbers, periods, hyphens, or underscores.",
+      "checking": "Checking…",
+      "available": "This username is available.",
+      "unavailable": "This username is already taken.",
+      "bio": "Bio",
+      "bioHelp": "{count}/280 characters",
+      "avatar": "Profile picture",
+      "banner": "Banner",
+      "chooseImage": "Choose an image",
+      "uploadFailed": "The image could not be uploaded.",
+      "save": "Save",
+      "saved": "Profile updated.",
+      "errors": {
+        "AUTH_REQUIRED": "You must be signed in.",
+        "USERNAME_TAKEN": "This username is already taken.",
+        "INVALID_ASSET_PATH": "The selected file is not valid.",
+        "INVALID_PROFILE": "Check the information you entered."
+      }
+    },
+    "privacy": {
+      "eyebrow": "Privacy",
+      "title": "Public visibility",
+      "publicProfile": {
+        "label": "Public profile",
+        "description": "Let other members find and view your profile."
+      },
+      "decks": {
+        "label": "Decks",
+        "description": "Show decks you marked as public."
+      },
+      "collection": {
+        "label": "Collection",
+        "description": "Show a preview of your collection."
+      },
+      "activity": {
+        "label": "Activity",
+        "description": "Publish meaningful updates to the community feed."
+      },
+      "save": "Save visibility",
+      "saved": "Visibility updated.",
+      "failed": "Visibility could not be updated."
+    },
+    "connections": {
+      "followers": "Followers",
+      "following": "Following",
+      "followersDescription": "Members following this profile.",
+      "followingDescription": "Profiles followed by this member.",
+      "empty": "No members to show.",
+      "loadMore": "Load more"
+    },
+    "onboarding": {
+      "eyebrow": "Community profile",
+      "title": "Choose your username",
+      "description": "Your existing profile remains intact. Add a unique handle to enable community features.",
+      "username": "Username",
+      "usernameHelp": "3 to 24 characters: letters, numbers, periods, hyphens, or underscores.",
+      "checking": "Checking…",
+      "available": "This username is available.",
+      "unavailable": "This username is already taken.",
+      "displayName": "Display name",
+      "continue": "Create my profile",
+      "errors": {
+        "AUTH_REQUIRED": "You must be signed in.",
+        "USERNAME_TAKEN": "This username is already taken.",
+        "INVALID_PROFILE": "Check the information you entered."
+      }
+    }
+  }
+}

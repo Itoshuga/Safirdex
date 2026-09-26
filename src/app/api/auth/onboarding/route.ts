@@ -2,10 +2,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import {
-  ensureUserProfile,
-  normalizePublicName,
-} from "@/lib/auth/user-profile";
+import { ensureUserProfile } from "@/lib/auth/user-profile";
 import {
   getFirebaseAdminAuth,
   getFirebaseAdminFirestore,
@@ -24,7 +21,7 @@ const completeSchema = z.object({
     .trim()
     .min(3)
     .max(24)
-    .regex(/^[\p{L}\p{N}._-]+$/u),
+    .regex(/^[a-zA-Z0-9._-]+$/),
   displayName: z.string().trim().min(2).max(40),
 });
 
@@ -34,7 +31,7 @@ const requestSchema = z.discriminatedUnion("action", [
 ]);
 
 class PublicNameConflict extends Error {
-  constructor(public readonly code: "PSEUDONYM_TAKEN" | "DISPLAY_NAME_TAKEN") {
+  constructor(public readonly code: "PSEUDONYM_TAKEN") {
     super(code);
   }
 }
@@ -63,8 +60,8 @@ export async function POST(request: Request) {
 
     const pseudonym = body.pseudonym.trim();
     const displayName = body.displayName.trim();
-    const pseudonymKey = normalizePublicName(pseudonym);
-    const displayNameKey = normalizePublicName(displayName);
+    const pseudonymKey = pseudonym.toLowerCase();
+    const displayNameKey = displayName.toLocaleLowerCase();
 
     if (!pseudonymKey || !displayNameKey) {
       return NextResponse.json(
@@ -74,58 +71,67 @@ export async function POST(request: Request) {
     }
 
     const firestore = getFirebaseAdminFirestore();
-    const pseudonymRef = firestore.collection("pseudonyms").doc(pseudonymKey);
-    const displayNameRef = firestore
-      .collection("displayNames")
-      .doc(displayNameKey);
+    const usernameRef = firestore.collection("usernames").doc(pseudonymKey);
+    const publicProfileRef = firestore.collection("publicProfiles").doc(decoded.uid);
 
     await firestore.runTransaction(async (transaction) => {
-      const [profileSnapshot, pseudonymSnapshot, displayNameSnapshot] =
+      const [profileSnapshot, usernameSnapshot, publicProfileSnapshot] =
         await Promise.all([
           transaction.get(account.profileRef),
-          transaction.get(pseudonymRef),
-          transaction.get(displayNameRef),
+          transaction.get(usernameRef),
+          transaction.get(publicProfileRef),
         ]);
-      const profile = profileSnapshot.data() as
-        | (typeof account.profile & {
-            pseudonymKey?: string | null;
-            displayNameKey?: string | null;
-          })
-        | undefined;
-
       if (
-        pseudonymSnapshot.exists &&
-        pseudonymSnapshot.get("uid") !== decoded.uid
+        usernameSnapshot.exists &&
+        ((usernameSnapshot.get("userId") as string | undefined) ??
+          (usernameSnapshot.get("uid") as string | undefined)) !== decoded.uid
       ) {
         throw new PublicNameConflict("PSEUDONYM_TAKEN");
       }
-      if (
-        displayNameSnapshot.exists &&
-        displayNameSnapshot.get("uid") !== decoded.uid
-      ) {
-        throw new PublicNameConflict("DISPLAY_NAME_TAKEN");
+      transaction.set(
+        usernameRef,
+        {
+          userId: decoded.uid,
+          username: pseudonym,
+          currentUsernameNormalized: pseudonymKey,
+          isAlias: false,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+      if (!publicProfileSnapshot.exists) {
+        transaction.create(publicProfileRef, {
+          username: pseudonym,
+          usernameNormalized: pseudonymKey,
+          displayName,
+          displayNameNormalized: displayName
+            .normalize("NFKD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLocaleLowerCase()
+            .trim()
+            .replace(/\s+/g, " "),
+          bio: "",
+          joinedAt: profileSnapshot.get("createdAt") ?? FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+          stats: {
+            followersCount: 0,
+            followingCount: 0,
+            decksCount: 0,
+            collectionCardsCount: 0,
+          },
+          visibility: {
+            publicProfile: true,
+            decks: "public",
+            collection: "private",
+            activity: "public",
+          },
+        });
       }
-
-      if (profile?.pseudonymKey && profile.pseudonymKey !== pseudonymKey) {
-        transaction.delete(
-          firestore.collection("pseudonyms").doc(profile.pseudonymKey),
-        );
-      }
-      if (profile?.displayNameKey && profile.displayNameKey !== displayNameKey) {
-        transaction.delete(
-          firestore.collection("displayNames").doc(profile.displayNameKey),
-        );
-      }
-
-      const reservation = {
-        uid: decoded.uid,
-        updatedAt: FieldValue.serverTimestamp(),
-      };
-      transaction.set(pseudonymRef, { ...reservation, pseudonym });
-      transaction.set(displayNameRef, { ...reservation, displayName });
       transaction.set(
         account.profileRef,
         {
+          username: pseudonym,
+          usernameNormalized: pseudonymKey,
           pseudonym,
           pseudonymKey,
           displayName,

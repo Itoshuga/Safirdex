@@ -15,6 +15,8 @@ const namespaces = [
   "dashboard",
   "cards",
   "admin",
+  "community",
+  "profile",
 ] as const;
 
 async function loadMessages(locale: string) {

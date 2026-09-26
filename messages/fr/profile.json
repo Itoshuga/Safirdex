@@ -1,0 +1,131 @@
+{
+  "Profile": {
+    "metadata": {
+      "account": {
+        "title": "Mon profil",
+        "description": "Gérez votre profil public Safirdex."
+      },
+      "public": {
+        "title": "{name} (@{username})",
+        "description": "Profil Safirdex de {name}.",
+        "notFound": "Profil introuvable"
+      }
+    },
+    "actions": { "edit": "Modifier le profil" },
+    "emptyBio": "Ce membre n’a pas encore ajouté de présentation.",
+    "joined": "Membre depuis {date}",
+    "stats": {
+      "followers": "Abonnés",
+      "following": "Abonnements",
+      "decks": "Decks",
+      "collection": "Cartes"
+    },
+    "tabs": {
+      "label": "Contenu du profil",
+      "overview": "Aperçu",
+      "decks": "Decks",
+      "collection": "Collection",
+      "activity": "Activité"
+    },
+    "sections": {
+      "privateTitle": "Contenu privé",
+      "privateDescription": "Ce membre a choisi de ne pas rendre cette section publique.",
+      "decks": {
+        "title": "Decks publics",
+        "overview": "Derniers decks",
+        "emptyTitle": "Aucun deck public",
+        "emptyDescription": "Les decks publics de ce membre apparaîtront ici.",
+        "cardCount": "{count, plural, one {# carte} other {# cartes}}"
+      },
+      "collection": {
+        "title": "Collection publique",
+        "overview": "Aperçu de la collection",
+        "emptyTitle": "Collection vide",
+        "emptyDescription": "Les cartes publiques de ce membre apparaîtront ici."
+      },
+      "activity": {
+        "title": "Activité publique",
+        "overview": "Activité récente",
+        "emptyTitle": "Aucune activité récente",
+        "emptyDescription": "Les prochaines activités publiques apparaîtront ici."
+      }
+    },
+    "account": {
+      "title": "Mon compte",
+      "admin": "Administration",
+      "logout": "Se déconnecter"
+    },
+    "editor": {
+      "eyebrow": "Personnalisation",
+      "title": "Modifier le profil",
+      "displayName": "Nom affiché",
+      "username": "Nom d’utilisateur",
+      "usernameHelp": "3 à 24 caractères : lettres, chiffres, point, tiret ou tiret bas.",
+      "checking": "Vérification…",
+      "available": "Ce nom d’utilisateur est disponible.",
+      "unavailable": "Ce nom d’utilisateur est déjà utilisé.",
+      "bio": "Présentation",
+      "bioHelp": "{count}/280 caractères",
+      "avatar": "Photo de profil",
+      "banner": "Bannière",
+      "chooseImage": "Choisir une image",
+      "uploadFailed": "L’image n’a pas pu être envoyée.",
+      "save": "Enregistrer",
+      "saved": "Profil mis à jour.",
+      "errors": {
+        "AUTH_REQUIRED": "Vous devez être connecté.",
+        "USERNAME_TAKEN": "Ce nom d’utilisateur est déjà utilisé.",
+        "INVALID_ASSET_PATH": "Le fichier sélectionné n’est pas valide.",
+        "INVALID_PROFILE": "Vérifiez les informations saisies."
+      }
+    },
+    "privacy": {
+      "eyebrow": "Confidentialité",
+      "title": "Visibilité publique",
+      "publicProfile": {
+        "label": "Profil public",
+        "description": "Permettre aux autres membres de trouver et consulter votre profil."
+      },
+      "decks": {
+        "label": "Decks",
+        "description": "Afficher vos decks marqués comme publics."
+      },
+      "collection": {
+        "label": "Collection",
+        "description": "Afficher un aperçu de votre collection."
+      },
+      "activity": {
+        "label": "Activité",
+        "description": "Publier les activités importantes dans le flux communautaire."
+      },
+      "save": "Enregistrer la visibilité",
+      "saved": "Visibilité mise à jour.",
+      "failed": "Impossible de mettre à jour la visibilité."
+    },
+    "connections": {
+      "followers": "Abonnés",
+      "following": "Abonnements",
+      "followersDescription": "Membres qui suivent ce profil.",
+      "followingDescription": "Profils suivis par ce membre.",
+      "empty": "Aucun membre à afficher.",
+      "loadMore": "Charger la suite"
+    },
+    "onboarding": {
+      "eyebrow": "Profil communautaire",
+      "title": "Choisissez votre nom d’utilisateur",
+      "description": "Votre ancien profil reste intact. Ajoutez un identifiant unique pour activer les fonctions communautaires.",
+      "username": "Nom d’utilisateur",
+      "usernameHelp": "3 à 24 caractères : lettres, chiffres, point, tiret ou tiret bas.",
+      "checking": "Vérification…",
+      "available": "Ce nom d’utilisateur est disponible.",
+      "unavailable": "Ce nom d’utilisateur est déjà utilisé.",
+      "displayName": "Nom affiché",
+      "continue": "Créer mon profil",
+      "errors": {
+        "AUTH_REQUIRED": "Vous devez être connecté.",
+        "USERNAME_TAKEN": "Ce nom d’utilisateur est déjà utilisé.",
+        "INVALID_PROFILE": "Vérifiez les informations saisies."
+      }
+    }
+  }
+}

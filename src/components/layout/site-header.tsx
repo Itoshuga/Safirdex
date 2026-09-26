@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpen } from "lucide-react";
+import { ArrowUpRight, BookOpen, UserRound, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -25,17 +25,35 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
         <ThemeToggle />
         <Link
           href="/cards"
-          className="ml-1 inline-flex h-9 items-center gap-1.5 px-2 text-xs font-semibold text-muted-foreground transition hover:text-foreground sm:px-3"
+          className="ml-1 hidden h-9 items-center gap-1.5 px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground sm:inline-flex"
         >
           <BookOpen className="size-3.5" />
           <span className="hidden sm:inline">{navigation("cards")}</span>
         </Link>
         <Link
+          href="/community"
+          className="hidden h-9 items-center gap-1.5 px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground sm:inline-flex"
+        >
+          <Users className="size-3.5" />
+          <span className="hidden md:inline">{navigation("community")}</span>
+        </Link>
+        <Link
           href={signedIn ? "/account" : "/login"}
+          aria-label={signedIn ? navigation("account") : navigation("login")}
           className="ml-2 inline-flex h-9 items-center gap-1.5 border-l pl-4 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
         >
-          <span>{signedIn ? navigation("account") : navigation("login")}</span>
-          <ArrowUpRight className="size-3.5" />
+          {signedIn ? (
+            <>
+              <UserRound className="size-4 sm:hidden" aria-hidden="true" />
+              <span className="hidden sm:inline">{navigation("account")}</span>
+              <ArrowUpRight className="hidden size-3.5 sm:block" aria-hidden="true" />
+            </>
+          ) : (
+            <>
+              <span>{navigation("login")}</span>
+              <ArrowUpRight className="size-3.5" aria-hidden="true" />
+            </>
+          )}
         </Link>
       </div>
     </header>

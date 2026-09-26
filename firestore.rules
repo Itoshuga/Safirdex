@@ -71,6 +71,34 @@ service cloud.firestore {
           isValidCollectionEntry(cardId);
         allow delete: if isOwner(userId);
       }
+
+      match /following/{targetId} {
+        allow read, write: if false;
+      }
+
+      match /followers/{followerId} {
+        allow read, write: if false;
+      }
+    }
+
+    match /publicProfiles/{userId} {
+      allow read, write: if false;
+    }
+
+    match /communityActivities/{activityId} {
+      allow read, write: if false;
+    }
+
+    match /userFeeds/{userId} {
+      allow read, write: if false;
+
+      match /items/{activityId} {
+        allow read, write: if false;
+      }
+    }
+
+    match /usernames/{key} {
+      allow read, write: if false;
     }
 
     match /pseudonyms/{key} {

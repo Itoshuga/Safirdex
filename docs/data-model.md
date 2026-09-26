@@ -57,9 +57,11 @@ Types are referenced from cards through `typeIds`. A card may have zero, one, or
 
 User document IDs match Firebase Authentication UIDs. A profile is created as soon as Firebase Authentication creates the account, before e-mail verification. It stores the account email, verification and onboarding status, unique pseudonym and display name, creation/update timestamps, last login timestamp, and authorization data. New accounts receive the stable `user` role in both their Firebase custom claims and Firestore profile. Administrators keep `user` and `admin` in `roles`, with `admin` as their primary `role`.
 
-### `pseudonyms/{normalizedPseudonym}` and `displayNames/{normalizedDisplayName}`
+### `publicProfiles/{userId}` and `usernames/{normalizedUsername}`
 
-These private reservation collections enforce case- and accent-insensitive uniqueness. Onboarding claims both names and updates the user profile in one Firestore transaction, preventing two simultaneous registrations from receiving the same public identity. Clients cannot read or write these reservations directly.
+Private account data remains in `users`. Public pages read the deliberately limited `publicProfiles` projection, which stores the username, display name, optional bio and imagery, exact counters, section visibility, and timestamps. `usernames` atomically reserves the case-insensitive ASCII username; a renamed username remains as a private alias that redirects old links to the current profile. Display names are not unique.
+
+Follow edges are mirrored below `users/{userId}/followers` and `users/{userId}/following`. Community activity snapshots live in `communityActivities`, while each authenticated Following feed is materialized below `userFeeds/{userId}/items` to keep feed reads constant and avoid fan-out-on-read.
 
 ### `users/{userId}/collection/{cardId}`
 
@@ -128,11 +130,14 @@ The public Codex converts one autonomous card document into a locale-specific `C
 
 ## Indexes and future queries
 
-The committed indexes cover the queries already represented in repositories:
+The committed indexes cover the queries already represented in repositories, including:
 
 - cards by `seasonId`, ordered by `number`;
 - cards by `setId`, ordered by `number`;
 - sets by `seasonId`, ordered by `releaseDate`.
+- public profile prefix search and newest-profile discovery;
+- public activity, actor activity, materialized Following feeds, and paginated follow lists;
+- public decks ordered by their last update.
 
 Firestore creates single-field indexes for simple filters. Add composite indexes only when a real query combines filters such as season + rarity + number or season + `array-contains(typeIds)` + number. Firebase error links can generate the exact missing index.
 
@@ -140,7 +145,7 @@ Firestore is not used as a full-text search engine. Advanced name/description se
 
 ## Security
 
-`firestore.rules` permits public reads only for the six Codex collections. Writes to those collections require an authenticated Firebase token carrying either `admin == true` or a `roles` list containing `admin`. Users may read their own server-managed profile and read or mutate only their own collection entries; collection writes also validate the referenced card and document shape. Name reservations and profile writes stay server-only. `storage.rules` applies the admin write policy below the documented public asset roots. Every other path is denied.
+`firestore.rules` permits public reads for Codex data. Public profiles, relations, activities, and feeds are read and mutated only by authenticated Next.js server code; browsers receive privacy-filtered DTOs without internal user IDs. Users may read their own private account profile and may mutate only their own collection entries; collection writes also validate the referenced card and document shape. Username reservations and community mutations stay server-only. `storage.rules` applies the admin write policy below public Codex asset roots and lets owners write only their fixed avatar/banner paths under strict size and MIME limits. Every other path is denied.
 
 The web admin uses a verified Firebase session cookie and repeats authorization inside every Server Action. Trusted Admin SDK code still bypasses Firebase Security Rules by design, making those server checks mandatory.
 

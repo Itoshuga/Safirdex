@@ -6,6 +6,10 @@ export const FIRESTORE_COLLECTIONS = {
   cardTypes: "cardTypes",
   glossaryEntries: "glossaryEntries",
   users: "users",
+  publicProfiles: "publicProfiles",
+  usernames: "usernames",
+  communityActivities: "communityActivities",
+  userFeeds: "userFeeds",
   pseudonyms: "pseudonyms",
   displayNames: "displayNames",
 } as const;

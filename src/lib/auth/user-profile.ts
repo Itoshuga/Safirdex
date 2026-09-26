@@ -15,6 +15,8 @@ export interface StoredUserProfile {
   emailVerified: boolean;
   pseudonym: string | null;
   pseudonymKey: string | null;
+  username: string | null;
+  usernameNormalized: string | null;
   displayName: string | null;
   displayNameKey: string | null;
   role: "user" | "admin";
@@ -64,6 +66,8 @@ export async function ensureUserProfile(decoded: DecodedIdToken) {
       emailVerified: user.emailVerified,
       pseudonym: null,
       pseudonymKey: null,
+      username: null,
+      usernameNormalized: null,
       displayName: null,
       displayNameKey: null,
       role,
@@ -82,6 +86,9 @@ export async function ensureUserProfile(decoded: DecodedIdToken) {
         emailVerified: user.emailVerified,
         pseudonym: existing.pseudonym ?? null,
         pseudonymKey: existing.pseudonymKey ?? null,
+        username: existing.username ?? existing.pseudonym ?? null,
+        usernameNormalized:
+          existing.usernameNormalized ?? existing.pseudonymKey ?? null,
         displayName: existing.displayName ?? null,
         displayNameKey: existing.displayNameKey ?? null,
         role,

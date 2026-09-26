@@ -1,0 +1,56 @@
+{
+  "Community": {
+    "metadata": {
+      "title": "Communauté",
+      "description": "Découvrez les collectionneurs et leurs dernières activités autour de Safir TCG."
+    },
+    "eyebrow": "Safir TCG",
+    "title": "Communauté",
+    "description": "Retrouvez les collectionneurs, leurs decks et les évolutions de leurs collections.",
+    "viewProfile": "Voir le profil",
+    "followersCount": "{count, plural, =0 {Aucun abonné} one {# abonné} other {# abonnés}}",
+    "actions": {
+      "follow": "Suivre",
+      "following": "Abonné",
+      "failed": "Impossible de modifier l’abonnement. Réessayez."
+    },
+    "search": {
+      "label": "Rechercher un membre",
+      "placeholder": "Pseudo ou nom affiché…",
+      "clear": "Effacer",
+      "limitNote": "Les 20 premiers résultats sont affichés."
+    },
+    "feed": {
+      "discover": "Découvrir",
+      "following": "Abonnements",
+      "loadMore": "Charger la suite",
+      "discoverPeople": "Découvrir des membres",
+      "empty": {
+        "discover": {
+          "title": "Aucune activité publique pour le moment",
+          "description": "Les nouveaux decks et les mises à jour importantes apparaîtront ici."
+        },
+        "following": {
+          "title": "Votre flux est encore vide",
+          "description": "Suivez des membres pour retrouver leurs activités ici."
+        }
+      }
+    },
+    "people": {
+      "discoverEyebrow": "Nouveaux profils",
+      "discover": "Membres à découvrir",
+      "resultsEyebrow": "Recherche",
+      "results": "Résultats pour « {query} »",
+      "noResults": "Aucun membre trouvé pour cette recherche.",
+      "empty": "Aucun profil public n’est encore disponible."
+    },
+    "activity": {
+      "deckCreated": "{user} a créé un nouveau deck.",
+      "deckUpdated": "{user} a mis à jour un deck.",
+      "collectionUpdated": "{user} a ajouté {count, plural, one {# carte} other {# cartes}} à sa collection.",
+      "deckPreview": "Aperçu du deck",
+      "commander": "Commandant : {name}",
+      "cardCount": "{count, plural, one {# carte} other {# cartes}}"
+    }
+  }
+}
