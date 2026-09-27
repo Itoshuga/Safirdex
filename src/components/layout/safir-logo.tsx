@@ -9,6 +9,7 @@ export function SafirLogo({ className }: { className?: string }) {
       alt=""
       width={600}
       height={600}
+      loading="eager"
       className={cn(
         "shrink-0 object-contain transition-transform duration-300 group-hover:scale-[1.04] dark:invert",
         className,

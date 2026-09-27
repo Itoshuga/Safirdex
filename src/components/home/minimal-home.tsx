@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { CodexSearch } from "@/components/home/codex-search";
 import { SiteHeader } from "@/components/layout/site-header";
+import type { SiteHeaderUser } from "@/components/layout/site-header-user";
 import type { HomeCardSearchItem } from "@/features/cards/types";
 
 export function MinimalHome({
@@ -9,7 +10,7 @@ export function MinimalHome({
   user,
 }: {
   cards: HomeCardSearchItem[];
-  user: { name?: string; email?: string } | null;
+  user: SiteHeaderUser | null;
 }) {
   const t = useTranslations("Home");
 

@@ -3,12 +3,16 @@
 import { FirebaseError } from "firebase/app";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  linkWithCredential,
   onAuthStateChanged,
   reload,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
+  type AuthCredential,
   type User,
 } from "firebase/auth";
 import {
@@ -49,6 +53,9 @@ type AuthErrorKey =
   | "errors.invalidCredential"
   | "errors.tooManyRequests"
   | "errors.network"
+  | "errors.popupBlocked"
+  | "errors.popupClosed"
+  | "errors.providerDisabled"
   | "errors.unavailable"
   | "errors.unexpected";
 
@@ -69,12 +76,31 @@ function getAuthMessage(error: unknown, translate: (key: AuthErrorKey) => string
         return translate("errors.tooManyRequests");
       case "auth/network-request-failed":
         return translate("errors.network");
+      case "auth/popup-blocked":
+        return translate("errors.popupBlocked");
+      case "auth/cancelled-popup-request":
+      case "auth/popup-closed-by-user":
+        return translate("errors.popupClosed");
+      case "auth/operation-not-allowed":
+      case "auth/unauthorized-domain":
+        return translate("errors.providerDisabled");
       default:
         return translate("errors.unavailable");
     }
   }
 
   return error instanceof Error ? error.message : translate("errors.unexpected");
+}
+
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4.5" aria-hidden="true">
+      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.4a4.6 4.6 0 0 1-2 3v2.6h3.3c1.9-1.8 2.9-4.4 2.9-7.5Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.3l-3.3-2.6c-.9.6-2.1 1-3.4 1a5.9 5.9 0 0 1-5.5-4.1H3.1v2.7A10 10 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.5 14a6 6 0 0 1 0-3.9V7.4H3.1a10 10 0 0 0 0 9.3L6.5 14Z" />
+      <path fill="#EA4335" d="M12 6c1.5 0 2.9.5 3.9 1.5l2.9-2.8A9.8 9.8 0 0 0 3.1 7.4l3.4 2.7A5.9 5.9 0 0 1 12 6Z" />
+    </svg>
+  );
 }
 
 async function initializeAccount(user: User, fallbackMessage: string) {
@@ -99,6 +125,10 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
   const [signupStep, setSignupStep] =
     useState<SignupStep>("credentials");
   const [accountEmail, setAccountEmail] = useState("");
+  const [credentialEmail, setCredentialEmail] = useState("");
+  const [suggestedDisplayName, setSuggestedDisplayName] = useState("");
+  const [pendingGoogleCredential, setPendingGoogleCredential] =
+    useState<AuthCredential | null>(null);
   const [pending, setPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -124,6 +154,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
         setMode("signup");
         setSignupStep("profile");
         setAccountEmail(user.email ?? "");
+        setSuggestedDisplayName(user.displayName ?? "");
         return "profile";
       }
       if (!response.ok) {
@@ -144,6 +175,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
       authActionRunning.current = true;
       setPending(true);
       setAccountEmail(user.email ?? "");
+      setSuggestedDisplayName(user.displayName ?? "");
 
       void initializeAccount(user, t("errors.accountInitialization"))
         .then(async () => {
@@ -173,8 +205,55 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
     setMode(nextMode);
     setSignupStep("credentials");
     setAccountEmail("");
+    setCredentialEmail("");
+    setSuggestedDisplayName("");
+    setPendingGoogleCredential(null);
     setError("");
     setNotice("");
+  }
+
+  async function handleGoogleSignIn() {
+    setPending(true);
+    setError("");
+    setNotice("");
+    setPendingGoogleCredential(null);
+    authActionRunning.current = true;
+
+    const auth = getFirebaseAuth();
+    auth.languageCode = locale;
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    try {
+      const credential = await signInWithPopup(auth, provider);
+      setAccountEmail(credential.user.email ?? "");
+      setSuggestedDisplayName(credential.user.displayName ?? "");
+      await initializeAccount(credential.user, t("errors.accountInitialization"));
+      await establishSession(credential.user);
+    } catch (authError) {
+      if (
+        authError instanceof FirebaseError &&
+        authError.code === "auth/account-exists-with-different-credential"
+      ) {
+        const googleCredential = GoogleAuthProvider.credentialFromError(authError);
+        const conflictEmail = authError.customData?.email;
+        const email = typeof conflictEmail === "string"
+          ? conflictEmail
+          : "";
+        if (googleCredential && email) {
+          setMode("signin");
+          setSignupStep("credentials");
+          setCredentialEmail(email);
+          setPendingGoogleCredential(googleCredential);
+          setError(t("errors.googleAccountConflict"));
+          return;
+        }
+      }
+      setError(getAuthMessage(authError, (key) => t(key)));
+    } finally {
+      setPending(false);
+      authActionRunning.current = false;
+    }
   }
 
   async function handleCredentials(event: React.FormEvent<HTMLFormElement>) {
@@ -219,6 +298,11 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
         mode === "signup"
           ? await createUserWithEmailAndPassword(auth, email, password)
           : await signInWithEmailAndPassword(auth, email, password);
+
+      if (mode === "signin" && pendingGoogleCredential) {
+        await linkWithCredential(credential.user, pendingGoogleCredential);
+        setPendingGoogleCredential(null);
+      }
 
       await initializeAccount(credential.user, t("errors.accountInitialization"));
       setAccountEmail(credential.user.email ?? email);
@@ -548,6 +632,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                   maxLength={40}
                   required
                   disabled={pending}
+                  defaultValue={suggestedDisplayName}
                   placeholder={t("fields.displayNamePlaceholder")}
                 />
               </div>
@@ -562,6 +647,25 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
           </form>
         ) : (
           <form className="space-y-4" onSubmit={handleCredentials}>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 w-full bg-background font-semibold"
+              disabled={pending}
+              onClick={() => void handleGoogleSignIn()}
+            >
+              {pending ? <LoaderCircle className="animate-spin" /> : <GoogleMark />}
+              {t("actions.continueWithGoogle")}
+            </Button>
+
+            <div className="flex items-center gap-3 py-1" aria-hidden="true">
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-[0.65rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                {t("actions.orEmail")}
+              </span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+
             <div className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor="email">
                 {t("fields.email")}
@@ -576,6 +680,8 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
                   autoComplete="email"
                   required
                   disabled={pending}
+                  value={credentialEmail}
+                  onChange={(event) => setCredentialEmail(event.target.value)}
                   placeholder={t("fields.emailPlaceholder")}
                 />
               </div>

@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SafirLogo } from "@/components/layout/safir-logo";
+import type { SiteHeaderUser } from "@/components/layout/site-header-user";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { Link } from "@/i18n/navigation";
@@ -10,7 +11,7 @@ import { Link } from "@/i18n/navigation";
 export function SiteHeader({
   user,
 }: {
-  user: { name?: string; email?: string } | null;
+  user: SiteHeaderUser | null;
 }) {
   const home = useTranslations("Home");
   const navigation = useTranslations("Navigation");
@@ -36,21 +37,26 @@ export function SiteHeader({
           <span className="hidden sm:inline">{navigation("cards")}</span>
         </Link>
         <Link
-          href="/community"
-          className="hidden h-9 items-center gap-1.5 px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground sm:inline-flex"
-        >
-          <Users className="size-3.5" />
-          <span className="hidden md:inline">{navigation("community")}</span>
-        </Link>
-        <Link
           href="/decks"
           className="hidden h-9 items-center gap-1.5 px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground md:inline-flex"
         >
           <Layers3 className="size-3.5" />
           <span>{navigation("decks")}</span>
         </Link>
+        <Link
+          href="/community"
+          className="hidden h-9 items-center gap-1.5 px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground sm:inline-flex"
+        >
+          <Users className="size-3.5" />
+          <span className="hidden md:inline">{navigation("community")}</span>
+        </Link>
         {user ? (
-          <UserMenu name={user.name} email={user.email} />
+          <UserMenu
+            name={user.name}
+            username={user.username}
+            email={user.email}
+            avatarUrl={user.avatarUrl}
+          />
         ) : (
           <Link
             href="/login"

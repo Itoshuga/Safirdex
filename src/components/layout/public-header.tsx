@@ -1,11 +1,7 @@
 import { SiteHeader } from "@/components/layout/site-header";
-import { getUserSession } from "@/lib/auth/user-session";
+import { getSiteHeaderUser } from "@/components/layout/site-header-user";
 
 export async function PublicHeader() {
-  const session = await getUserSession();
-  return (
-    <SiteHeader
-      user={session ? { name: session.name, email: session.email } : null}
-    />
-  );
+  const user = await getSiteHeaderUser();
+  return <SiteHeader user={user} />;
 }

@@ -18,11 +18,22 @@ import {
 import { useRouter } from "@/i18n/navigation";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 
-export function UserMenu({ name, email }: { name?: string; email?: string }) {
+export function UserMenu({
+  name,
+  username,
+  email,
+  avatarUrl,
+}: {
+  name?: string;
+  username?: string;
+  email?: string;
+  avatarUrl?: string;
+}) {
   const t = useTranslations("Navigation");
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const label = name || email?.split("@")[0] || t("account");
+  const label = username ? `@${username}` : name || email?.split("@")[0] || t("account");
+  const avatarName = name || username || label;
 
   async function handleSignOut() {
     setPending(true);
@@ -38,7 +49,11 @@ export function UserMenu({ name, email }: { name?: string; email?: string }) {
         className="ml-2 inline-flex h-10 items-center gap-2 border-l pl-4 text-xs font-semibold outline-none transition hover:text-safir focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={t("userMenu")}
       >
-        <ProfileAvatar name={label} className="size-7 border-0 shadow-none" />
+        <ProfileAvatar
+          src={avatarUrl}
+          name={avatarName}
+          className="size-7 border-0 shadow-none"
+        />
         <span className="hidden max-w-28 truncate sm:inline">{label}</span>
         <ChevronDown className="hidden size-3 text-muted-foreground sm:block" aria-hidden="true" />
       </DropdownMenuTrigger>

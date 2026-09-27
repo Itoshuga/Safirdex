@@ -1,23 +1,29 @@
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
+
 import { MinimalHome } from "@/components/home/minimal-home";
+import { getSiteHeaderUser } from "@/components/layout/site-header-user";
 import { getHomeCodexCards } from "@/features/cards/server/codex-service";
-import { getUserSession } from "@/lib/auth/user-session";
-import type { AppLocale } from "@/lib/i18n/locales";
+import { routing } from "@/i18n/routing";
 
 export default async function HomePage({
   params,
 }: {
-  params: Promise<{ locale: AppLocale }>;
+  params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const [session, cards] = await Promise.all([
-    getUserSession(),
+
+  if (!hasLocale(routing.locales, locale)) notFound();
+
+  const [user, cards] = await Promise.all([
+    getSiteHeaderUser(),
     getHomeCodexCards(locale),
   ]);
 
   return (
     <MinimalHome
       cards={cards}
-      user={session ? { name: session.name, email: session.email } : null}
+      user={user}
     />
   );
 }

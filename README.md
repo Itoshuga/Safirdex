@@ -20,12 +20,14 @@ The back-office is available at [http://localhost:3000/admin](http://localhost:3
 
 The unified account flow is server-aware:
 
-1. Registration creates the Firebase Authentication account and immediately initializes a Firestore profile with the `user` role.
+1. Registration with Email/Password or Google creates the Firebase Authentication account and immediately initializes a Firestore profile with the `user` role.
 2. The user must verify the email address before continuing.
 3. Onboarding reserves a unique pseudonym and display name in one Firestore transaction.
 4. The Firebase ID token is sent to the same-origin session endpoint.
 5. Firebase Admin verifies email, onboarding state, and custom claims before returning a signed, `httpOnly`, `sameSite=lax` session cookie.
 6. The `/admin` layout and every Server Action accept that same session only when it carries the administrator claim.
+
+Enable both **Email/Password** and **Google** in Firebase Console → Authentication → Sign-in method. Add every deployed Safirdex hostname to Authentication → Settings → Authorized domains; `localhost` is required for local Google sign-in.
 
 Create an Email/Password user in Firebase Authentication, then grant the first administrator claim locally with one of these commands:
 
