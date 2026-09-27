@@ -22,6 +22,8 @@
       "types": "Types",
       "factions": "Factions",
       "glossary": "Glossary",
+      "patch-notes": "News",
+      "patchNotes": "News",
       "settings": "Settings",
       "new": "New",
       "edit": "Edit",
@@ -360,7 +362,24 @@
       "invalidField": "This value is invalid.",
       "operationFailed": "The operation failed.",
       "sessionExpired": "Your administrator session has expired."
-      ,"factionInUse": "This faction is still used by at least one card."
+      ,"factionInUse": "This faction is still used by at least one card.",
+      "patchNoteSaved": "Draft saved.",
+      "patchNotePublished": "News article published.",
+      "patchNoteScheduled": "Publication scheduled.",
+      "patchNoteDeleted": "News article deleted.",
+      "patchNoteDuplicated": "News article duplicated as a draft.",
+      "patchNoteUnpublished": "News article moved back to drafts.",
+      "patchNotePayloadMissing": "The article content is missing.",
+      "patchNoteImageType": "Choose a JPG, PNG, WebP or AVIF image.",
+      "patchNoteImageSize": "Each image must be smaller than 15 MB.",
+      "patchNoteImageMissing": "A content image is missing.",
+      "patchNoteFrenchRequired": "A French title and summary are required to publish.",
+      "patchNoteFutureDateRequired": "Choose a future publication date.",
+      "patchNoteAltRequired": "Add French alternative text to every image.",
+      "patchNoteNotFound": "This news article no longer exists.",
+      "patchNoteSlugTaken": "This slug is already in use."
+      ,"patchNoteImageSource": "An image source is not allowed. Upload it again."
+      ,"patchNoteTooLarge": "This article is too large. Reduce the number or length of its blocks."
     }
   }
 }

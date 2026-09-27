@@ -24,6 +24,8 @@
       "types": "Types",
       "factions": "Factions",
       "glossary": "Lexique",
+      "patch-notes": "Actualités",
+      "patchNotes": "Actualités",
       "settings": "Paramètres",
       "new": "Nouveau",
       "edit": "Modifier",
@@ -362,7 +364,24 @@
       "invalidField": "Cette valeur est invalide.",
       "operationFailed": "L’opération a échoué.",
       "sessionExpired": "Votre session administrateur a expiré."
-      ,"factionInUse": "Cette faction est encore utilisée par au moins une carte."
+      ,"factionInUse": "Cette faction est encore utilisée par au moins une carte.",
+      "patchNoteSaved": "Brouillon enregistré.",
+      "patchNotePublished": "Actualité publiée.",
+      "patchNoteScheduled": "Publication planifiée.",
+      "patchNoteDeleted": "Actualité supprimée.",
+      "patchNoteDuplicated": "Actualité dupliquée en brouillon.",
+      "patchNoteUnpublished": "Actualité replacée en brouillon.",
+      "patchNotePayloadMissing": "Le contenu de l’article est manquant.",
+      "patchNoteImageType": "Choisissez une image JPG, PNG, WebP ou AVIF.",
+      "patchNoteImageSize": "Chaque image doit peser moins de 15 Mo.",
+      "patchNoteImageMissing": "Une image du contenu est manquante.",
+      "patchNoteFrenchRequired": "Le titre et le résumé français sont requis pour publier.",
+      "patchNoteFutureDateRequired": "Choisissez une date de publication future.",
+      "patchNoteAltRequired": "Renseignez les textes alternatifs français des images.",
+      "patchNoteNotFound": "Cette actualité n’existe plus.",
+      "patchNoteSlugTaken": "Ce slug est déjà utilisé."
+      ,"patchNoteImageSource": "La source d’une image n’est pas autorisée. Importez-la à nouveau."
+      ,"patchNoteTooLarge": "L’article est trop volumineux. Réduisez le nombre ou la longueur des blocs."
     }
   }
 }

@@ -16,6 +16,7 @@ export const STORAGE_ROOTS = {
   rarities: "rarities",
   cardTypes: "card-types",
   factions: "factions",
+  patchNotes: "patch-notes",
 } as const;
 
 export const storagePaths = {
@@ -45,5 +46,13 @@ export const storagePaths = {
 
   factionIcon(factionId: string, extension = "svg") {
     return `${STORAGE_ROOTS.factions}/${assertStorageSegment(factionId, "factionId")}/icon.${assertStorageSegment(extension, "extension")}`;
+  },
+
+  patchNoteCover(patchNoteId: string, extension = "webp") {
+    return `${STORAGE_ROOTS.patchNotes}/${assertStorageSegment(patchNoteId, "patchNoteId")}/cover.${assertStorageSegment(extension, "extension")}`;
+  },
+
+  patchNoteImage(patchNoteId: string, imageId: string, extension = "webp") {
+    return `${STORAGE_ROOTS.patchNotes}/${assertStorageSegment(patchNoteId, "patchNoteId")}/images/${assertStorageSegment(imageId, "imageId")}.${assertStorageSegment(extension, "extension")}`;
   },
 };

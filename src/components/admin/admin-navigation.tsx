@@ -6,6 +6,7 @@ import {
   CircleGauge,
   Diamond,
   Layers3,
+  Newspaper,
   Settings,
   Shapes,
   Sparkles,
@@ -31,6 +32,7 @@ const sections = [
       { href: "/admin/types", label: "types", icon: Shapes },
       { href: "/admin/factions", label: "factions", icon: Sparkles },
       { href: "/admin/glossary", label: "glossary", icon: BookOpenText },
+      { href: "/admin/patch-notes", label: "patchNotes", icon: Newspaper },
     ],
   },
   {

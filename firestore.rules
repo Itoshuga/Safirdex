@@ -72,6 +72,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Public delivery and all editorial mutations go through the server layer.
+    // This prevents clients from reading drafts or future scheduled articles.
+    match /patchNotes/{patchNoteId} {
+      allow read, write: if false;
+    }
+
     match /users/{userId} {
       allow read: if isOwner(userId);
       allow write: if false;

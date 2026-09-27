@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpen, Layers3, Users } from "lucide-react";
+import { ArrowUpRight, BookOpen, Layers3, Newspaper, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -49,6 +49,13 @@ export function SiteHeader({
         >
           <Users className="size-3.5" />
           <span className="hidden md:inline">{navigation("community")}</span>
+        </Link>
+        <Link
+          href="/patch-notes"
+          className="hidden h-9 items-center gap-1.5 px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground lg:inline-flex"
+        >
+          <Newspaper className="size-3.5" />
+          <span>{navigation("patchNotes")}</span>
         </Link>
         {user ? (
           <UserMenu

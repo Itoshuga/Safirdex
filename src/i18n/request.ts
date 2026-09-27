@@ -19,6 +19,7 @@ const namespaces = [
   "profile",
   "decks",
   "settings",
+  "patch-notes",
 ] as const;
 
 async function loadMessages(locale: string) {
