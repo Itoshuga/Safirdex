@@ -162,7 +162,15 @@ export interface ProfileCollectionItem {
 export type ProfileTab = "overview" | "decks" | "collection" | "activity";
 
 export type ProfileTabContent =
-  | { tab: "overview" }
+  | {
+      tab: "overview";
+      decks: ProfileDeckItem[];
+      decksPrivate: boolean;
+      collectionCount: number;
+      collectionPrivate: boolean;
+      feed: CommunityFeedPage;
+      activityPrivate: boolean;
+    }
   | { tab: "decks"; items: ProfileDeckItem[]; private: boolean }
   | { tab: "collection"; items: ProfileCollectionItem[]; private: boolean }
   | { tab: "activity"; feed: CommunityFeedPage; private: boolean };

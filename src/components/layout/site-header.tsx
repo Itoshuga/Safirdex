@@ -1,12 +1,17 @@
-import { ArrowUpRight, BookOpen, Layers3, UserRound, Users } from "lucide-react";
+import { ArrowUpRight, BookOpen, Layers3, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { SafirLogo } from "@/components/layout/safir-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { UserMenu } from "@/components/layout/user-menu";
 import { Link } from "@/i18n/navigation";
 
-export function SiteHeader({ signedIn }: { signedIn: boolean }) {
+export function SiteHeader({
+  user,
+}: {
+  user: { name?: string; email?: string } | null;
+}) {
   const home = useTranslations("Home");
   const navigation = useTranslations("Navigation");
 
@@ -44,24 +49,18 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
           <Layers3 className="size-3.5" />
           <span>{navigation("decks")}</span>
         </Link>
-        <Link
-          href={signedIn ? "/account" : "/login"}
-          aria-label={signedIn ? navigation("account") : navigation("login")}
-          className="ml-2 inline-flex h-9 items-center gap-1.5 border-l pl-4 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
-        >
-          {signedIn ? (
-            <>
-              <UserRound className="size-4 sm:hidden" aria-hidden="true" />
-              <span className="hidden sm:inline">{navigation("account")}</span>
-              <ArrowUpRight className="hidden size-3.5 sm:block" aria-hidden="true" />
-            </>
-          ) : (
-            <>
-              <span>{navigation("login")}</span>
-              <ArrowUpRight className="size-3.5" aria-hidden="true" />
-            </>
-          )}
-        </Link>
+        {user ? (
+          <UserMenu name={user.name} email={user.email} />
+        ) : (
+          <Link
+            href="/login"
+            aria-label={navigation("login")}
+            className="ml-2 inline-flex h-9 items-center gap-1.5 border-l pl-4 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
+          >
+            <span>{navigation("login")}</span>
+            <ArrowUpRight className="size-3.5" aria-hidden="true" />
+          </Link>
+        )}
       </div>
     </header>
   );

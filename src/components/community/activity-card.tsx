@@ -57,7 +57,13 @@ function CollectionPreview({ payload }: { payload: LocalizedCollectionPayload })
   );
 }
 
-export function ActivityCard({ activity }: { activity: CommunityActivityItem }) {
+export function ActivityCard({
+  activity,
+  compact = false,
+}: {
+  activity: CommunityActivityItem;
+  compact?: boolean;
+}) {
   const t = useTranslations("Community.activity");
   const format = useFormatter();
   const date = new Date(activity.createdAtIso);
@@ -71,6 +77,35 @@ export function ActivityCard({ activity }: { activity: CommunityActivityItem }) 
     : activity.type === "deck_updated"
       ? t("deckUpdated", { user: activity.actor.displayName })
       : t("deckCreated", { user: activity.actor.displayName });
+
+  const activityIcon = isCollection
+    ? <Layers3 className="size-4" />
+    : activity.type === "deck_updated"
+      ? <RefreshCw className="size-4" />
+      : <Sparkles className="size-4" />;
+
+  if (compact) {
+    return (
+      <article className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
+        <Link href={`/user/@${activity.actor.username}`} className="shrink-0">
+          <ProfileAvatar
+            src={activity.actor.avatarUrl}
+            name={activity.actor.displayName}
+            className="size-10 border-2"
+          />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm leading-5">{message}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            <time dateTime={activity.createdAtIso}>{format.relativeTime(date)}</time>
+          </p>
+        </div>
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-safir/10 text-safir">
+          {activityIcon}
+        </span>
+      </article>
+    );
+  }
 
   return (
     <article className="rounded-2xl border bg-card p-4 sm:p-5">
@@ -87,7 +122,7 @@ export function ActivityCard({ activity }: { activity: CommunityActivityItem }) 
           </p>
         </div>
         <span className="grid size-8 place-items-center rounded-lg bg-safir/10 text-safir">
-          {isCollection ? <Layers3 className="size-4" /> : activity.type === "deck_updated" ? <RefreshCw className="size-4" /> : <Sparkles className="size-4" />}
+          {activityIcon}
         </span>
       </header>
       <p className="mt-4 text-sm leading-6">{message}</p>

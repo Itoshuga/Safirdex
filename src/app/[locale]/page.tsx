@@ -17,7 +17,7 @@ export default async function HomePage({
   return (
     <MinimalHome
       cards={cards}
-      signedIn={Boolean(session)}
+      user={session ? { name: session.name, email: session.email } : null}
     />
   );
 }

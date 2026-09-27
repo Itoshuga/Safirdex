@@ -8,6 +8,7 @@ import type dashboard from "../../messages/fr/dashboard.json";
 import type home from "../../messages/fr/home.json";
 import type navigation from "../../messages/fr/navigation.json";
 import type profile from "../../messages/fr/profile.json";
+import type settings from "../../messages/fr/settings.json";
 import type decks from "../../messages/fr/decks.json";
 import type { formats } from "@/i18n/formats";
 import type { AppLocale } from "@/lib/i18n/locales";
@@ -22,6 +23,7 @@ type AppMessages = typeof common &
   typeof admin &
   typeof community &
   typeof profile &
+  typeof settings &
   typeof decks;
 
 declare module "next-intl" {

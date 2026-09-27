@@ -22,14 +22,14 @@ function encodeCursor(createdAt: Timestamp, id: string) {
   return Buffer.from(`${createdAt.toMillis()}:${id}`, "utf8").toString("base64url");
 }
 
-async function execute(query: Query, cursor?: string) {
+async function execute(query: Query, cursor?: string, pageSize = PAGE_SIZE) {
   const decoded = decodeCursor(cursor);
   const paginated = decoded
     ? query.startAfter(Timestamp.fromMillis(decoded.timestamp), decoded.id)
     : query;
   let snapshot;
   try {
-    snapshot = await paginated.limit(PAGE_SIZE + 1).get();
+    snapshot = await paginated.limit(pageSize + 1).get();
   } catch (error) {
     const code = typeof error === "object" && error !== null && "code" in error
       ? (error as { code?: unknown }).code
@@ -37,8 +37,8 @@ async function execute(query: Query, cursor?: string) {
     if (code === 9 || code === "failed-precondition") return { items: [] };
     throw error;
   }
-  const hasMore = snapshot.docs.length > PAGE_SIZE;
-  const docs = snapshot.docs.slice(0, PAGE_SIZE);
+  const hasMore = snapshot.docs.length > pageSize;
+  const docs = snapshot.docs.slice(0, pageSize);
   const items = docs.map((document) => ({
     id: document.id,
     ...document.data(),
@@ -88,13 +88,13 @@ export const activitiesRepository = {
     );
   },
 
-  async byActor(actorId: string, includePrivate: boolean, cursor?: string) {
+  async byActor(actorId: string, includePrivate: boolean, cursor?: string, pageSize = PAGE_SIZE) {
     let query: Query = this.collection().where("actorId", "==", actorId);
     if (!includePrivate) {
       query = query
         .where("published", "==", true)
         .where("visibility", "==", "public");
     }
-    return execute(ordered(query), cursor);
+    return execute(ordered(query), cursor, pageSize);
   },
 };

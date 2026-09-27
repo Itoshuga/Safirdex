@@ -14,6 +14,7 @@ import type {
   PublicUserProfileDocument,
 } from "@/features/community/types";
 import type { AppLocale } from "@/lib/i18n/locales";
+import { firestoreDateIso } from "@/lib/firebase/timestamp";
 import { activitiesRepository } from "@/repositories/activities.repository";
 import { followsRepository } from "@/repositories/follows.repository";
 import { publicProfilesRepository } from "@/repositories/public-profiles.repository";
@@ -28,7 +29,7 @@ function userResult(
     ...(profile.avatarUrl ? { avatarUrl: profile.avatarUrl } : {}),
     ...(profile.bannerUrl ? { bannerUrl: profile.bannerUrl } : {}),
     ...(profile.bio ? { bio: profile.bio } : {}),
-    joinedAtIso: profile.joinedAt.toDate().toISOString(),
+    joinedAtIso: firestoreDateIso(profile.joinedAt),
     stats: {
       ...profile.stats,
       decksCount: profile.visibility.decks === "public" ? profile.stats.decksCount : 0,

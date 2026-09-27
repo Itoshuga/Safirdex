@@ -53,6 +53,7 @@ export const followsRepository = {
   async getFollowingStates(viewerId: string | null, targetIds: string[]) {
     if (!viewerId || targetIds.length === 0) return new Set<string>();
     const uniqueIds = [...new Set(targetIds)].filter((id) => id !== viewerId);
+    if (uniqueIds.length === 0) return new Set<string>();
     const snapshots = await getFirebaseAdminFirestore().getAll(
       ...uniqueIds.map((id) => this.followingReference(viewerId, id)),
     );
@@ -93,4 +94,3 @@ export const followsRepository = {
     };
   },
 };
-

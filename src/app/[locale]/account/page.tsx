@@ -11,7 +11,6 @@ import {
   parseProfileTab,
 } from "@/features/community/server/profile-service";
 import { redirect } from "@/i18n/navigation";
-import { hasAdminClaim } from "@/lib/auth/claims";
 import { getUserSession } from "@/lib/auth/user-session";
 import { resolveLocale } from "@/lib/i18n/locales";
 
@@ -33,13 +32,16 @@ export default async function AccountPage({
   const locale = resolveLocale((await params).locale);
   const session = await getUserSession();
   if (!session) return redirect({ href: "/login", locale });
-  const profile = await getAccountProfile(session.uid);
+  const [profile, accountTranslations] = await Promise.all([
+    getAccountProfile(session.uid),
+    getTranslations({ locale, namespace: "Account" }),
+  ]);
   if (!profile) {
     return (
       <div className="min-h-screen bg-background">
         <PublicHeader />
         <main className="site-container grid min-h-[calc(100vh-5rem)] place-items-center py-12">
-          <UsernameOnboarding suggestedName={session.name ?? session.email?.split("@")[0] ?? "Player"} />
+          <UsernameOnboarding suggestedName={session.name ?? session.email?.split("@")[0] ?? accountTranslations("fallbackPlayer")} />
         </main>
       </div>
     );
@@ -81,7 +83,6 @@ export default async function AccountPage({
       tab={tab}
       content={content}
       basePath="/account"
-      owner={{ userId: session.uid, email: session.email ?? "", isAdmin: hasAdminClaim(session) }}
       connections={connections}
     />
   );

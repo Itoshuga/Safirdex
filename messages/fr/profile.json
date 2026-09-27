@@ -2,16 +2,21 @@
   "Profile": {
     "metadata": {
       "account": {
-        "title": "Mon profil",
+        "title": "Mon profil — Safirdex",
         "description": "Gérez votre profil public Safirdex."
       },
       "public": {
-        "title": "{name} (@{username})",
+        "title": "{name} (@{username}) — Safirdex",
         "description": "Profil Safirdex de {name}.",
         "notFound": "Profil introuvable"
       }
     },
-    "actions": { "edit": "Modifier le profil" },
+    "actions": {
+      "edit": "Modifier le profil",
+      "settings": "Réglages",
+      "share": "Partager",
+      "copied": "Lien copié"
+    },
     "emptyBio": "Ce membre n’a pas encore ajouté de présentation.",
     "joined": "Membre depuis {date}",
     "stats": {
@@ -28,26 +33,36 @@
       "activity": "Activité"
     },
     "sections": {
+      "viewAll": "Tout voir",
       "privateTitle": "Contenu privé",
       "privateDescription": "Ce membre a choisi de ne pas rendre cette section publique.",
       "decks": {
         "title": "Decks publics",
         "overview": "Derniers decks",
+        "overviewDescription": "Les listes les plus récentes publiées sur ce profil.",
         "emptyTitle": "Aucun deck public",
         "emptyDescription": "Les decks publics de ce membre apparaîtront ici.",
+        "ownerEmptyTitle": "Créez votre premier deck",
+        "ownerEmptyDescription": "Composez un deck pour commencer à enrichir votre profil.",
+        "create": "Créer un deck",
         "cardCount": "{count, plural, one {# carte} other {# cartes}}"
       },
       "collection": {
         "title": "Collection publique",
         "overview": "Aperçu de la collection",
+        "overviewDescription": "Ouvrir la collection pour découvrir toutes les cartes.",
+        "unit": "{count, plural, one {carte possédée} other {cartes possédées}}",
+        "summary": "{count, plural, one {# carte possédée} other {# cartes possédées}}",
         "emptyTitle": "Collection vide",
         "emptyDescription": "Les cartes publiques de ce membre apparaîtront ici."
       },
       "activity": {
         "title": "Activité publique",
         "overview": "Activité récente",
+        "overviewDescription": "Les dernières nouveautés de ce profil.",
         "emptyTitle": "Aucune activité récente",
-        "emptyDescription": "Les prochaines activités publiques apparaîtront ici."
+        "emptyDescription": "Les prochaines activités publiques apparaîtront ici.",
+        "ownerEmptyDescription": "Vos créations et mises à jour importantes apparaîtront ici."
       }
     },
     "account": {
@@ -61,6 +76,7 @@
       "displayName": "Nom affiché",
       "username": "Nom d’utilisateur",
       "usernameHelp": "3 à 24 caractères : lettres, chiffres, point, tiret ou tiret bas.",
+      "usernamePreview": "/user/@{username}",
       "checking": "Vérification…",
       "available": "Ce nom d’utilisateur est disponible.",
       "unavailable": "Ce nom d’utilisateur est déjà utilisé.",
@@ -68,9 +84,20 @@
       "bioHelp": "{count}/280 caractères",
       "avatar": "Photo de profil",
       "banner": "Bannière",
+      "imagesTitle": "Images du profil",
+      "imagesDescription": "Prévisualisez ensemble votre photo et votre bannière avant d’enregistrer.",
+      "preview": "Aperçu",
+      "avatarHelp": "Format carré recommandé · 512 × 512 px",
+      "bannerHelp": "Format panoramique recommandé · 1600 × 600 px",
+      "imageReady": "Image sélectionnée",
+      "imageEmpty": "Aucune image personnalisée",
       "chooseImage": "Choisir une image",
+      "replaceImage": "Remplacer",
+      "removeImage": "Retirer",
       "uploadFailed": "L’image n’a pas pu être envoyée.",
       "save": "Enregistrer",
+      "cancel": "Annuler",
+      "leaveWarning": "Vous avez des modifications non enregistrées. Quitter sans enregistrer ?",
       "saved": "Profil mis à jour.",
       "errors": {
         "AUTH_REQUIRED": "Vous devez être connecté.",

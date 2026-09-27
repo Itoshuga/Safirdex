@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 
-export function useUnsavedChanges(enabled: boolean) {
+export function useUnsavedChanges(
+  enabled: boolean,
+  message = "You have unsaved changes. Leave without saving?",
+) {
   useEffect(() => {
     if (!enabled) return;
 
@@ -12,7 +15,7 @@ export function useUnsavedChanges(enabled: boolean) {
       if (!target || target.getAttribute("target") === "_blank") return;
       const href = target.getAttribute("href");
       if (!href || href.startsWith("#")) return;
-      if (!window.confirm("You have unsaved changes. Leave without saving?")) {
+      if (!window.confirm(message)) {
         event.preventDefault();
         event.stopPropagation();
       }
@@ -24,5 +27,5 @@ export function useUnsavedChanges(enabled: boolean) {
       window.removeEventListener("beforeunload", beforeUnload);
       document.removeEventListener("click", linkClick, true);
     };
-  }, [enabled]);
+  }, [enabled, message]);
 }

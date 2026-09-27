@@ -2,16 +2,21 @@
   "Profile": {
     "metadata": {
       "account": {
-        "title": "My profile",
+        "title": "My profile — Safirdex",
         "description": "Manage your public Safirdex profile."
       },
       "public": {
-        "title": "{name} (@{username})",
+        "title": "{name} (@{username}) — Safirdex",
         "description": "{name}'s Safirdex profile.",
         "notFound": "Profile not found"
       }
     },
-    "actions": { "edit": "Edit profile" },
+    "actions": {
+      "edit": "Edit profile",
+      "settings": "Settings",
+      "share": "Share",
+      "copied": "Link copied"
+    },
     "emptyBio": "This member has not added a bio yet.",
     "joined": "Member since {date}",
     "stats": {
@@ -28,26 +33,36 @@
       "activity": "Activity"
     },
     "sections": {
+      "viewAll": "View all",
       "privateTitle": "Private content",
       "privateDescription": "This member has chosen not to make this section public.",
       "decks": {
         "title": "Public decks",
         "overview": "Latest decks",
+        "overviewDescription": "The latest lists published on this profile.",
         "emptyTitle": "No public decks",
         "emptyDescription": "This member's public decks will appear here.",
+        "ownerEmptyTitle": "Create your first deck",
+        "ownerEmptyDescription": "Build a deck to start enriching your profile.",
+        "create": "Create a deck",
         "cardCount": "{count, plural, one {# card} other {# cards}}"
       },
       "collection": {
         "title": "Public collection",
         "overview": "Collection preview",
+        "overviewDescription": "Open the collection to discover every card.",
+        "unit": "{count, plural, one {card owned} other {cards owned}}",
+        "summary": "{count, plural, one {# card owned} other {# cards owned}}",
         "emptyTitle": "Empty collection",
         "emptyDescription": "This member's public cards will appear here."
       },
       "activity": {
         "title": "Public activity",
         "overview": "Recent activity",
+        "overviewDescription": "The latest updates from this profile.",
         "emptyTitle": "No recent activity",
-        "emptyDescription": "Future public activity will appear here."
+        "emptyDescription": "Future public activity will appear here.",
+        "ownerEmptyDescription": "Your meaningful creations and updates will appear here."
       }
     },
     "account": {
@@ -61,6 +76,7 @@
       "displayName": "Display name",
       "username": "Username",
       "usernameHelp": "3 to 24 characters: letters, numbers, periods, hyphens, or underscores.",
+      "usernamePreview": "/user/@{username}",
       "checking": "Checking…",
       "available": "This username is available.",
       "unavailable": "This username is already taken.",
@@ -68,9 +84,20 @@
       "bioHelp": "{count}/280 characters",
       "avatar": "Profile picture",
       "banner": "Banner",
+      "imagesTitle": "Profile images",
+      "imagesDescription": "Preview your profile picture and banner together before saving.",
+      "preview": "Preview",
+      "avatarHelp": "Recommended square format · 512 × 512 px",
+      "bannerHelp": "Recommended panoramic format · 1600 × 600 px",
+      "imageReady": "Image selected",
+      "imageEmpty": "No custom image",
       "chooseImage": "Choose an image",
+      "replaceImage": "Replace",
+      "removeImage": "Remove",
       "uploadFailed": "The image could not be uploaded.",
       "save": "Save",
+      "cancel": "Cancel",
+      "leaveWarning": "You have unsaved changes. Leave without saving?",
       "saved": "Profile updated.",
       "errors": {
         "AUTH_REQUIRED": "You must be signed in.",

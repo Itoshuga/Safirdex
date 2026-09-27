@@ -36,7 +36,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       canonical: `/${locale}/user/@${profile.view.username}`,
       languages: { fr: `/fr/user/@${profile.view.username}`, en: `/en/user/@${profile.view.username}` },
     },
-    openGraph: { title, description, ...(profile.view.avatarUrl ? { images: [profile.view.avatarUrl] } : {}) },
+    openGraph: {
+      title,
+      description,
+      ...(profile.view.bannerUrl || profile.view.avatarUrl
+        ? { images: [profile.view.bannerUrl ?? profile.view.avatarUrl!] }
+        : {}),
+    },
   };
 }
 

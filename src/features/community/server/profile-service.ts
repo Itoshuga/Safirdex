@@ -16,7 +16,8 @@ import type {
   PublicProfileView,
   PublicUserProfileDocument,
 } from "@/features/community/types";
-import { getFirebaseAdminAuth, getFirebaseAdminFirestore } from "@/lib/firebase/admin";
+import { getFirebaseAdminAuth, getFirebaseAdminFirestore, getFirebaseAdminStorage } from "@/lib/firebase/admin";
+import { firestoreDateIso } from "@/lib/firebase/timestamp";
 import { getLocalizedName } from "@/lib/i18n/get-localized-value";
 import type { AppLocale } from "@/lib/i18n/locales";
 import { activitiesRepository } from "@/repositories/activities.repository";
@@ -62,7 +63,7 @@ function toProfileView(
     ...(profile.avatarUrl ? { avatarUrl: profile.avatarUrl } : {}),
     ...(profile.bannerUrl ? { bannerUrl: profile.bannerUrl } : {}),
     ...(profile.bio ? { bio: profile.bio } : {}),
-    joinedAtIso: profile.joinedAt.toDate().toISOString(),
+    joinedAtIso: firestoreDateIso(profile.joinedAt),
     stats: owner
       ? profile.stats
       : {
@@ -269,7 +270,7 @@ export async function updatePublicProfile(userId: string, input: unknown) {
   const userRef = firestore.collection("users").doc(userId);
   const newUsernameRef = firestore.collection("usernames").doc(usernameNormalized);
 
-  const previousUsernameNormalized = await firestore.runTransaction(async (transaction) => {
+  const previous = await firestore.runTransaction(async (transaction) => {
     const [profileSnapshot, reservation] = await Promise.all([
       transaction.get(profileRef),
       transaction.get(newUsernameRef),
@@ -331,11 +332,22 @@ export async function updatePublicProfile(userId: string, input: unknown) {
       },
       { merge: true },
     );
-    return oldUsernameNormalized;
+    return {
+      usernameNormalized: oldUsernameNormalized,
+      removedStoragePaths: [
+        !data.avatarStoragePath && profile.avatarStoragePath ? profile.avatarStoragePath : null,
+        !data.bannerStoragePath && profile.bannerStoragePath ? profile.bannerStoragePath : null,
+      ].filter((path): path is string => Boolean(path)),
+    };
   });
 
   await getFirebaseAdminAuth().updateUser(userId, { displayName: data.displayName });
-  return { usernameNormalized, previousUsernameNormalized };
+  await Promise.allSettled(
+    previous.removedStoragePaths.map((path) =>
+      getFirebaseAdminStorage().bucket().file(path).delete({ ignoreNotFound: true }),
+    ),
+  );
+  return { usernameNormalized, previousUsernameNormalized: previous.usernameNormalized };
 }
 
 export async function updateProfilePrivacy(userId: string, input: unknown) {
@@ -398,7 +410,7 @@ function mapActivity(
       actor,
       type: activity.type,
       visibility: activity.visibility,
-      createdAtIso: activity.createdAt.toDate().toISOString(),
+      createdAtIso: firestoreDateIso(activity.createdAt),
       payload: {
         addedCount: payload.addedCount,
         cards: payload.cards.map((card) => ({
@@ -413,7 +425,7 @@ function mapActivity(
     actor,
     type: activity.type,
     visibility: activity.visibility,
-    createdAtIso: activity.createdAt.toDate().toISOString(),
+    createdAtIso: firestoreDateIso(activity.createdAt),
     payload: activity.payload as Extract<CommunityActivityDocument["payload"], { deck: object }>,
   };
 }
@@ -439,15 +451,47 @@ async function getDecks(
   profile: PublicUserProfileDocument,
   owner: boolean,
   locale: AppLocale,
+  limit = 12,
 ): Promise<ProfileDeckItem[]> {
-  let query = getFirebaseAdminFirestore()
-    .collection("decks")
+  const collection = getFirebaseAdminFirestore().collection("decks");
+  let query = collection
     .where("authorId", "==", profile.id)
     .orderBy("updatedAt", "desc")
-    .limit(12);
+    .limit(limit);
   if (!owner) query = query.where("visibility", "==", "public").where("status", "==", "published");
-  const snapshot = await query.get();
-  return snapshot.docs.map((document) => {
+  let documents: FirebaseFirestore.QueryDocumentSnapshot[];
+  try {
+    documents = (await query.get()).docs;
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error
+      ? (error as { code?: unknown }).code
+      : undefined;
+    const message = error instanceof Error ? error.message : "";
+    if (code !== 9 && code !== "failed-precondition" && !/requires an index/i.test(message)) {
+      throw error;
+    }
+
+    // Keep profiles usable while a newly declared composite index is building.
+    // The equality-only query uses Firestore's automatic single-field index.
+    const fallback = await collection
+      .where("authorId", "==", profile.id)
+      .limit(Math.max(100, limit * 5))
+      .get();
+    documents = fallback.docs
+      .filter((document) => owner || (
+        document.get("visibility") === "public" &&
+        document.get("status") === "published"
+      ))
+      .sort((left, right) => {
+        const leftDate = left.get("updatedAt");
+        const rightDate = right.get("updatedAt");
+        const leftMillis = leftDate instanceof Timestamp ? leftDate.toMillis() : 0;
+        const rightMillis = rightDate instanceof Timestamp ? rightDate.toMillis() : 0;
+        return rightMillis - leftMillis || right.id.localeCompare(left.id);
+      })
+      .slice(0, limit);
+  }
+  return documents.map((document) => {
     const data = document.data();
     return {
       id: document.id,
@@ -502,7 +546,28 @@ export async function getProfileTabContent({
   owner: boolean;
   cursor?: string;
 }): Promise<ProfileTabContent> {
-  if (tab === "overview") return { tab };
+  if (tab === "overview") {
+    const decksPrivate = !owner && profile.visibility.decks === "private";
+    const collectionPrivate = !owner && profile.visibility.collection === "private";
+    const activityPrivate = !owner && profile.visibility.activity === "private";
+    const [decks, feed] = await Promise.all([
+      decksPrivate ? [] : getDecks(profile, owner, locale, 3),
+      activityPrivate
+        ? { items: [] }
+        : activitiesRepository
+            .byActor(profile.id, owner, undefined, 3)
+            .then((page) => mapActivityPage(page, locale)),
+    ]);
+    return {
+      tab,
+      decks,
+      decksPrivate,
+      collectionCount: collectionPrivate ? 0 : profile.stats.collectionCardsCount,
+      collectionPrivate,
+      feed,
+      activityPrivate,
+    };
+  }
   const privateSection = !owner && profile.visibility[tab] === "private";
   if (privateSection) {
     return tab === "activity"

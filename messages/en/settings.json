@@ -1,0 +1,79 @@
+{
+  "Settings": {
+    "metadata": {
+      "title": "Settings",
+      "description": "Manage your Safirdex profile, account, and preferences."
+    },
+    "eyebrow": "Your space",
+    "title": "Settings",
+    "description": "Customize your public identity, privacy, and account preferences.",
+    "navigation": {
+      "label": "Settings sections",
+      "profile": "Profile",
+      "account": "Account",
+      "privacy": "Privacy",
+      "preferences": "Preferences",
+      "security": "Security",
+      "viewProfile": "View my profile"
+    },
+    "account": {
+      "eyebrow": "Private information",
+      "title": "Account",
+      "description": "This information comes from your Firebase account and is never exposed on your public profile.",
+      "email": "Email address",
+      "verified": "Verified email",
+      "provider": "Sign-in method",
+      "emailProvider": "Email and password",
+      "externalProvider": "External provider",
+      "createdAt": "Account created",
+      "unknown": "Unavailable",
+      "emailHelp": "Changing the email address requires reauthentication. This action is not offered until that secure flow is available.",
+      "openAdmin": "Open administration",
+      "dangerEyebrow": "Sensitive area",
+      "dangerTitle": "Account deletion",
+      "dangerDescription": "Deletion permanently removes your Firebase identity and all associated Safirdex data.",
+      "deleteAccount": "Delete my account",
+      "deleteWarning": "This action cannot be undone. Your profiles, usernames, follows, activities, decks, collection, and images will be deleted.",
+      "confirmLabel": "Enter {value} to confirm",
+      "passwordLabel": "Current password",
+      "confirmDelete": "Delete permanently",
+      "cancelDelete": "Cancel",
+      "deleteProviderUnsupported": "Self-service deletion is not yet available for this sign-in method because its secure reauthentication flow is not supported.",
+      "deleteErrors": {
+        "AUTH_REQUIRED": "Sign in again and verify your password before retrying.",
+        "RECENT_LOGIN_REQUIRED": "A recent sign-in is required. Sign in again, then retry.",
+        "CONFIRMATION_MISMATCH": "The confirmation does not match your username.",
+        "DELETE_FAILED": "Deletion could not be completed. Your access remains active; try again later."
+      }
+    },
+    "preferences": {
+      "eyebrow": "Display",
+      "title": "Preferences",
+      "description": "Adapt Safirdex's language and appearance to your needs.",
+      "languageTitle": "Interface language",
+      "languageDescription": "Switching language keeps the current page and its parameters.",
+      "themeTitle": "Theme",
+      "themeDescription": "Choose a theme or automatically follow your device settings.",
+      "themes": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "savedLocally": "This preference is saved on this device."
+    },
+    "security": {
+      "eyebrow": "Account access",
+      "title": "Security",
+      "description": "Manage your password and the session open on this device.",
+      "passwordTitle": "Password",
+      "passwordDescription": "Receive a secure link to choose a new password.",
+      "providerManaged": "Your sign-in provider manages the password outside Safirdex.",
+      "resetPassword": "Reset password",
+      "resetSent": "The password reset email has been sent.",
+      "resetFailed": "The password reset email could not be sent right now.",
+      "sessionTitle": "Current session",
+      "sessionDescription": "Close the Safirdex and Firebase sessions on this device.",
+      "signOut": "Sign out"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "Settings": {
+    "metadata": {
+      "title": "Réglages",
+      "description": "Gérez votre profil, votre compte et vos préférences Safirdex."
+    },
+    "eyebrow": "Votre espace",
+    "title": "Réglages",
+    "description": "Personnalisez votre identité publique, votre confidentialité et les préférences de votre compte.",
+    "navigation": {
+      "label": "Sections des réglages",
+      "profile": "Profil",
+      "account": "Compte",
+      "privacy": "Confidentialité",
+      "preferences": "Préférences",
+      "security": "Sécurité",
+      "viewProfile": "Voir mon profil"
+    },
+    "account": {
+      "eyebrow": "Informations privées",
+      "title": "Compte",
+      "description": "Ces informations proviennent de votre compte Firebase et ne sont jamais exposées sur votre profil public.",
+      "email": "Adresse e-mail",
+      "verified": "Adresse vérifiée",
+      "provider": "Mode de connexion",
+      "emailProvider": "E-mail et mot de passe",
+      "externalProvider": "Fournisseur externe",
+      "createdAt": "Compte créé le",
+      "unknown": "Non disponible",
+      "emailHelp": "La modification de l’adresse e-mail nécessite une réauthentification. Cette action n’est pas proposée tant que ce parcours sécurisé n’est pas en place.",
+      "openAdmin": "Ouvrir l’administration",
+      "dangerEyebrow": "Zone sensible",
+      "dangerTitle": "Suppression du compte",
+      "dangerDescription": "La suppression efface définitivement votre identité Firebase et toutes les données Safirdex associées.",
+      "deleteAccount": "Supprimer mon compte",
+      "deleteWarning": "Cette action est irréversible. Vos profils, usernames, abonnements, activités, decks, collection et images seront supprimés.",
+      "confirmLabel": "Saisissez {value} pour confirmer",
+      "passwordLabel": "Mot de passe actuel",
+      "confirmDelete": "Supprimer définitivement",
+      "cancelDelete": "Annuler",
+      "deleteProviderUnsupported": "La suppression autonome n’est pas encore disponible pour ce mode de connexion, car sa réauthentification sécurisée n’est pas prise en charge.",
+      "deleteErrors": {
+        "AUTH_REQUIRED": "Reconnectez-vous et vérifiez votre mot de passe avant de réessayer.",
+        "RECENT_LOGIN_REQUIRED": "Une connexion récente est nécessaire. Reconnectez-vous puis réessayez.",
+        "CONFIRMATION_MISMATCH": "La confirmation ne correspond pas à votre nom d’utilisateur.",
+        "DELETE_FAILED": "La suppression n’a pas pu être finalisée. Vos accès restent actifs ; réessayez plus tard."
+      }
+    },
+    "preferences": {
+      "eyebrow": "Affichage",
+      "title": "Préférences",
+      "description": "Adaptez la langue et l’apparence de Safirdex à votre usage.",
+      "languageTitle": "Langue de l’interface",
+      "languageDescription": "Le changement conserve votre page actuelle et ses paramètres.",
+      "themeTitle": "Thème",
+      "themeDescription": "Choisissez un thème ou suivez automatiquement les réglages de votre appareil.",
+      "themes": {
+        "system": "Système",
+        "light": "Clair",
+        "dark": "Sombre"
+      },
+      "savedLocally": "Cette préférence est enregistrée sur cet appareil."
+    },
+    "security": {
+      "eyebrow": "Accès au compte",
+      "title": "Sécurité",
+      "description": "Gérez votre mot de passe et la session ouverte sur cet appareil.",
+      "passwordTitle": "Mot de passe",
+      "passwordDescription": "Recevez un lien sécurisé pour choisir un nouveau mot de passe.",
+      "providerManaged": "Votre mode de connexion gère le mot de passe en dehors de Safirdex.",
+      "resetPassword": "Réinitialiser",
+      "resetSent": "L’e-mail de réinitialisation a été envoyé.",
+      "resetFailed": "Impossible d’envoyer l’e-mail de réinitialisation pour le moment.",
+      "sessionTitle": "Session actuelle",
+      "sessionDescription": "Fermez la session Safirdex et la session Firebase de cet appareil.",
+      "signOut": "Se déconnecter"
+    }
+  }
+}

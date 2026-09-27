@@ -6,10 +6,10 @@ import type { HomeCardSearchItem } from "@/features/cards/types";
 
 export function MinimalHome({
   cards,
-  signedIn,
+  user,
 }: {
   cards: HomeCardSearchItem[];
-  signedIn: boolean;
+  user: { name?: string; email?: string } | null;
 }) {
   const t = useTranslations("Home");
 
@@ -20,7 +20,7 @@ export function MinimalHome({
         <div className="absolute top-[-28rem] left-1/2 h-[38rem] w-[58rem] -translate-x-1/2 rotate-[-8deg] bg-safir/9 blur-[100px]" />
       </div>
 
-      <SiteHeader signedIn={signedIn} />
+      <SiteHeader user={user} />
 
       <main className="relative z-10 mx-auto flex min-h-[calc(100svh-10rem)] w-full max-w-5xl flex-col items-center px-5 pt-[12svh] text-center sm:px-8 sm:pt-[14svh]">
         <div className="inline-flex items-center gap-2.5 text-[0.68rem] font-semibold tracking-[0.12em] text-safir uppercase">
