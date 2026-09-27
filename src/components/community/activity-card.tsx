@@ -1,7 +1,8 @@
 import { Layers3, RefreshCw, Sparkles } from "lucide-react";
-import Image from "next/image";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
+import { CollectionActivityPreview } from "@/components/community/collection-activity-preview";
+import { CommunityDeckPreview } from "@/components/community/community-deck-preview";
 import { ProfileAvatar } from "@/components/community/profile-avatar";
 import type {
   CollectionActivityPayload,
@@ -9,66 +10,30 @@ import type {
   DeckActivityPayload,
 } from "@/features/community/types";
 import { Link } from "@/i18n/navigation";
-import { getLocalizedName } from "@/lib/i18n/get-localized-value";
 
-type LocalizedCollectionPayload = Extract<CommunityActivityItem["payload"], { addedCount: number }>;
-
-function DeckPreview({ payload }: { payload: DeckActivityPayload }) {
-  const t = useTranslations("Community.activity");
-  const locale = useLocale();
-  const artwork = payload.deck.commander?.artworkUrl ?? payload.deck.coverCard?.artworkUrl;
-  const commander = payload.deck.commander
-    ? getLocalizedName(payload.deck.commander.translations, locale)
-    : undefined;
-
-  return (
-    <div className="mt-4 overflow-hidden rounded-xl border bg-background">
-      <div className="grid min-h-40 sm:grid-cols-[12rem_1fr]">
-        <div className="relative min-h-40 bg-muted">
-          {artwork ? <Image src={artwork} alt="" fill sizes="192px" className="object-cover" /> : null}
-        </div>
-        <div className="flex flex-col justify-between p-5">
-          <div>
-            <p className="eyebrow">{t("deckPreview")}</p>
-            <h3 className="mt-3 font-heading text-xl font-semibold">{payload.deck.name}</h3>
-            {commander ? <p className="mt-1 text-xs text-muted-foreground">{t("commander", { name: commander })}</p> : null}
-          </div>
-          <p className="mt-5 font-mono text-xs font-semibold text-safir">
-            {t("cardCount", { count: payload.deck.cardCount })}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CollectionPreview({ payload }: { payload: LocalizedCollectionPayload }) {
-  return (
-    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-      {payload.cards.map((card) => (
-        <Link key={card.cardId} href={`/cards/${card.slug}`} className="group relative aspect-[5/7] overflow-hidden rounded-xl border bg-muted">
-          {card.artworkUrl ? <Image src={card.artworkUrl} alt={card.name} fill sizes="(max-width: 639px) 50vw, 12rem" className="object-cover transition duration-300 group-hover:scale-[1.03]" /> : null}
-          <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pt-8 pb-2 text-xs font-semibold text-white">
-            {card.name}
-          </span>
-        </Link>
-      ))}
-    </div>
-  );
-}
+type LocalizedCollectionPayload = Extract<
+  CommunityActivityItem["payload"],
+  { addedCount: number }
+>;
 
 export function ActivityCard({
   activity,
   compact = false,
+  viewerId,
 }: {
   activity: CommunityActivityItem;
   compact?: boolean;
+  viewerId?: string | null;
 }) {
   const t = useTranslations("Community.activity");
   const format = useFormatter();
   const date = new Date(activity.createdAtIso);
   const payload = activity.payload;
   const isCollection = activity.type === "collection_updated";
+  const profileHref =
+    viewerId && activity.actor.userId === viewerId
+      ? "/account"
+      : `/user/@${activity.actor.username}`;
   const message = isCollection
     ? t("collectionUpdated", {
         user: activity.actor.displayName,
@@ -78,16 +43,18 @@ export function ActivityCard({
       ? t("deckUpdated", { user: activity.actor.displayName })
       : t("deckCreated", { user: activity.actor.displayName });
 
-  const activityIcon = isCollection
-    ? <Layers3 className="size-4" />
-    : activity.type === "deck_updated"
-      ? <RefreshCw className="size-4" />
-      : <Sparkles className="size-4" />;
+  const activityIcon = isCollection ? (
+    <Layers3 className="size-3.5" aria-hidden="true" />
+  ) : activity.type === "deck_updated" ? (
+    <RefreshCw className="size-3.5" aria-hidden="true" />
+  ) : (
+    <Sparkles className="size-3.5" aria-hidden="true" />
+  );
 
   if (compact) {
     return (
       <article className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
-        <Link href={`/user/@${activity.actor.username}`} className="shrink-0">
+        <Link href={profileHref} className="shrink-0">
           <ProfileAvatar
             src={activity.actor.avatarUrl}
             name={activity.actor.displayName}
@@ -108,28 +75,35 @@ export function ActivityCard({
   }
 
   return (
-    <article className="rounded-2xl border bg-card p-4 sm:p-5">
-      <header className="flex items-start gap-3">
-        <Link href={`/user/@${activity.actor.username}`}>
-          <ProfileAvatar src={activity.actor.avatarUrl} name={activity.actor.displayName} className="size-11 border-2" />
+    <article className="border-b border-border/65 pb-8 last:border-0 last:pb-0">
+      <header className="flex items-center gap-3">
+        <Link href={profileHref} className="shrink-0 rounded-full outline-none ring-safir/40 focus-visible:ring-2">
+          <ProfileAvatar
+            src={activity.actor.avatarUrl}
+            name={activity.actor.displayName}
+            className="size-11 border-2 sm:size-12"
+          />
         </Link>
         <div className="min-w-0 flex-1">
-          <Link href={`/user/@${activity.actor.username}`} className="truncate text-sm font-semibold hover:text-safir">
+          <Link href={profileHref} className="block truncate text-sm font-semibold hover:text-safir">
             {activity.actor.displayName}
           </Link>
           <p className="truncate text-xs text-muted-foreground">
-            @{activity.actor.username} · <time dateTime={activity.createdAtIso}>{format.relativeTime(date)}</time>
+            @{activity.actor.username}
+            <span aria-hidden="true"> · </span>
+            <time dateTime={activity.createdAtIso}>{format.relativeTime(date)}</time>
           </p>
         </div>
-        <span className="grid size-8 place-items-center rounded-lg bg-safir/10 text-safir">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-safir/8 px-2.5 py-1 text-[0.65rem] font-semibold text-safir">
           {activityIcon}
+          {t(`types.${activity.type}`)}
         </span>
       </header>
-      <p className="mt-4 text-sm leading-6">{message}</p>
+      <p className="mt-4 text-sm leading-6 text-foreground/90">{message}</p>
       {isCollection ? (
-        <CollectionPreview payload={payload as LocalizedCollectionPayload} />
+        <CollectionActivityPreview payload={payload as LocalizedCollectionPayload} />
       ) : (
-        <DeckPreview payload={payload as DeckActivityPayload} />
+        <CommunityDeckPreview payload={payload as DeckActivityPayload} />
       )}
     </article>
   );

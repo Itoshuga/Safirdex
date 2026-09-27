@@ -517,6 +517,11 @@ export async function saveDeck({
               },
             }
           : {}),
+        factions: factions.map((faction) => ({
+          id: faction.id,
+          translations: faction.translations,
+          ...(faction.color ? { color: faction.color } : {}),
+        })),
         cardCount: ruleResult.cardCount,
       },
       });

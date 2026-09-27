@@ -1,5 +1,6 @@
 import type { Timestamp } from "firebase-admin/firestore";
 
+import type { DeckPreviewView } from "@/features/decks/types";
 import type { Translations } from "@/types/translation";
 
 export type ProfileSectionVisibility = "public" | "private";
@@ -59,7 +60,22 @@ export interface ProfileViewerState {
 
 export interface CommunityUserResult extends PublicProfileView {
   isFollowing: boolean;
+  isSelf: boolean;
 }
+
+export type CommunityDeckItem = Pick<
+  DeckPreviewView,
+  | "id"
+  | "name"
+  | "description"
+  | "author"
+  | "cardCount"
+  | "factions"
+  | "commanderName"
+  | "artworkUrl"
+  | "artworkOrientation"
+  | "publishedAtIso"
+>;
 
 export interface CommunityConnectionItem {
   username: string;
@@ -93,6 +109,11 @@ export interface DeckActivityPayload {
       translations: Translations<{ name: string }>;
       artworkUrl: string;
     };
+    factions?: Array<{
+      id: string;
+      translations: Translations<{ name: string }>;
+      color?: string;
+    }>;
     cardCount: number;
   };
 }
@@ -123,7 +144,7 @@ export interface CommunityActivityDocument {
 
 export interface CommunityActivityItem {
   id: string;
-  actor: Omit<ActivityActorSnapshot, "userId">;
+  actor: ActivityActorSnapshot;
   type: CommunityActivityType;
   visibility: CommunityActivityVisibility;
   createdAtIso: string;

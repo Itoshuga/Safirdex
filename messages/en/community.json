@@ -1,56 +1,102 @@
 {
   "Community": {
     "metadata": {
-      "title": "Community",
-      "description": "Discover collectors and their latest Safir TCG activity."
+      "title": "Community — Safirdex",
+      "description": "Discover Safir players, their decks, and updates to their collections."
     },
-    "eyebrow": "Safir TCG",
+    "eyebrow": "The Safir community",
     "title": "Community",
-    "description": "Meet collectors and follow updates to their decks and collections.",
-    "viewProfile": "View profile",
+    "description": "Discover what Safir players are building, collecting, and sharing.",
+    "viewProfile": "View {name}'s profile",
     "followersCount": "{count, plural, =0 {No followers} one {# follower} other {# followers}}",
+    "decksCount": "{count, plural, =0 {No decks} one {# deck} other {# decks}}",
+    "navigation": {
+      "label": "Community navigation",
+      "discover": "Discover",
+      "following": "Following",
+      "people": "Players"
+    },
     "actions": {
       "follow": "Follow",
       "following": "Following",
       "failed": "The follow status could not be changed. Please try again."
     },
     "search": {
-      "label": "Search members",
-      "placeholder": "Username or display name…",
-      "clear": "Clear",
+      "label": "Search players",
+      "placeholder": "Search an @username or player…",
+      "clear": "Clear search",
+      "submit": "Show results",
+      "loading": "Searching…",
+      "viewAll": "View all results",
+      "noResults": "No player found for “{query}”.",
       "limitNote": "The first 20 results are shown."
     },
     "feed": {
       "discover": "Discover",
       "following": "Following",
-      "loadMore": "Load more",
-      "discoverPeople": "Discover members",
+      "discoverEyebrow": "Recent activity",
+      "discoverTitle": "What's happening in Safir",
+      "followingEyebrow": "Your circle",
+      "followingTitle": "Activity from players you follow",
+      "loadMore": "Load more activity",
+      "loadingMore": "Loading…",
+      "loadFailed": "The rest of the feed could not be loaded. Please try again.",
+      "discoverPeople": "Discover players",
+      "createDeck": "Create a deck",
+      "signedOut": {
+        "title": "Keep up with players you follow",
+        "description": "Sign in to follow Safir players and see their decks and collections in a personal feed.",
+        "action": "Sign in"
+      },
       "empty": {
         "discover": {
-          "title": "No public activity yet",
-          "description": "New decks and meaningful collection updates will appear here."
+          "title": "The community is just getting started",
+          "description": "Be among the first to publish a deck and share your Safir activity."
         },
         "following": {
-          "title": "Your feed is still empty",
-          "description": "Follow members to see their activity here."
+          "title": "Your feed is empty for now",
+          "description": "Discover Safir players and follow them to keep up with their decks and collections."
         }
       }
     },
     "people": {
-      "discoverEyebrow": "New profiles",
-      "discover": "Members to discover",
-      "resultsEyebrow": "Search",
-      "results": "Results for “{query}”",
-      "noResults": "No members match this search.",
+      "metadata": {
+        "title": "Community players — Safirdex",
+        "description": "Search and discover players from the Safir community."
+      },
+      "discoverEyebrow": "Players to discover",
+      "discover": "New profiles",
+      "viewAll": "View all",
+      "pageTitle": "Discover Safir players",
+      "pageDescription": "Browse public profiles and find new players to follow.",
+      "resultsEyebrow": "Search results",
+      "results": "Players matching “{query}”",
+      "resultsDescription": "Results by username and display name.",
+      "noResults": "No players match this search.",
+      "noResultsTitle": "No player found for “{query}”",
+      "noResultsDescription": "Try another username or check the spelling of your search.",
+      "emptyTitle": "The community is just getting started",
       "empty": "No public profile is available yet."
+    },
+    "decks": {
+      "eyebrow": "Recent creations",
+      "title": "Community decks",
+      "viewAll": "View all",
+      "cards": "{count, plural, one {# card} other {# cards}}"
     },
     "activity": {
       "deckCreated": "{user} created a new deck.",
       "deckUpdated": "{user} updated a deck.",
       "collectionUpdated": "{user} added {count, plural, one {# card} other {# cards}} to their collection.",
-      "deckPreview": "Deck preview",
+      "deckPreview": "New deck",
       "commander": "Commander: {name}",
-      "cardCount": "{count, plural, one {# card} other {# cards}}"
+      "cardCount": "{count, plural, one {# card} other {# cards}}",
+      "moreCards": "+{count, plural, one {# other card} other {# other cards}}",
+      "types": {
+        "deck_created": "Deck",
+        "deck_updated": "Update",
+        "collection_updated": "Collection"
+      }
     }
   }
 }

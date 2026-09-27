@@ -1,96 +1,131 @@
-import { Compass, SearchX, Users } from "lucide-react";
+import { Compass, LogIn, Sparkles, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { ActivityCard } from "@/components/community/activity-card";
-import { CommunitySearch } from "@/components/community/community-search";
-import { UserCard } from "@/components/community/user-card";
+import { CommunityDeckGallery } from "@/components/community/community-deck-gallery";
+import { CommunityFeed } from "@/components/community/community-feed";
+import { CommunityHeader } from "@/components/community/community-header";
+import { CommunityPeopleSuggestions } from "@/components/community/community-people-suggestions";
 import { PublicHeader } from "@/components/layout/public-header";
 import { Button } from "@/components/ui/button";
-import type { CommunityFeedPage, CommunityUserResult } from "@/features/community/types";
+import type {
+  CommunityDeckItem,
+  CommunityFeedPage,
+  CommunityUserResult,
+} from "@/features/community/types";
 import { Link } from "@/i18n/navigation";
+
+function FeedEmpty({ mode }: { mode: "discover" | "following" }) {
+  const t = useTranslations("Community.feed");
+  const Icon = mode === "discover" ? Sparkles : Users;
+
+  return (
+    <div className="rounded-3xl border border-dashed px-6 py-16 text-center sm:py-20">
+      <span className="mx-auto grid size-12 place-items-center rounded-full bg-muted text-muted-foreground">
+        <Icon className="size-5" aria-hidden="true" />
+      </span>
+      <h2 className="mt-5 font-heading text-2xl font-semibold">
+        {t(`empty.${mode}.title`)}
+      </h2>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+        {t(`empty.${mode}.description`)}
+      </p>
+      <Button
+        className="mt-6 rounded-full"
+        nativeButton={false}
+        render={<Link href={mode === "following" ? "/community/people" : "/decks/new"} />}
+      >
+        {mode === "following" ? t("discoverPeople") : t("createDeck")}
+      </Button>
+    </div>
+  );
+}
+
+function SignedOutFollowing() {
+  const t = useTranslations("Community.feed.signedOut");
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border bg-muted/25 px-6 py-16 text-center sm:px-10 sm:py-20">
+      <div className="surface-grid pointer-events-none absolute inset-0 opacity-25" aria-hidden="true" />
+      <div className="relative">
+        <span className="mx-auto grid size-12 place-items-center rounded-full bg-background text-safir shadow-sm">
+          <LogIn className="size-5" aria-hidden="true" />
+        </span>
+        <h2 className="mt-5 font-heading text-2xl font-semibold">{t("title")}</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+          {t("description")}
+        </p>
+        <Button className="mt-6 rounded-full" nativeButton={false} render={<Link href="/login" />}>
+          {t("action")}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export function CommunityHub({
   mode,
-  query,
   people,
+  recentDecks,
   feed,
   signedIn,
+  viewerId,
+  locale,
 }: {
   mode: "discover" | "following";
-  query: string;
   people: CommunityUserResult[];
+  recentDecks: CommunityDeckItem[];
   feed: CommunityFeedPage;
   signedIn: boolean;
+  viewerId: string | null;
+  locale: string;
 }) {
-  const t = useTranslations("Community");
-  const modeHref = (nextMode: "discover" | "following") =>
-    `/community?feed=${nextMode}${query ? `&q=${encodeURIComponent(query)}` : ""}`;
-  const nextHref = feed.nextCursor
-    ? `/community?feed=${mode}${query ? `&q=${encodeURIComponent(query)}` : ""}&cursor=${encodeURIComponent(feed.nextCursor)}`
-    : undefined;
+  const t = useTranslations("Community.feed");
 
   return (
     <div className="min-h-screen bg-background">
       <PublicHeader />
       <main>
-        <section className="border-b bg-[linear-gradient(180deg,color-mix(in_oklch,var(--safir)_8%,var(--background)),var(--background))]">
-          <div className="site-container py-12 sm:py-16">
-            <p className="eyebrow">{t("eyebrow")}</p>
-            <h1 className="mt-4 font-heading text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">{t("title")}</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{t("description")}</p>
-            <div className="mt-7 max-w-2xl"><CommunitySearch initialQuery={query} /></div>
-          </div>
-        </section>
-
+        <CommunityHeader active={mode} />
         <div className="site-container py-8 sm:py-10">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.6fr)] lg:items-start">
-            <section>
-              <div className="mb-5 flex items-center justify-between gap-4 border-b">
-                <div className="flex">
-                  {(["discover", "following"] as const).map((entry) => (
-                    <Link
-                      key={entry}
-                      href={!signedIn && entry === "following" ? "/login" : modeHref(entry)}
-                      className={`relative px-4 py-3 text-sm font-semibold ${mode === entry ? "text-foreground after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:bg-safir" : "text-muted-foreground hover:text-foreground"}`}
-                    >
-                      {t(`feed.${entry}`)}
-                    </Link>
-                  ))}
-                </div>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.62fr)_minmax(19rem,0.72fr)] lg:items-start xl:gap-14">
+            <aside className="order-1 min-w-0 space-y-9 lg:order-2 lg:sticky lg:top-6">
+              <CommunityPeopleSuggestions people={people} signedIn={signedIn} />
+              <div className="hidden lg:block">
+                <CommunityDeckGallery decks={recentDecks} />
               </div>
-              {feed.items.length ? (
-                <div className="space-y-4">
-                  {feed.items.map((activity) => <ActivityCard key={activity.id} activity={activity} />)}
-                  {nextHref ? <Button variant="outline" size="lg" className="w-full" nativeButton={false} render={<Link href={nextHref} />}>{t("feed.loadMore")}</Button> : null}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed px-6 py-20 text-center">
-                  <Compass className="mx-auto size-9 text-muted-foreground/50" />
-                  <h2 className="mt-4 font-heading text-xl font-semibold">{t(`feed.empty.${mode}.title`)}</h2>
-                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t(`feed.empty.${mode}.description`)}</p>
-                  {mode === "following" ? <Button className="mt-6" nativeButton={false} render={<Link href="/community?feed=discover" />}>{t("feed.discoverPeople")}</Button> : null}
-                </div>
-              )}
-            </section>
-
-            <aside className="lg:sticky lg:top-6">
-              <div className="mb-4 flex items-end justify-between gap-3">
-                <div>
-                  <p className="eyebrow">{query ? t("people.resultsEyebrow") : t("people.discoverEyebrow")}</p>
-                  <h2 className="mt-2 font-heading text-2xl font-semibold">{query ? t("people.results", { query }) : t("people.discover")}</h2>
-                </div>
-                <Users className="size-5 text-safir" />
-              </div>
-              {people.length ? (
-                <div className="space-y-3">{people.map((user) => <UserCard key={user.username} user={user} signedIn={signedIn} />)}</div>
-              ) : (
-                <div className="rounded-2xl border border-dashed p-8 text-center">
-                  <SearchX className="mx-auto size-7 text-muted-foreground/50" />
-                  <p className="mt-3 text-sm text-muted-foreground">{query ? t("people.noResults") : t("people.empty")}</p>
-                </div>
-              )}
-              <p className="mt-4 text-[0.68rem] leading-5 text-muted-foreground">{t("search.limitNote")}</p>
             </aside>
+
+            <section className="order-2 min-w-0 lg:order-1" aria-labelledby="community-feed-title">
+              <div className="mb-6 flex items-end justify-between gap-4 border-b pb-4">
+                <div>
+                  <p className="eyebrow">
+                    {mode === "discover" ? t("discoverEyebrow") : t("followingEyebrow")}
+                  </p>
+                  <h2 id="community-feed-title" className="mt-2 font-heading text-2xl font-semibold sm:text-3xl">
+                    {mode === "discover" ? t("discoverTitle") : t("followingTitle")}
+                  </h2>
+                </div>
+                <Compass className="size-5 text-safir" aria-hidden="true" />
+              </div>
+
+              {mode === "following" && !signedIn ? (
+                <SignedOutFollowing />
+              ) : feed.items.length ? (
+                <CommunityFeed
+                  key={mode}
+                  initialFeed={feed}
+                  mode={mode}
+                  locale={locale}
+                  viewerId={viewerId}
+                />
+              ) : (
+                <FeedEmpty mode={mode} />
+              )}
+
+              <div className="mt-12 lg:hidden">
+                <CommunityDeckGallery decks={recentDecks} />
+              </div>
+            </section>
           </div>
         </div>
       </main>

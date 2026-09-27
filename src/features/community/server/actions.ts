@@ -4,6 +4,11 @@ import { revalidatePath, updateTag } from "next/cache";
 
 import type { CommunityActionState } from "@/features/community/action-state";
 import { COMMUNITY_CACHE_TAGS } from "@/features/community/server/cache-tags";
+import {
+  getDiscoverFeed,
+  getFollowingFeed,
+  searchCommunityUsers,
+} from "@/features/community/server/community-service";
 import { followUser, unfollowUser } from "@/features/community/server/follow-service";
 import {
   createCommunityProfile,
@@ -14,6 +19,7 @@ import {
 } from "@/features/community/server/profile-service";
 import { getUserSession } from "@/lib/auth/user-session";
 import { getFirebaseAdminFirestore } from "@/lib/firebase/admin";
+import { resolveLocale } from "@/lib/i18n/locales";
 
 function invalidateProfiles(usernames: string[]) {
   updateTag(COMMUNITY_CACHE_TAGS.profiles);
@@ -173,4 +179,27 @@ export async function checkUsernameAvailabilityAction(username: string) {
   } catch {
     return { available: false, code: "INVALID_USERNAME" } as const;
   }
+}
+
+export async function searchCommunityUsersAction(query: string) {
+  const session = await getUserSession();
+  return searchCommunityUsers({
+    viewerId: session?.uid ?? null,
+    query,
+    limit: 5,
+  });
+}
+
+export async function loadCommunityFeedAction(input: {
+  locale: string;
+  mode: "discover" | "following";
+  cursor: string;
+}) {
+  const locale = resolveLocale(input.locale);
+  if (input.mode === "discover") {
+    return getDiscoverFeed(locale, input.cursor);
+  }
+  const session = await getUserSession();
+  if (!session) return { items: [] };
+  return getFollowingFeed(locale, session.uid, input.cursor);
 }

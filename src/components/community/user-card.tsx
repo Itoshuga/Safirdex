@@ -1,4 +1,4 @@
-import { ArrowUpRight, Users } from "lucide-react";
+import { ArrowUpRight, Layers3, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { FollowButton } from "@/components/community/follow-button";
@@ -10,7 +10,7 @@ type UserCardData = CommunityUserResult | CommunityConnectionItem;
 
 export function UserCard({ user, signedIn }: { user: UserCardData; signedIn: boolean }) {
   const t = useTranslations("Community");
-  const profileHref = "isSelf" in user && user.isSelf ? "/account" : `/user/@${user.username}`;
+  const profileHref = user.isSelf ? "/account" : `/user/@${user.username}`;
 
   return (
     <article className="flex min-w-0 items-start gap-3 rounded-2xl border bg-card p-4 sm:gap-4">
@@ -26,7 +26,7 @@ export function UserCard({ user, signedIn }: { user: UserCardData; signedIn: boo
             </Link>
             <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
           </div>
-          {!("isSelf" in user && user.isSelf) ? (
+          {!user.isSelf ? (
             <FollowButton
               username={user.username}
               initialFollowing={user.isFollowing}
@@ -36,14 +36,22 @@ export function UserCard({ user, signedIn }: { user: UserCardData; signedIn: boo
           ) : null}
         </div>
         {user.bio ? <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">{user.bio}</p> : null}
-        <p className="mt-2 flex items-center gap-1.5 text-[0.68rem] text-muted-foreground">
-          <Users className="size-3" />
-          {t("followersCount", {
-            count: "followersCount" in user
-              ? user.followersCount
-              : user.stats.followersCount,
-          })}
-        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.68rem] text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <Users className="size-3" aria-hidden="true" />
+            {t("followersCount", {
+              count: "followersCount" in user
+                ? user.followersCount
+                : user.stats.followersCount,
+            })}
+          </span>
+          {"stats" in user ? (
+            <span className="inline-flex items-center gap-1.5">
+              <Layers3 className="size-3" aria-hidden="true" />
+              {t("decksCount", { count: user.stats.decksCount })}
+            </span>
+          ) : null}
+        </div>
       </div>
     </article>
   );

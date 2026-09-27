@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag, updateTag } from "next/cache";
 
 import { COMMUNITY_CACHE_TAGS } from "@/features/community/server/cache-tags";
 import type { DeckActionState } from "@/features/decks/action-state";
@@ -28,6 +28,7 @@ export async function saveDeckAction(
     revalidatePath("/[locale]/decks", "page");
     revalidatePath(`/[locale]/decks/${deckId}`, "page");
     revalidateTag(COMMUNITY_CACHE_TAGS.profiles, "max");
+    updateTag(COMMUNITY_CACHE_TAGS.discover);
     return { status: "success", message: "DECK_SAVED", deckId };
   } catch (error) {
     const message = error instanceof Error ? error.message : "DECK_SAVE_FAILED";
@@ -41,6 +42,7 @@ export async function deleteDeckAction(deckId: string) {
   await deleteDeck(session.uid, deckId);
   revalidatePath("/[locale]/decks", "page");
   revalidateTag(COMMUNITY_CACHE_TAGS.profiles, "max");
+  updateTag(COMMUNITY_CACHE_TAGS.discover);
 }
 
 export async function loadDeckCardsAction(locale: string, query: DeckCatalogQuery, cursor?: string) {

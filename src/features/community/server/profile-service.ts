@@ -399,6 +399,7 @@ function mapActivity(
   locale: AppLocale,
 ): CommunityActivityItem {
   const actor = {
+    userId: activity.actor.userId,
     username: activity.actor.username,
     displayName: activity.actor.displayName,
     ...(activity.actor.avatarUrl ? { avatarUrl: activity.actor.avatarUrl } : {}),
