@@ -4,7 +4,7 @@ import { LoaderCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
-import { ActivityCard } from "@/components/community/activity-card";
+import { CommunityFeedItemCard } from "@/components/community/community-feed-item-card";
 import { Button } from "@/components/ui/button";
 import { loadCommunityFeedAction } from "@/features/community/server/actions";
 import type { CommunityFeedPage } from "@/features/community/types";
@@ -29,11 +29,12 @@ export function CommunityFeed({
   return (
     <div>
       <div className="space-y-8">
-        {items.map((activity) => (
-          <ActivityCard
-            key={activity.id}
-            activity={activity}
+        {items.map((item) => (
+          <CommunityFeedItemCard
+            key={item.id}
+            item={item}
             viewerId={viewerId}
+            onDeleted={(postId) => setItems((current) => current.filter((entry) => entry.id !== postId))}
           />
         ))}
       </div>

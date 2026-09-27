@@ -4,7 +4,7 @@ import { unstable_cache } from "next/cache";
 
 import { COMMUNITY_CACHE_TAGS } from "@/features/community/server/cache-tags";
 import {
-  mapActivityPage,
+  mapFeedPage,
   normalizeProfileSearch,
   normalizeUsername,
 } from "@/features/community/server/profile-service";
@@ -117,16 +117,18 @@ export async function getSuggestedUsers(
 
 export async function getDiscoverFeed(
   locale: AppLocale,
+  viewerId: string | null,
   cursor?: string,
 ): Promise<CommunityFeedPage> {
   if (cursor) {
-    return mapActivityPage(await activitiesRepository.discover(cursor), locale);
+    return mapFeedPage(await activitiesRepository.discover(cursor), locale, viewerId);
   }
-  return unstable_cache(
-    async () => mapActivityPage(await activitiesRepository.discover(), locale),
+  const page = await unstable_cache(
+    async () => activitiesRepository.discover(),
     ["community-discover-feed-v2", locale],
     { tags: [COMMUNITY_CACHE_TAGS.discover], revalidate: 120 },
   )();
+  return mapFeedPage(page, locale, viewerId);
 }
 
 export async function getFollowingFeed(
@@ -134,9 +136,10 @@ export async function getFollowingFeed(
   viewerId: string,
   cursor?: string,
 ) {
-  return mapActivityPage(
+  return mapFeedPage(
     await activitiesRepository.following(viewerId, cursor),
     locale,
+    viewerId,
   );
 }
 
@@ -170,17 +173,24 @@ export async function getCommunityPageData({
   mode: "discover" | "following";
   cursor?: string;
 }) {
-  const [people, recentDecks, feed] = await Promise.all([
+  const [people, recentDecks, feed, viewerProfile] = await Promise.all([
     getSuggestedUsers(viewerId),
     getRecentCommunityDecks(locale),
     mode === "following" && viewerId
       ? getFollowingFeed(locale, viewerId, cursor)
       : mode === "discover"
-        ? getDiscoverFeed(locale, cursor)
+        ? getDiscoverFeed(locale, viewerId, cursor)
         : Promise.resolve({ items: [] } satisfies CommunityFeedPage),
+    viewerId ? publicProfilesRepository.getById(viewerId) : Promise.resolve(null),
   ]);
 
-  return { people, recentDecks, feed, mode };
+  const viewer = viewerProfile ? {
+    userId: viewerProfile.id,
+    username: viewerProfile.username,
+    displayName: viewerProfile.displayName,
+    ...(viewerProfile.avatarUrl ? { avatarUrl: viewerProfile.avatarUrl } : {}),
+  } : null;
+  return { people, recentDecks, feed, mode, viewer };
 }
 
 export async function getCommunityPeoplePageData({

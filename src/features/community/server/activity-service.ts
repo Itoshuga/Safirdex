@@ -62,6 +62,7 @@ async function createActivity({
   const createdAt = Timestamp.now();
   const activity: CommunityActivityDocument = {
     id: reference.id,
+    kind: "activity",
     actorId,
     actor: {
       userId: actorId,
@@ -210,6 +211,7 @@ export async function setActorActivitiesPublished(
   const recipients = new Set([profile.id, ...followers.docs.map((document) => document.id)]);
   const operations: Array<(batch: FirebaseFirestore.WriteBatch) => void> = [];
   for (const activity of activities.docs) {
+    if (activity.get("kind") === "post") continue;
     const type = activity.get("type") as CommunityActivityType;
     const sectionIsPublic = type === "collection_updated"
       ? profile.visibility.collection === "public"

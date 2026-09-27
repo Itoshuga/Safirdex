@@ -43,6 +43,7 @@ export default async function CommunityPage({
       feed={data.feed}
       signedIn={Boolean(session)}
       viewerId={session?.uid ?? null}
+      viewer={data.viewer}
       locale={locale}
     />
   );

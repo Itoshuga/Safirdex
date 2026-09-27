@@ -2,7 +2,7 @@ import { Activity, ArrowRight, Layers3, Library, LockKeyhole, Plus } from "lucid
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-import { ActivityCard } from "@/components/community/activity-card";
+import { CommunityFeedItemCard } from "@/components/community/community-feed-item-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ProfileTabContent } from "@/features/community/types";
@@ -170,7 +170,7 @@ export function ProfileTabContentView({
                 <OverviewEmptySection icon={LockKeyhole} title={t("privateTitle")} description={t("privateDescription")} />
               ) : content.feed.items.length ? (
                 <div className="divide-y">
-                  {content.feed.items.map((activity) => <ActivityCard key={activity.id} activity={activity} compact />)}
+                  {content.feed.items.map((item) => <CommunityFeedItemCard key={item.id} item={item} compact />)}
                 </div>
               ) : (
                 <OverviewEmptySection icon={Activity} title={t("activity.emptyTitle")} description={t(owner ? "activity.ownerEmptyDescription" : "activity.emptyDescription")} />
@@ -229,7 +229,7 @@ export function ProfileTabContentView({
   if (!content.feed.items.length) return <EmptySection icon={Activity} title={t("activity.emptyTitle")} description={t("activity.emptyDescription")} />;
   return (
     <div className="space-y-4">
-      {content.feed.items.map((activity) => <ActivityCard key={activity.id} activity={activity} />)}
+      {content.feed.items.map((item) => <CommunityFeedItemCard key={item.id} item={item} />)}
       {content.feed.nextCursor ? (
         <Button
           variant="outline"

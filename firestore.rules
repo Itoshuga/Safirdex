@@ -101,6 +101,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Posts are validated, authorized and fanned out by authenticated Server
+    // Actions. Direct reads would bypass follower-only visibility checks.
+    match /communityPosts/{postId} {
+      allow read, write: if false;
+    }
+
     match /userFeeds/{userId} {
       allow read, write: if false;
 

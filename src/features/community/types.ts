@@ -5,6 +5,8 @@ import type { Translations } from "@/types/translation";
 
 export type ProfileSectionVisibility = "public" | "private";
 export type CommunityActivityVisibility = "public" | "followers";
+export type CommunityPostVisibility = CommunityActivityVisibility;
+export type CommunityPostAttachmentType = "card" | "deck" | "collection";
 export type CommunityActivityType =
   | "deck_created"
   | "deck_updated"
@@ -132,6 +134,7 @@ export interface CollectionActivityPayload {
 
 export interface CommunityActivityDocument {
   id: string;
+  kind?: "activity";
   actorId: string;
   actor: ActivityActorSnapshot;
   type: CommunityActivityType;
@@ -141,6 +144,71 @@ export interface CommunityActivityDocument {
   createdAt: Timestamp;
   payload: DeckActivityPayload | CollectionActivityPayload;
 }
+
+export interface CommunityPostCardSnapshot {
+  type: "card";
+  cardId: string;
+  slug: string;
+  number: number;
+  translations: Translations<{ name: string }>;
+  artworkUrl?: string;
+  orientation: "vertical" | "horizontal";
+  rarityTranslations?: Translations<{ name: string }>;
+}
+
+export interface CommunityPostDeckSnapshot {
+  type: "deck";
+  deckId: string;
+  authorId: string;
+  name: string;
+  artworkUrl?: string;
+  artworkOrientation: "vertical" | "horizontal";
+  commanderTranslations?: Translations<{ name: string }>;
+  commanderName?: string;
+  cardCount: number;
+}
+
+export interface CommunityPostCollectionSnapshot {
+  type: "collection";
+  ownerId: string;
+  cardCount: number;
+  cards: CollectionActivityCardSnapshot[];
+}
+
+export type CommunityPostAttachmentSnapshot =
+  | CommunityPostCardSnapshot
+  | CommunityPostDeckSnapshot
+  | CommunityPostCollectionSnapshot;
+
+export interface CommunityPostDocument {
+  id: string;
+  authorId: string;
+  author: ActivityActorSnapshot;
+  content: string;
+  visibility: CommunityPostVisibility;
+  published: boolean;
+  attachmentKey?: string;
+  attachmentAvailable: boolean;
+  attachment?: CommunityPostAttachmentSnapshot;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  stats: { likesCount: number; commentsCount: number };
+}
+
+export interface CommunityPostFeedDocument {
+  id: string;
+  kind: "post";
+  actorId: string;
+  actor: ActivityActorSnapshot;
+  visibility: CommunityPostVisibility;
+  published: boolean;
+  entityKey: string;
+  attachmentKey?: string;
+  createdAt: Timestamp;
+  payload: Omit<CommunityPostDocument, "id" | "authorId" | "author" | "visibility" | "published" | "createdAt">;
+}
+
+export type CommunityFeedDocument = CommunityActivityDocument | CommunityPostFeedDocument;
 
 export interface CommunityActivityItem {
   id: string;
@@ -155,10 +223,63 @@ export interface CommunityActivityItem {
       });
 }
 
+export type CommunityPostAttachmentView =
+  | { type: CommunityPostAttachmentType; available: false }
+  | ({ type: "card"; available: true; cardId: string; slug: string; number: number; name: string; artworkUrl?: string; orientation: "vertical" | "horizontal"; rarityName?: string })
+  | ({ type: "deck"; available: true; deckId: string; name: string; artworkUrl?: string; artworkOrientation: "vertical" | "horizontal"; commanderName?: string; cardCount: number })
+  | ({ type: "collection"; available: true; ownerId: string; cardCount: number; cards: Array<CollectionActivityCardSnapshot & { name: string }> });
+
+export interface CommunityPostView {
+  id: string;
+  author: ActivityActorSnapshot;
+  content: string;
+  visibility: CommunityPostVisibility;
+  createdAtIso: string;
+  updatedAtIso: string;
+  isOwner: boolean;
+  attachment?: CommunityPostAttachmentView;
+}
+
+export type CommunityFeedItem =
+  | { id: string; kind: "activity"; activity: CommunityActivityItem }
+  | { id: string; kind: "post"; post: CommunityPostView };
+
 export interface CommunityFeedPage {
-  items: CommunityActivityItem[];
+  items: CommunityFeedItem[];
   nextCursor?: string;
 }
+
+export interface CommunityPostCardOption {
+  type: "card";
+  id: string;
+  slug: string;
+  number: number;
+  name: string;
+  artworkUrl?: string;
+  orientation: "vertical" | "horizontal";
+}
+
+export interface CommunityPostDeckOption {
+  type: "deck";
+  id: string;
+  name: string;
+  artworkUrl?: string;
+  artworkOrientation: "vertical" | "horizontal";
+  commanderName?: string;
+  cardCount: number;
+}
+
+export interface CommunityPostCollectionOption {
+  type: "collection";
+  id: "self";
+  cardCount: number;
+  cards: Array<{ cardId: string; name: string; artworkUrl?: string }>;
+}
+
+export type CommunityPostAttachmentOption =
+  | CommunityPostCardOption
+  | CommunityPostDeckOption
+  | CommunityPostCollectionOption;
 
 export interface ProfileDeckItem {
   id: string;

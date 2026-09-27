@@ -1,5 +1,5 @@
 import { Layers3, RefreshCw, Sparkles } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 
 import { CollectionActivityPreview } from "@/components/community/collection-activity-preview";
 import { CommunityDeckPreview } from "@/components/community/community-deck-preview";
@@ -27,6 +27,7 @@ export function ActivityCard({
 }) {
   const t = useTranslations("Community.activity");
   const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
   const date = new Date(activity.createdAtIso);
   const payload = activity.payload;
   const isCollection = activity.type === "collection_updated";
@@ -64,7 +65,7 @@ export function ActivityCard({
         <div className="min-w-0 flex-1">
           <p className="text-sm leading-5">{message}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            <time dateTime={activity.createdAtIso}>{format.relativeTime(date)}</time>
+            <time dateTime={activity.createdAtIso}>{format.relativeTime(date, { now })}</time>
           </p>
         </div>
         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-safir/10 text-safir">
@@ -91,7 +92,7 @@ export function ActivityCard({
           <p className="truncate text-xs text-muted-foreground">
             @{activity.actor.username}
             <span aria-hidden="true"> · </span>
-            <time dateTime={activity.createdAtIso}>{format.relativeTime(date)}</time>
+            <time dateTime={activity.createdAtIso}>{format.relativeTime(date, { now })}</time>
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-safir/8 px-2.5 py-1 text-[0.65rem] font-semibold text-safir">

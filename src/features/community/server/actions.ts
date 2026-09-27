@@ -11,6 +11,13 @@ import {
 } from "@/features/community/server/community-service";
 import { followUser, unfollowUser } from "@/features/community/server/follow-service";
 import {
+  createCommunityPost,
+  deleteCommunityPost,
+  getCommunityPostCollectionOption,
+  getCommunityPostDeckOptions,
+  searchCommunityPostCards,
+} from "@/features/community/server/post-service";
+import {
   createCommunityProfile,
   normalizeUsername,
   resolvePublicProfile,
@@ -196,10 +203,70 @@ export async function loadCommunityFeedAction(input: {
   cursor: string;
 }) {
   const locale = resolveLocale(input.locale);
-  if (input.mode === "discover") {
-    return getDiscoverFeed(locale, input.cursor);
-  }
   const session = await getUserSession();
+  if (input.mode === "discover") {
+    return getDiscoverFeed(locale, session?.uid ?? null, input.cursor);
+  }
   if (!session) return { items: [] };
   return getFollowingFeed(locale, session.uid, input.cursor);
+}
+
+export async function createCommunityPostAction(input: {
+  locale: string;
+  content: string;
+  visibility: "public" | "followers";
+  attachment?: { type: "card" | "deck" | "collection"; id: string } | null;
+}) {
+  const session = await getUserSession();
+  if (!session) return { ok: false, code: "AUTH_REQUIRED" } as const;
+  try {
+    const post = await createCommunityPost(session.uid, input, resolveLocale(input.locale));
+    updateTag(COMMUNITY_CACHE_TAGS.discover);
+    revalidatePath("/[locale]/community", "page");
+    revalidatePath("/[locale]/account", "page");
+    revalidatePath("/[locale]/user/[username]", "page");
+    return { ok: true, post } as const;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    const code = message === "ATTACHMENT_FORBIDDEN" || message === "ATTACHMENT_NOT_FOUND"
+      ? "ATTACHMENT_UNAVAILABLE"
+      : message === "PROFILE_REQUIRED"
+        ? "PROFILE_REQUIRED"
+        : "INVALID_POST";
+    return { ok: false, code } as const;
+  }
+}
+
+export async function deleteCommunityPostAction(postId: string) {
+  const session = await getUserSession();
+  if (!session) return { ok: false, code: "AUTH_REQUIRED" } as const;
+  try {
+    await deleteCommunityPost(session.uid, postId);
+    updateTag(COMMUNITY_CACHE_TAGS.discover);
+    revalidatePath("/[locale]/community", "page");
+    revalidatePath("/[locale]/account", "page");
+    revalidatePath("/[locale]/user/[username]", "page");
+    revalidatePath("/[locale]/community/posts/[postId]", "page");
+    return { ok: true } as const;
+  } catch {
+    return { ok: false, code: "DELETE_FAILED" } as const;
+  }
+}
+
+export async function searchCommunityPostCardsAction(localeValue: string, query: string) {
+  const session = await getUserSession();
+  if (!session) return [];
+  return searchCommunityPostCards(resolveLocale(localeValue), query);
+}
+
+export async function getCommunityPostDeckOptionsAction(localeValue: string) {
+  const session = await getUserSession();
+  if (!session) return [];
+  return getCommunityPostDeckOptions(session.uid, resolveLocale(localeValue));
+}
+
+export async function getCommunityPostCollectionOptionAction(localeValue: string) {
+  const session = await getUserSession();
+  if (!session) return null;
+  return getCommunityPostCollectionOption(session.uid, resolveLocale(localeValue));
 }

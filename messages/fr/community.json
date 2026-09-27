@@ -21,6 +21,65 @@
       "following": "Abonné",
       "failed": "Impossible de modifier l’abonnement. Réessayez."
     },
+    "composer": {
+      "title": "Créer une publication",
+      "placeholder": "Partagez quelque chose avec la communauté Safir…",
+      "attach": "Ajouter un élément Safir",
+      "visibility": "Visibilité",
+      "public": "Tout le monde",
+      "followers": "Abonnés uniquement",
+      "publicDescription": "Visible par tout le monde.",
+      "followersDescription": "Visible uniquement par les personnes qui vous suivent.",
+      "publish": "Publier",
+      "created": "Publication créée.",
+      "removeAttachment": "Retirer l’élément joint",
+      "pickerTitle": "Ajouter à la publication",
+      "pickerDescription": "Choisissez une carte, un deck public ou votre collection publique.",
+      "searchCards": "Rechercher une carte…",
+      "loading": "Chargement…",
+      "collectionSummary": "{count, plural, =0 {Collection vide} one {# carte collectionnée} other {# cartes collectionnées}}",
+      "deckSummary": "{count, plural, one {# carte dans le deck} other {# cartes dans le deck}}",
+      "collectionHint": "Aperçu de votre progression",
+      "types": {
+        "card": "Carte",
+        "deck": "Deck",
+        "collection": "Collection"
+      },
+      "empty": {
+        "card": "Aucune carte ne correspond à cette recherche.",
+        "deck": "Vous n’avez pas encore de deck public publié.",
+        "collection": "Rendez votre collection publique pour pouvoir la partager."
+      },
+      "errors": {
+        "AUTH_REQUIRED": "Connectez-vous pour publier.",
+        "ATTACHMENT_UNAVAILABLE": "Cet élément n’est plus disponible ou public.",
+        "PROFILE_REQUIRED": "Créez et rendez votre profil public avant de publier.",
+        "INVALID_POST": "La publication n’a pas pu être créée. Vérifiez son contenu."
+      }
+    },
+    "posts": {
+      "card": "Carte Safir",
+      "deck": "Deck Safir",
+      "collection": "Collection Safir",
+      "deckCards": "{count, plural, one {# carte} other {# cartes}}",
+      "collectionCards": "{count, plural, =0 {Collection vide} one {# carte collectionnée} other {# cartes collectionnées}}",
+      "attachmentUnavailable": "Cet élément n’est plus public ou a été supprimé.",
+      "sharedAttachment": "a partagé un élément Safir",
+      "moreActions": "Plus d’actions",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer définitivement cette publication ?",
+      "readMore": "Lire la suite",
+      "showLess": "Réduire",
+      "share": "Partager",
+      "copied": "Lien copié",
+      "shareTitle": "Publication de {name} sur Safirdex",
+      "backToCommunity": "Retour à la communauté",
+      "metadata": {
+        "title": "Publication de {name} — Safirdex",
+        "privateTitle": "Publication privée — Safirdex",
+        "attachmentDescription": "Découvrez ce que {name} partage avec la communauté Safir."
+      }
+    },
     "search": {
       "label": "Rechercher un joueur",
       "placeholder": "Rechercher un @pseudo ou un joueur…",

@@ -2,7 +2,7 @@ import "server-only";
 
 import { FieldPath, Timestamp, type Query } from "firebase-admin/firestore";
 
-import type { CommunityActivityDocument } from "@/features/community/types";
+import type { CommunityFeedDocument } from "@/features/community/types";
 import { getFirebaseAdminFirestore } from "@/lib/firebase/admin";
 
 const PAGE_SIZE = 20;
@@ -42,7 +42,7 @@ async function execute(query: Query, cursor?: string, pageSize = PAGE_SIZE) {
   const items = docs.map((document) => ({
     id: document.id,
     ...document.data(),
-  })) as CommunityActivityDocument[];
+  })) as CommunityFeedDocument[];
   const last = docs.at(-1);
   return {
     items,
@@ -88,11 +88,16 @@ export const activitiesRepository = {
     );
   },
 
-  async byActor(actorId: string, includePrivate: boolean, cursor?: string, pageSize = PAGE_SIZE) {
+  async byActor(
+    actorId: string,
+    access: "owner" | "follower" | "public",
+    cursor?: string,
+    pageSize = PAGE_SIZE,
+  ) {
     let query: Query = this.collection().where("actorId", "==", actorId);
-    if (!includePrivate) {
+    if (access !== "owner") query = query.where("published", "==", true);
+    if (access === "public") {
       query = query
-        .where("published", "==", true)
         .where("visibility", "==", "public");
     }
     return execute(ordered(query), cursor, pageSize);

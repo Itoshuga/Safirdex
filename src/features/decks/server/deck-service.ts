@@ -7,6 +7,7 @@ import {
   removeActivitiesForEntity,
   setDeckActivityPublished,
 } from "@/features/community/server/activity-service";
+import { setPostAttachmentAvailability } from "@/features/community/server/post-service";
 import { ensurePublicProfileForUser } from "@/features/community/server/profile-service";
 import { validateDeck } from "@/features/decks/rules/validate-deck";
 import { SAFIR_STANDARD_RULESET } from "@/features/decks/rules/ruleset";
@@ -533,7 +534,10 @@ export async function saveDeck({
     }
   } else if (existing?.firstPublishedAt) {
     try {
-      await setDeckActivityPublished(userId, reference.id, false);
+      await Promise.all([
+        setDeckActivityPublished(userId, reference.id, false),
+        setPostAttachmentAvailability(`deck:${reference.id}`, false),
+      ]);
     } catch (error) {
       console.error("[decks] Community activity privacy update failed", error);
     }
@@ -557,6 +561,7 @@ export async function deleteDeck(userId: string, deckId: string) {
     await batch.commit();
   }
   await removeActivitiesForEntity(userId, `deck:${deckId}`);
+  await setPostAttachmentAvailability(`deck:${deckId}`, false);
 }
 
 export function deckToBuilderDraft(deck: DeckDocument): DeckBuilderDraft {

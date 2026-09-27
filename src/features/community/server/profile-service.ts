@@ -4,10 +4,12 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { unstable_cache } from "next/cache";
 
 import { COMMUNITY_CACHE_TAGS } from "@/features/community/server/cache-tags";
+import { mapPostFeedDocument, setActorPostsPublished, setPostAttachmentAvailability } from "@/features/community/server/post-service";
 import type {
   CommunityActivityDocument,
   CommunityActivityItem,
   CommunityConnectionItem,
+  CommunityFeedDocument,
   CommunityFeedPage,
   ProfileCollectionItem,
   ProfileDeckItem,
@@ -356,7 +358,13 @@ export async function updateProfilePrivacy(userId: string, input: unknown) {
   await profileRef.update({ visibility, updatedAt: FieldValue.serverTimestamp() });
   const updated = await publicProfilesRepository.getById(userId);
   if (!updated) throw new Error("PROFILE_NOT_FOUND");
-  await setActorActivitiesPublished(updated);
+  await Promise.all([
+    setActorActivitiesPublished(updated),
+    setActorPostsPublished(updated),
+    updated.visibility.collection === "private"
+      ? setPostAttachmentAvailability(`collection:${userId}`, false)
+      : Promise.resolve(),
+  ]);
   return updated;
 }
 
@@ -431,12 +439,15 @@ function mapActivity(
   };
 }
 
-export function mapActivityPage(
-  page: { items: CommunityActivityDocument[]; nextCursor?: string },
+export function mapFeedPage(
+  page: { items: CommunityFeedDocument[]; nextCursor?: string },
   locale: AppLocale,
+  viewerId: string | null,
 ): CommunityFeedPage {
   return {
-    items: page.items.map((item) => mapActivity(item, locale)),
+    items: page.items.map((item) => item.kind === "post"
+      ? { id: item.id, kind: "post" as const, post: mapPostFeedDocument(item, locale, viewerId) }
+      : { id: item.id, kind: "activity" as const, activity: mapActivity(item as CommunityActivityDocument, locale) }),
     ...(page.nextCursor ? { nextCursor: page.nextCursor } : {}),
   };
 }
@@ -539,14 +550,19 @@ export async function getProfileTabContent({
   tab,
   locale,
   owner,
+  viewerId,
+  canViewFollowers = false,
   cursor,
 }: {
   profile: PublicUserProfileDocument;
   tab: ProfileTab;
   locale: AppLocale;
   owner: boolean;
+  viewerId: string | null;
+  canViewFollowers?: boolean;
   cursor?: string;
 }): Promise<ProfileTabContent> {
+  const feedAccess = owner ? "owner" : canViewFollowers ? "follower" : "public";
   if (tab === "overview") {
     const decksPrivate = !owner && profile.visibility.decks === "private";
     const collectionPrivate = !owner && profile.visibility.collection === "private";
@@ -556,8 +572,8 @@ export async function getProfileTabContent({
       activityPrivate
         ? { items: [] }
         : activitiesRepository
-            .byActor(profile.id, owner, undefined, 3)
-            .then((page) => mapActivityPage(page, locale)),
+            .byActor(profile.id, feedAccess, undefined, 3)
+            .then((page) => mapFeedPage(page, locale, viewerId)),
     ]);
     return {
       tab,
@@ -582,6 +598,10 @@ export async function getProfileTabContent({
   return {
     tab,
     private: false,
-    feed: mapActivityPage(await activitiesRepository.byActor(profile.id, owner, cursor), locale),
+    feed: mapFeedPage(
+      await activitiesRepository.byActor(profile.id, feedAccess, cursor),
+      locale,
+      viewerId,
+    ),
   };
 }

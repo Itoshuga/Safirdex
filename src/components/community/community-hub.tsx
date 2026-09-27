@@ -5,12 +5,14 @@ import { CommunityDeckGallery } from "@/components/community/community-deck-gall
 import { CommunityFeed } from "@/components/community/community-feed";
 import { CommunityHeader } from "@/components/community/community-header";
 import { CommunityPeopleSuggestions } from "@/components/community/community-people-suggestions";
+import { CommunityPostComposer } from "@/components/community/community-post-composer";
 import { PublicHeader } from "@/components/layout/public-header";
 import { Button } from "@/components/ui/button";
 import type {
   CommunityDeckItem,
   CommunityFeedPage,
   CommunityUserResult,
+  ActivityActorSnapshot,
 } from "@/features/community/types";
 import { Link } from "@/i18n/navigation";
 
@@ -69,6 +71,7 @@ export function CommunityHub({
   feed,
   signedIn,
   viewerId,
+  viewer,
   locale,
 }: {
   mode: "discover" | "following";
@@ -77,6 +80,7 @@ export function CommunityHub({
   feed: CommunityFeedPage;
   signedIn: boolean;
   viewerId: string | null;
+  viewer: ActivityActorSnapshot | null;
   locale: string;
 }) {
   const t = useTranslations("Community.feed");
@@ -108,11 +112,13 @@ export function CommunityHub({
                 <Compass className="size-5 text-safir" aria-hidden="true" />
               </div>
 
+              {signedIn && viewer ? <CommunityPostComposer viewer={viewer} locale={locale} /> : null}
+
               {mode === "following" && !signedIn ? (
                 <SignedOutFollowing />
               ) : feed.items.length ? (
                 <CommunityFeed
-                  key={mode}
+                  key={`${mode}:${feed.items.map((item) => item.id).join(",")}`}
                   initialFeed={feed}
                   mode={mode}
                   locale={locale}

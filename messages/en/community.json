@@ -21,6 +21,65 @@
       "following": "Following",
       "failed": "The follow status could not be changed. Please try again."
     },
+    "composer": {
+      "title": "Create a post",
+      "placeholder": "Share something with the Safir community…",
+      "attach": "Add a Safir item",
+      "visibility": "Visibility",
+      "public": "Everyone",
+      "followers": "Followers only",
+      "publicDescription": "Visible to everyone.",
+      "followersDescription": "Visible only to people who follow you.",
+      "publish": "Post",
+      "created": "Post created.",
+      "removeAttachment": "Remove attachment",
+      "pickerTitle": "Add to your post",
+      "pickerDescription": "Choose a card, one of your public decks, or your public collection.",
+      "searchCards": "Search cards…",
+      "loading": "Loading…",
+      "collectionSummary": "{count, plural, =0 {Empty collection} one {# collected card} other {# collected cards}}",
+      "deckSummary": "{count, plural, one {# card in deck} other {# cards in deck}}",
+      "collectionHint": "Preview your progress",
+      "types": {
+        "card": "Card",
+        "deck": "Deck",
+        "collection": "Collection"
+      },
+      "empty": {
+        "card": "No card matches this search.",
+        "deck": "You do not have a published public deck yet.",
+        "collection": "Make your collection public before sharing it."
+      },
+      "errors": {
+        "AUTH_REQUIRED": "Sign in to post.",
+        "ATTACHMENT_UNAVAILABLE": "This item is no longer available or public.",
+        "PROFILE_REQUIRED": "Create a public profile before posting.",
+        "INVALID_POST": "The post could not be created. Check its content."
+      }
+    },
+    "posts": {
+      "card": "Safir card",
+      "deck": "Safir deck",
+      "collection": "Safir collection",
+      "deckCards": "{count, plural, one {# card} other {# cards}}",
+      "collectionCards": "{count, plural, =0 {Empty collection} one {# collected card} other {# collected cards}}",
+      "attachmentUnavailable": "This item is no longer public or has been deleted.",
+      "sharedAttachment": "shared a Safir item",
+      "moreActions": "More actions",
+      "delete": "Delete",
+      "deleteConfirm": "Permanently delete this post?",
+      "readMore": "Read more",
+      "showLess": "Show less",
+      "share": "Share",
+      "copied": "Link copied",
+      "shareTitle": "Post by {name} on Safirdex",
+      "backToCommunity": "Back to community",
+      "metadata": {
+        "title": "Post by {name} — Safirdex",
+        "privateTitle": "Private post — Safirdex",
+        "attachmentDescription": "See what {name} shared with the Safir community."
+      }
+    },
     "search": {
       "label": "Search players",
       "placeholder": "Search an @username or player…",

@@ -59,10 +59,18 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   if (profile.matchedAlias) return redirect({ href: `/user/@${profile.view.username}`, locale });
   const tab = parseProfileTab(query.tab);
   const cursor = Array.isArray(query.cursor) ? query.cursor[0] : query.cursor;
-  const [isFollowing, content] = await Promise.all([
-    session ? followsRepository.isFollowing(session.uid, profile.internal.id) : false,
-    getProfileTabContent({ profile: profile.internal, tab, locale, owner: false, cursor }),
-  ]);
+  const isFollowing = session
+    ? await followsRepository.isFollowing(session.uid, profile.internal.id)
+    : false;
+  const content = await getProfileTabContent({
+    profile: profile.internal,
+    tab,
+    locale,
+    owner: false,
+    viewerId: session?.uid ?? null,
+    canViewFollowers: isFollowing,
+    cursor,
+  });
   const connectionKind: "followers" | "following" | undefined =
     query.connections === "followers" || query.connections === "following"
     ? query.connections

@@ -54,6 +54,7 @@ export default async function AccountPage({
     tab,
     locale,
     owner: true,
+    viewerId: session.uid,
     cursor,
   });
   const connectionKind: "followers" | "following" | undefined =
