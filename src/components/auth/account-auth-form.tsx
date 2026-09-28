@@ -7,7 +7,6 @@ import {
   linkWithCredential,
   onAuthStateChanged,
   reload,
-  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -56,10 +55,16 @@ type AuthErrorKey =
   | "errors.popupBlocked"
   | "errors.popupClosed"
   | "errors.providerDisabled"
+  | "errors.verificationEmail"
+  | "errors.verificationRateLimited"
   | "errors.unavailable"
   | "errors.unexpected";
 
 function getAuthMessage(error: unknown, translate: (key: AuthErrorKey) => string) {
+  if (error instanceof VerificationEmailError) {
+    return translate(error.translationKey);
+  }
+
   if (error instanceof FirebaseError) {
     switch (error.code) {
       case "auth/email-already-in-use":
@@ -90,6 +95,32 @@ function getAuthMessage(error: unknown, translate: (key: AuthErrorKey) => string
   }
 
   return error instanceof Error ? error.message : translate("errors.unexpected");
+}
+
+class VerificationEmailError extends Error {
+  constructor(public readonly translationKey: AuthErrorKey) {
+    super(translationKey);
+  }
+}
+
+async function requestVerificationEmail(user: User, locale: string) {
+  const idToken = await user.getIdToken();
+  const response = await fetch("/api/auth/verification-email", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${idToken}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ locale }),
+  });
+
+  if (!response.ok) {
+    throw new VerificationEmailError(
+      response.status === 429
+        ? "errors.verificationRateLimited"
+        : "errors.verificationEmail",
+    );
+  }
 }
 
 function GoogleMark() {
@@ -308,8 +339,8 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
       setAccountEmail(credential.user.email ?? email);
 
       if (mode === "signup") {
-        await sendEmailVerification(credential.user);
         setSignupStep("verification");
+        await requestVerificationEmail(credential.user, locale);
         setNotice(t("notices.verificationSent"));
       } else if (!credential.user.emailVerified) {
         setMode("signup");
@@ -373,7 +404,7 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
     setNotice("");
 
     try {
-      await sendEmailVerification(user);
+      await requestVerificationEmail(user, locale);
       setNotice(t("notices.verificationResent"));
     } catch (authError) {
       setError(getAuthMessage(authError, (key) => t(key)));
