@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { AdminEntryTransition } from "@/components/admin/admin-entry-transition";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getMaintenanceConfig } from "@/features/maintenance/server/maintenance-service";
 import { redirect } from "@/i18n/navigation";
 import { getAdminSession } from "@/lib/auth/admin-session";
 import { resolveLocale } from "@/lib/i18n/locales";
@@ -14,10 +15,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default async function AdminLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
-  const [routeParams, session, t] = await Promise.all([
+  const [routeParams, session, t, maintenance] = await Promise.all([
     params,
     getAdminSession(),
     getTranslations("Admin.shell"),
+    getMaintenanceConfig(),
   ]);
   const locale = resolveLocale(routeParams.locale);
 
@@ -27,7 +29,10 @@ export default async function AdminLayout({ children, params }: { children: Reac
 
   return (
     <AdminEntryTransition label={t("loading")}>
-      <AdminShell email={session.email ?? session.uid}>
+      <AdminShell
+        email={session.email ?? session.uid}
+        maintenanceActive={maintenance.enabled}
+      >
         {children}
       </AdminShell>
     </AdminEntryTransition>

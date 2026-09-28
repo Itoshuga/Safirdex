@@ -207,6 +207,7 @@
       },
       "errors": {
         "AUTH_REQUIRED": "Connectez-vous pour enregistrer un deck.",
+        "APPLICATION_MAINTENANCE": "Safirdex est actuellement en maintenance. Les modifications sont temporairement suspendues.",
         "PROFILE_REQUIRED": "Créez votre profil communautaire avant d’enregistrer un deck.",
         "DECK_NOT_LEGAL": "Ce deck doit être légal avant sa publication.",
         "CARD_NOT_FOUND": "Une carte sélectionnée n’existe plus.",

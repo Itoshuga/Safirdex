@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag, updateTag } from "next/cache";
 import { COMMUNITY_CACHE_TAGS } from "@/features/community/server/cache-tags";
 import type { DeckActionState } from "@/features/decks/action-state";
 import type { DeckCatalogQuery } from "@/features/decks/types";
+import { assertApplicationAvailable } from "@/features/maintenance/server/maintenance-service";
 import {
   deleteDeck,
   getBuilderCatalogPage,
@@ -20,6 +21,7 @@ export async function saveDeckAction(
   const session = await getUserSession();
   if (!session) return { status: "error", message: "AUTH_REQUIRED" };
   try {
+    await assertApplicationAvailable({ session });
     const payload = saveDeckPayloadSchema.parse({
       draft: JSON.parse(String(formData.get("payload") ?? "{}")),
       intent: String(formData.get("intent") ?? "draft"),
@@ -39,6 +41,7 @@ export async function saveDeckAction(
 export async function deleteDeckAction(deckId: string) {
   const session = await getUserSession();
   if (!session) throw new Error("AUTH_REQUIRED");
+  await assertApplicationAvailable({ session });
   await deleteDeck(session.uid, deckId);
   revalidatePath("/[locale]/decks", "page");
   revalidateTag(COMMUNITY_CACHE_TAGS.profiles, "max");

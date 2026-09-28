@@ -1,0 +1,22 @@
+{
+  "Maintenance": {
+    "screen": {
+      "eyebrow": "Maintenance underway",
+      "retry": "Try again",
+      "retrying": "Checking…",
+      "retryHelp": "There is no automatic polling. Check again whenever you are ready.",
+      "estimatedReturn": "Estimated return",
+      "countdown": "Estimated return in",
+      "adminAccess": "Administration access",
+      "footer": "Safirdex · The community Codex for Safir"
+    },
+    "adminBanner": {
+      "title": "Maintenance mode is active",
+      "description": "The website is currently unavailable to regular users.",
+      "system": "Open System",
+      "disable": "Disable",
+      "disabling": "Disabling…",
+      "error": "Maintenance mode could not be disabled."
+    }
+  }
+}

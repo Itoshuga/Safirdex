@@ -66,6 +66,7 @@ export function ProfileEditor({ profile, userId }: { profile: PublicProfileView;
   const dirty = JSON.stringify(snapshot) !== JSON.stringify(baseline);
   useUnsavedChanges(dirty && !pending, t("leaveWarning"));
   const errorKey = state.code === "AUTH_REQUIRED" ||
+    state.code === "APPLICATION_MAINTENANCE" ||
     state.code === "USERNAME_TAKEN" ||
     state.code === "INVALID_ASSET_PATH"
     ? state.code

@@ -310,7 +310,7 @@ export function DeckBuilder({
             ))}
           </ol>
 
-          {state.status === "error" ? <div role="alert" className="m-5 flex gap-2 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive"><AlertCircle className="size-4 shrink-0" />{state.message && ["AUTH_REQUIRED", "PROFILE_REQUIRED", "DECK_NOT_LEGAL", "CARD_NOT_FOUND", "FORBIDDEN", "DECK_SAVE_FAILED"].includes(state.message) ? t(`errors.${state.message}` as "errors.AUTH_REQUIRED") : t("errors.fallback")}</div> : null}
+          {state.status === "error" ? <div role="alert" className="m-5 flex gap-2 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive"><AlertCircle className="size-4 shrink-0" />{state.message && ["AUTH_REQUIRED", "APPLICATION_MAINTENANCE", "PROFILE_REQUIRED", "DECK_NOT_LEGAL", "CARD_NOT_FOUND", "FORBIDDEN", "DECK_SAVE_FAILED"].includes(state.message) ? t(`errors.${state.message}` as "errors.AUTH_REQUIRED") : t("errors.fallback")}</div> : null}
 
           {step === 0 ? (
             <section className="mx-auto max-w-2xl px-5 py-9 sm:px-8 sm:py-12">
@@ -361,7 +361,7 @@ export function DeckBuilder({
             <div className="mt-4 grid grid-cols-2 gap-4 border-t pt-3 lg:hidden"><ProgressMetric compact label={t("deckProgressLabel")} current={result.cardCount} target={deckTarget} complete={result.cardCount >= SAFIR_STANDARD_RULESET.deckSize.min && result.cardCount <= SAFIR_STANDARD_RULESET.deckSize.max} />{commander ? <ProgressMetric compact label={t("commanderProgressShort")} current={result.compatibleCombatantsCount} target={SAFIR_STANDARD_RULESET.commander.minimumFactionCombatants} complete={commanderComplete} /> : <div />}</div>
           </header>
 
-          {state.status === "error" ? <div role="alert" className="mt-4 flex gap-2 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive"><AlertCircle className="size-4 shrink-0" />{state.message && ["AUTH_REQUIRED", "PROFILE_REQUIRED", "DECK_NOT_LEGAL", "CARD_NOT_FOUND", "FORBIDDEN", "DECK_SAVE_FAILED"].includes(state.message) ? t(`errors.${state.message}` as "errors.AUTH_REQUIRED") : t("errors.fallback")}</div> : null}
+          {state.status === "error" ? <div role="alert" className="mt-4 flex gap-2 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive"><AlertCircle className="size-4 shrink-0" />{state.message && ["AUTH_REQUIRED", "APPLICATION_MAINTENANCE", "PROFILE_REQUIRED", "DECK_NOT_LEGAL", "CARD_NOT_FOUND", "FORBIDDEN", "DECK_SAVE_FAILED"].includes(state.message) ? t(`errors.${state.message}` as "errors.AUTH_REQUIRED") : t("errors.fallback")}</div> : null}
 
           <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 xl:hidden"><button type="button" className={cn("h-10 rounded-lg text-xs font-medium", mobilePane === "browse" ? "bg-card shadow-sm" : "text-muted-foreground")} onClick={() => setMobilePane("browse")}>{t("cardsTab")}</button><button type="button" className={cn("h-10 rounded-lg text-xs font-medium", mobilePane === "deck" ? "bg-card shadow-sm" : "text-muted-foreground")} onClick={() => setMobilePane("deck")}>{t("myDeckTab", { count: result.cardCount })}</button></div>
 

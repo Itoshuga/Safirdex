@@ -8,6 +8,7 @@ import {
   Diamond,
   Layers3,
   Newspaper,
+  ServerCog,
   Settings,
   Shapes,
   Sparkles,
@@ -38,7 +39,10 @@ const sections = [
   },
   {
     label: "system",
-    items: [{ href: "/admin/settings", label: "settings", icon: Settings }],
+    items: [
+      { href: "/admin/settings", label: "settings", icon: Settings },
+      { href: "/admin/system", label: "system", icon: ServerCog },
+    ],
   },
 ] as const;
 

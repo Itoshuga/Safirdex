@@ -52,6 +52,7 @@
       },
       "errors": {
         "AUTH_REQUIRED": "Sign in to post.",
+        "APPLICATION_MAINTENANCE": "Safirdex is currently under maintenance. Please try again later.",
         "ATTACHMENT_UNAVAILABLE": "This item is no longer available or public.",
         "PROFILE_REQUIRED": "Create a public profile before posting.",
         "INVALID_POST": "The post could not be created. Check its content."

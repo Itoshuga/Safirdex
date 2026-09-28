@@ -236,6 +236,66 @@
         "production": "Production"
       }
     },
+    "system": {
+      "eyebrow": "Administration",
+      "title": "System",
+      "description": "Manage Safirdex's global availability and operational application features.",
+      "maintenance": {
+        "eyebrow": "Application availability",
+        "title": "Maintenance mode",
+        "description": "Temporarily suspend public access during an update or intervention. Administrators retain access.",
+        "status": {
+          "active": "ACTIVE",
+          "inactive": "INACTIVE"
+        },
+        "toggle": {
+          "label": "Enable maintenance mode",
+          "description": "When enabled, Safirdex becomes unavailable to regular users. Administrators and sign-in remain available."
+        },
+        "content": {
+          "title": "Maintenance message",
+          "description": "Customize the content shown to visitors in each language.",
+          "languageLabel": "Maintenance message language",
+          "titleLabel": "Title",
+          "messageLabel": "Message"
+        },
+        "estimate": {
+          "title": "Estimated return",
+          "description": "Add an optional date and display an informative countdown.",
+          "label": "Date and time",
+          "show": "Show to visitors",
+          "help": "Maintenance mode will not be disabled automatically when the countdown reaches zero."
+        },
+        "actions": {
+          "save": "Save changes",
+          "saving": "Saving…"
+        },
+        "feedback": {
+          "saved": "Configuration saved.",
+          "error": "The configuration could not be saved."
+        },
+        "summary": {
+          "activeTitle": "Safirdex is under maintenance",
+          "activeDescription": "The public application is blocked. You can continue working from the administration area.",
+          "readyTitle": "Ready for an intervention",
+          "readyDescription": "Visitors are currently using Safirdex normally.",
+          "started": "Enabled on",
+          "activatedBy": "Enabled by",
+          "justNow": "Just now",
+          "unknown": "Administrator",
+          "adminAccess": "Custom Claims protect the administrator bypass.",
+          "cache": "The status is cached and invalidated after every change.",
+          "login": "Sign-in stays available during maintenance."
+        },
+        "confirmation": {
+          "title": "Enable maintenance mode?",
+          "description": "Users will be unable to access Safirdex until it is disabled. Your administrator access will remain available.",
+          "cancel": "Cancel",
+          "confirm": "Enable maintenance",
+          "close": "Close"
+        }
+      }
+    },
     "dialogs": {
       "deleteLabel": "Delete {name}",
       "deleteTitle": "Delete “{name}”?",

@@ -45,6 +45,10 @@ async function main() {
 
   assert.match(firestoreRules, /match \/\{document=\*\*\}/);
   assert.match(storageRules, /match \/\{allPaths=\*\*\}/);
+  assert.match(
+    firestoreRules,
+    /match \/appConfig\/\{configId\}\s*\{\s*allow read, write: if false;/,
+  );
 
   console.info("Firebase configuration checks passed.");
 }

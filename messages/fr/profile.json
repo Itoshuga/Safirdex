@@ -101,6 +101,7 @@
       "saved": "Profil mis à jour.",
       "errors": {
         "AUTH_REQUIRED": "Vous devez être connecté.",
+        "APPLICATION_MAINTENANCE": "Safirdex est actuellement en maintenance. Les modifications sont temporairement suspendues.",
         "USERNAME_TAKEN": "Ce nom d’utilisateur est déjà utilisé.",
         "INVALID_ASSET_PATH": "Le fichier sélectionné n’est pas valide.",
         "INVALID_PROFILE": "Vérifiez les informations saisies."
@@ -150,6 +151,7 @@
       "continue": "Créer mon profil",
       "errors": {
         "AUTH_REQUIRED": "Vous devez être connecté.",
+        "APPLICATION_MAINTENANCE": "Safirdex est actuellement en maintenance. Réessayez plus tard.",
         "USERNAME_TAKEN": "Ce nom d’utilisateur est déjà utilisé.",
         "INVALID_PROFILE": "Vérifiez les informations saisies."
       }

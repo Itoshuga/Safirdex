@@ -15,6 +15,7 @@ export const FIRESTORE_COLLECTIONS = {
   pseudonyms: "pseudonyms",
   displayNames: "displayNames",
   patchNotes: "patchNotes",
+  appConfig: "appConfig",
 } as const;
 
 export type FirestoreCollectionName =

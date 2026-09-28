@@ -101,6 +101,7 @@
       "saved": "Profile updated.",
       "errors": {
         "AUTH_REQUIRED": "You must be signed in.",
+        "APPLICATION_MAINTENANCE": "Safirdex is currently under maintenance. Changes are temporarily paused.",
         "USERNAME_TAKEN": "This username is already taken.",
         "INVALID_ASSET_PATH": "The selected file is not valid.",
         "INVALID_PROFILE": "Check the information you entered."
@@ -150,6 +151,7 @@
       "continue": "Create my profile",
       "errors": {
         "AUTH_REQUIRED": "You must be signed in.",
+        "APPLICATION_MAINTENANCE": "Safirdex is currently under maintenance. Please try again later.",
         "USERNAME_TAKEN": "This username is already taken.",
         "INVALID_PROFILE": "Check the information you entered."
       }

@@ -207,6 +207,7 @@
       },
       "errors": {
         "AUTH_REQUIRED": "Sign in to save a deck.",
+        "APPLICATION_MAINTENANCE": "Safirdex is currently under maintenance. Changes are temporarily paused.",
         "PROFILE_REQUIRED": "Create your community profile before saving a deck.",
         "DECK_NOT_LEGAL": "This deck must be legal before publication.",
         "CARD_NOT_FOUND": "A selected card no longer exists.",

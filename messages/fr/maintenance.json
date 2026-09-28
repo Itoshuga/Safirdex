@@ -1,0 +1,22 @@
+{
+  "Maintenance": {
+    "screen": {
+      "eyebrow": "Intervention en cours",
+      "retry": "Réessayer",
+      "retrying": "Vérification…",
+      "retryHelp": "Aucune vérification automatique : réessayez lorsque vous le souhaitez.",
+      "estimatedReturn": "Retour estimé",
+      "countdown": "Retour estimé dans",
+      "adminAccess": "Accès administration",
+      "footer": "Safirdex · Le Codex communautaire Safir"
+    },
+    "adminBanner": {
+      "title": "Mode maintenance actif",
+      "description": "Le site est actuellement inaccessible aux utilisateurs.",
+      "system": "Ouvrir la page Système",
+      "disable": "Désactiver",
+      "disabling": "Désactivation…",
+      "error": "La maintenance n’a pas pu être désactivée."
+    }
+  }
+}

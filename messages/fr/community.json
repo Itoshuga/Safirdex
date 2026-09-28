@@ -52,6 +52,7 @@
       },
       "errors": {
         "AUTH_REQUIRED": "Connectez-vous pour publier.",
+        "APPLICATION_MAINTENANCE": "Safirdex est actuellement en maintenance. Réessayez plus tard.",
         "ATTACHMENT_UNAVAILABLE": "Cet élément n’est plus disponible ou public.",
         "PROFILE_REQUIRED": "Créez et rendez votre profil public avant de publier.",
         "INVALID_POST": "La publication n’a pas pu être créée. Vérifiez son contenu."

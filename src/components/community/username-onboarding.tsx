@@ -22,7 +22,9 @@ export function UsernameOnboarding({ suggestedName }: { suggestedName: string })
     available: boolean;
   } | null>(null);
   const [, startAvailabilityTransition] = useTransition();
-  const errorKey = state.code === "AUTH_REQUIRED" || state.code === "USERNAME_TAKEN"
+  const errorKey = state.code === "AUTH_REQUIRED" ||
+    state.code === "APPLICATION_MAINTENANCE" ||
+    state.code === "USERNAME_TAKEN"
     ? state.code
     : "INVALID_PROFILE";
   const validUsername = /^[a-zA-Z0-9._-]{3,24}$/.test(username);

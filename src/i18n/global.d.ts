@@ -11,6 +11,7 @@ import type profile from "../../messages/fr/profile.json";
 import type settings from "../../messages/fr/settings.json";
 import type decks from "../../messages/fr/decks.json";
 import type patchNotes from "../../messages/fr/patch-notes.json";
+import type maintenance from "../../messages/fr/maintenance.json";
 import type { formats } from "@/i18n/formats";
 import type { AppLocale } from "@/lib/i18n/locales";
 
@@ -26,7 +27,8 @@ type AppMessages = typeof common &
   typeof profile &
   typeof settings &
   typeof decks &
-  typeof patchNotes;
+  typeof patchNotes &
+  typeof maintenance;
 
 declare module "next-intl" {
   interface AppConfig {

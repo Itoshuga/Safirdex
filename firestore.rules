@@ -78,6 +78,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Application-wide operational settings are read and changed exclusively
+    // through the trusted server layer after validating the admin claim.
+    match /appConfig/{configId} {
+      allow read, write: if false;
+    }
+
     match /users/{userId} {
       allow read: if isOwner(userId);
       allow write: if false;

@@ -41,6 +41,7 @@
       "deleteProviderUnsupported": "Self-service deletion is not yet available for this sign-in method because its secure reauthentication flow is not supported.",
       "deleteErrors": {
         "AUTH_REQUIRED": "Sign in again and verify your password before retrying.",
+        "APPLICATION_MAINTENANCE": "Account deletion is temporarily paused during maintenance.",
         "RECENT_LOGIN_REQUIRED": "A recent sign-in is required. Sign in again, then retry.",
         "CONFIRMATION_MISMATCH": "The confirmation does not match your username.",
         "DELETE_FAILED": "Deletion could not be completed. Your access remains active; try again later."

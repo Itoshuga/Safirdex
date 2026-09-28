@@ -3,6 +3,10 @@
 import { revalidatePath, updateTag } from "next/cache";
 
 import type { CommunityActionState } from "@/features/community/action-state";
+import {
+  assertApplicationAvailable,
+  MAINTENANCE_UNAVAILABLE_CODE,
+} from "@/features/maintenance/server/maintenance-service";
 import { COMMUNITY_CACHE_TAGS } from "@/features/community/server/cache-tags";
 import {
   getDiscoverFeed,
@@ -51,12 +55,26 @@ function isOwnedStorageAsset(urlValue: string, storagePath: string) {
   }
 }
 
+async function userMutationAllowed(
+  session: NonNullable<Awaited<ReturnType<typeof getUserSession>>>,
+) {
+  try {
+    await assertApplicationAvailable({ session });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function updateProfileAction(
   _previous: CommunityActionState,
   formData: FormData,
 ): Promise<CommunityActionState> {
   const session = await getUserSession();
   if (!session) return { status: "error", code: "AUTH_REQUIRED" };
+  if (!(await userMutationAllowed(session))) {
+    return { status: "error", code: MAINTENANCE_UNAVAILABLE_CODE };
+  }
   const avatarStoragePath = String(formData.get("avatarStoragePath") ?? "");
   const bannerStoragePath = String(formData.get("bannerStoragePath") ?? "");
   const avatarUrl = String(formData.get("avatarUrl") ?? "");
@@ -98,6 +116,9 @@ export async function createCommunityProfileAction(
 ): Promise<CommunityActionState> {
   const session = await getUserSession();
   if (!session) return { status: "error", code: "AUTH_REQUIRED" };
+  if (!(await userMutationAllowed(session))) {
+    return { status: "error", code: MAINTENANCE_UNAVAILABLE_CODE };
+  }
   try {
     const profile = await createCommunityProfile(session.uid, {
       username: String(formData.get("username") ?? ""),
@@ -122,6 +143,9 @@ export async function updatePrivacyAction(
 ): Promise<CommunityActionState> {
   const session = await getUserSession();
   if (!session) return { status: "error", code: "AUTH_REQUIRED" };
+  if (!(await userMutationAllowed(session))) {
+    return { status: "error", code: MAINTENANCE_UNAVAILABLE_CODE };
+  }
   try {
     const profile = await updateProfilePrivacy(session.uid, {
       publicProfile: formData.get("publicProfile") === "on",
@@ -143,6 +167,9 @@ export async function setFollowStateAction(input: {
 }) {
   const session = await getUserSession();
   if (!session) return { ok: false, code: "AUTH_REQUIRED" } as const;
+  if (!(await userMutationAllowed(session))) {
+    return { ok: false, code: MAINTENANCE_UNAVAILABLE_CODE } as const;
+  }
   const resolved = await resolvePublicProfile(input.username);
   if (!resolved || !resolved.profile.visibility.publicProfile) {
     return { ok: false, code: "PROFILE_NOT_FOUND" } as const;
@@ -219,6 +246,9 @@ export async function createCommunityPostAction(input: {
 }) {
   const session = await getUserSession();
   if (!session) return { ok: false, code: "AUTH_REQUIRED" } as const;
+  if (!(await userMutationAllowed(session))) {
+    return { ok: false, code: MAINTENANCE_UNAVAILABLE_CODE } as const;
+  }
   try {
     const post = await createCommunityPost(session.uid, input, resolveLocale(input.locale));
     updateTag(COMMUNITY_CACHE_TAGS.discover);
@@ -240,6 +270,9 @@ export async function createCommunityPostAction(input: {
 export async function deleteCommunityPostAction(postId: string) {
   const session = await getUserSession();
   if (!session) return { ok: false, code: "AUTH_REQUIRED" } as const;
+  if (!(await userMutationAllowed(session))) {
+    return { ok: false, code: MAINTENANCE_UNAVAILABLE_CODE } as const;
+  }
   try {
     await deleteCommunityPost(session.uid, postId);
     updateTag(COMMUNITY_CACHE_TAGS.discover);

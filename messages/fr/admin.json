@@ -238,6 +238,66 @@
         "production": "Production"
       }
     },
+    "system": {
+      "eyebrow": "Administration",
+      "title": "Système",
+      "description": "Gérez la disponibilité globale de Safirdex et les fonctions opérationnelles de l’application.",
+      "maintenance": {
+        "eyebrow": "Disponibilité de l’application",
+        "title": "Mode maintenance",
+        "description": "Suspendez temporairement l’accès public pendant une mise à jour ou une intervention. Les administrateurs conservent leur accès.",
+        "status": {
+          "active": "ACTIF",
+          "inactive": "INACTIF"
+        },
+        "toggle": {
+          "label": "Activer le mode maintenance",
+          "description": "Lorsqu’il est activé, Safirdex devient inaccessible aux utilisateurs ordinaires. Les administrateurs et la connexion restent disponibles."
+        },
+        "content": {
+          "title": "Message de maintenance",
+          "description": "Personnalisez le contenu affiché aux visiteurs dans chaque langue.",
+          "languageLabel": "Langue du message de maintenance",
+          "titleLabel": "Titre",
+          "messageLabel": "Message"
+        },
+        "estimate": {
+          "title": "Retour estimé",
+          "description": "Ajoutez une date facultative et affichez un compte à rebours informatif.",
+          "label": "Date et heure",
+          "show": "Afficher aux visiteurs",
+          "help": "Le mode maintenance ne sera pas désactivé automatiquement lorsque le compteur atteindra zéro."
+        },
+        "actions": {
+          "save": "Enregistrer les modifications",
+          "saving": "Enregistrement…"
+        },
+        "feedback": {
+          "saved": "Configuration enregistrée.",
+          "error": "La configuration n’a pas pu être enregistrée."
+        },
+        "summary": {
+          "activeTitle": "Safirdex est en maintenance",
+          "activeDescription": "L’application publique est bloquée. Vous pouvez continuer votre intervention depuis l’administration.",
+          "readyTitle": "Prêt en cas d’intervention",
+          "readyDescription": "Les visiteurs utilisent actuellement Safirdex normalement.",
+          "started": "Activée le",
+          "activatedBy": "Activée par",
+          "justNow": "À l’instant",
+          "unknown": "Administrateur",
+          "adminAccess": "Les Custom Claims protègent le bypass administrateur.",
+          "cache": "Le statut est mis en cache et invalidé à chaque changement.",
+          "login": "La connexion reste accessible pendant une maintenance."
+        },
+        "confirmation": {
+          "title": "Activer le mode maintenance ?",
+          "description": "Les utilisateurs ne pourront plus accéder à Safirdex jusqu’à sa désactivation. Votre accès administrateur restera disponible.",
+          "cancel": "Annuler",
+          "confirm": "Activer la maintenance",
+          "close": "Fermer"
+        }
+      }
+    },
     "dialogs": {
       "deleteLabel": "Supprimer {name}",
       "deleteTitle": "Supprimer « {name} » ?",

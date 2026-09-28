@@ -9,6 +9,7 @@ import { AdminNavigation } from "@/components/admin/admin-navigation";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { MaintenanceAdminBanner } from "@/features/maintenance/components/maintenance-admin-banner";
 import {
   Sheet,
   SheetContent,
@@ -22,9 +23,11 @@ import { useRouter } from "@/i18n/navigation";
 export function AdminShell({
   children,
   email,
+  maintenanceActive,
 }: {
   children: React.ReactNode;
   email: string;
+  maintenanceActive: boolean;
 }) {
   const t = useTranslations("Admin.shell");
   const router = useRouter();
@@ -44,7 +47,8 @@ export function AdminShell({
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r md:block">
         <AdminNavigation />
       </aside>
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b bg-background/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+      {maintenanceActive ? <MaintenanceAdminBanner /> : null}
+      <header className={`sticky ${maintenanceActive ? "top-[3.3rem]" : "top-0"} z-20 flex h-16 items-center justify-between gap-4 border-b bg-background/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8`}>
         <div className="flex min-w-0 items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger render={<Button variant="outline" size="icon" className="md:hidden" />}>
