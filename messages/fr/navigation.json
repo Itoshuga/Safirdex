@@ -17,6 +17,7 @@
     "register": "Créer un compte",
     "logout": "Déconnexion",
     "admin": "Administration",
+    "adminLoading": "Chargement de l’administration",
     "language": "Langue",
     "changeLanguage": "Changer de langue",
     "openMenu": "Ouvrir le menu",

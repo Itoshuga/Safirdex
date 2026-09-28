@@ -63,6 +63,7 @@ export function SiteHeader({
             username={user.username}
             email={user.email}
             avatarUrl={user.avatarUrl}
+            isAdmin={user.isAdmin}
           />
         ) : (
           <Link

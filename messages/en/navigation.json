@@ -17,6 +17,7 @@
     "register": "Create account",
     "logout": "Sign out",
     "admin": "Administration",
+    "adminLoading": "Loading administration",
     "language": "Language",
     "changeLanguage": "Change language",
     "openMenu": "Open menu",

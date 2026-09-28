@@ -177,6 +177,19 @@
   }
 }
 
+@keyframes admin-loading-slide {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(210%);
+  }
+}
+
+.admin-loading-bar {
+  animation: admin-loading-slide 0.85s ease-in-out infinite;
+}
+
 .card-drift {
   animation: card-drift 7s ease-in-out infinite;
 }

@@ -27,6 +27,7 @@
       "patch-notes": "Actualités",
       "patchNotes": "Actualités",
       "settings": "Paramètres",
+      "backToSite": "Retour au site",
       "new": "Nouveau",
       "edit": "Modifier",
       "admin": "Admin"
@@ -209,10 +210,33 @@
       "editDescription": "La clé technique reste stable tandis que les libellés et définitions sont traduits."
     },
     "settings": {
+      "eyebrow": "Administration",
       "title": "Paramètres",
-      "description": "La configuration du système sera ajoutée à mesure que l’administration Safir évoluera.",
-      "emptyTitle": "Les paramètres arriveront plus tard",
-      "emptyDescription": "Aucune configuration n’est exposée dans cette première version de l’administration."
+      "description": "Personnalisez votre espace d’administration et retrouvez les accès essentiels de Safirdex.",
+      "appearance": {
+        "title": "Apparence et langue",
+        "description": "Adaptez l’interface d’administration à votre façon de travailler."
+      },
+      "website": {
+        "title": "Voir le site public",
+        "description": "Quittez l’administration et vérifiez immédiatement le rendu visible par les visiteurs.",
+        "action": "Retourner à l’accueil"
+      },
+      "account": {
+        "title": "Compte et sécurité",
+        "description": "Gérez votre mot de passe et les accès liés à votre compte administrateur.",
+        "action": "Ouvrir les paramètres de sécurité"
+      },
+      "configuration": {
+        "eyebrow": "Lecture seule",
+        "title": "Configuration active",
+        "description": "Les principaux services utilisés par cette installation.",
+        "languages": "Langues",
+        "data": "Données et médias",
+        "environment": "Environnement",
+        "development": "Développement",
+        "production": "Production"
+      }
     },
     "dialogs": {
       "deleteLabel": "Supprimer {name}",

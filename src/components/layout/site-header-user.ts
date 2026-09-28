@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
+import { hasAdminClaim } from "@/lib/auth/claims";
 import { getUserSession } from "@/lib/auth/user-session";
 import { publicProfilesRepository } from "@/repositories/public-profiles.repository";
 
@@ -10,6 +11,7 @@ export interface SiteHeaderUser {
   username?: string;
   email?: string;
   avatarUrl?: string;
+  isAdmin: boolean;
 }
 
 export const getSiteHeaderUser = cache(
@@ -20,6 +22,7 @@ export const getSiteHeaderUser = cache(
     const profile = await publicProfilesRepository.getById(session.uid);
 
     return {
+      isAdmin: hasAdminClaim(session),
       ...(profile?.displayName || session.name
         ? { name: profile?.displayName ?? session.name }
         : {}),

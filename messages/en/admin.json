@@ -25,6 +25,7 @@
       "patch-notes": "News",
       "patchNotes": "News",
       "settings": "Settings",
+      "backToSite": "Back to website",
       "new": "New",
       "edit": "Edit",
       "admin": "Admin"
@@ -207,10 +208,33 @@
       "editDescription": "The technical key stays stable while labels and definitions are localized."
     },
     "settings": {
+      "eyebrow": "Administration",
       "title": "Settings",
-      "description": "System configuration will be added as Safir administration grows.",
-      "emptyTitle": "Settings are coming later",
-      "emptyDescription": "No configuration is exposed in this first administration release."
+      "description": "Customize your admin workspace and find Safirdex's essential access points.",
+      "appearance": {
+        "title": "Appearance and language",
+        "description": "Adapt the administration interface to the way you work."
+      },
+      "website": {
+        "title": "View the public website",
+        "description": "Leave the administration area and immediately review what visitors can see.",
+        "action": "Return to homepage"
+      },
+      "account": {
+        "title": "Account and security",
+        "description": "Manage your password and the access linked to your administrator account.",
+        "action": "Open security settings"
+      },
+      "configuration": {
+        "eyebrow": "Read only",
+        "title": "Active configuration",
+        "description": "The main services used by this installation.",
+        "languages": "Languages",
+        "data": "Data and media",
+        "environment": "Environment",
+        "development": "Development",
+        "production": "Production"
+      }
     },
     "dialogs": {
       "deleteLabel": "Delete {name}",

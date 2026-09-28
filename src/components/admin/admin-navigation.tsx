@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeft,
   BookOpenText,
   Boxes,
   CircleGauge,
@@ -95,6 +96,16 @@ export function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         ))}
       </nav>
+      <div className="border-t p-3">
+        <Link
+          href="/"
+          onClick={onNavigate}
+          className="group flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
+          {t("backToSite")}
+        </Link>
+      </div>
     </div>
   );
 }
