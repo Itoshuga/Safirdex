@@ -2,7 +2,10 @@ import { Timestamp } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { sendVerificationEmail } from "@/lib/email/verification-email";
+import {
+  createVerificationPageUrl,
+  sendVerificationEmail,
+} from "@/lib/email/verification-email";
 import {
   getFirebaseAdminAuth,
   getFirebaseAdminFirestore,
@@ -77,7 +80,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const verificationUrl = await auth.generateEmailVerificationLink(user.email);
+    const firebaseVerificationUrl = await auth.generateEmailVerificationLink(user.email);
+    const verificationUrl = createVerificationPageUrl(firebaseVerificationUrl, locale);
     await sendVerificationEmail({
       email: user.email,
       locale,

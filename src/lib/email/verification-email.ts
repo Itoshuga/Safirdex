@@ -87,6 +87,20 @@ function renderVerificationEmail(locale: AppLocale, verificationUrl: string) {
   };
 }
 
+export function createVerificationPageUrl(
+  firebaseVerificationUrl: string,
+  locale: AppLocale,
+) {
+  const firebaseUrl = new URL(firebaseVerificationUrl);
+  const actionCode = firebaseUrl.searchParams.get("oobCode");
+  if (!actionCode) throw new Error("FIREBASE_VERIFICATION_CODE_MISSING");
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://safirdex.xyz";
+  const verificationUrl = new URL(`/${locale}/verify-email`, siteUrl);
+  verificationUrl.searchParams.set("oobCode", actionCode);
+  return verificationUrl.toString();
+}
+
 export async function sendVerificationEmail({
   email,
   locale,

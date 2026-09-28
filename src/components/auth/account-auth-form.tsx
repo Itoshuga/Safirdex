@@ -13,6 +13,7 @@ import {
   signOut,
   type AuthCredential,
   type User,
+  type UserCredential,
 } from "firebase/auth";
 import {
   ArrowRight,
@@ -325,10 +326,39 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
     auth.languageCode = locale;
 
     try {
-      const credential =
-        mode === "signup"
-          ? await createUserWithEmailAndPassword(auth, email, password)
-          : await signInWithEmailAndPassword(auth, email, password);
+      let credential: UserCredential;
+
+      if (mode === "signup") {
+        try {
+          credential = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password,
+          );
+        } catch (createError) {
+          if (
+            !(createError instanceof FirebaseError) ||
+            createError.code !== "auth/email-already-in-use"
+          ) {
+            throw createError;
+          }
+
+          try {
+            credential = await signInWithEmailAndPassword(
+              auth,
+              email,
+              password,
+            );
+          } catch {
+            setMode("signin");
+            setSignupStep("credentials");
+            setCredentialEmail(email);
+            throw createError;
+          }
+        }
+      } else {
+        credential = await signInWithEmailAndPassword(auth, email, password);
+      }
 
       if (mode === "signin" && pendingGoogleCredential) {
         await linkWithCredential(credential.user, pendingGoogleCredential);
@@ -338,13 +368,13 @@ export function AccountAuthForm({ initialMode }: { initialMode: AuthMode }) {
       await initializeAccount(credential.user, t("errors.accountInitialization"));
       setAccountEmail(credential.user.email ?? email);
 
-      if (mode === "signup") {
-        setSignupStep("verification");
-        await requestVerificationEmail(credential.user, locale);
-        setNotice(t("notices.verificationSent"));
-      } else if (!credential.user.emailVerified) {
+      if (!credential.user.emailVerified) {
         setMode("signup");
         setSignupStep("verification");
+        if (mode === "signup") {
+          await requestVerificationEmail(credential.user, locale);
+          setNotice(t("notices.verificationSent"));
+        }
       } else {
         await establishSession(credential.user);
       }
