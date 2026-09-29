@@ -178,19 +178,67 @@ export function recordSignificantDeckUpdateActivity(
   });
 }
 
-export function recordCollectionUpdatedActivity(
+export async function recordCollectionUpdatedActivity(
   actorId: string,
   payload: CollectionActivityPayload,
   visibility: CommunityActivityVisibility = "public",
 ) {
-  return createActivity({
-    actorId,
-    type: "collection_updated",
-    visibility,
-    entityKey: `collection:${actorId}`,
-    payload: { ...payload, cards: payload.cards.slice(0, 4) },
-    requiredSection: "collection",
+  const profile = await publicProfilesRepository.getById(actorId);
+  if (
+    !profile ||
+    !profile.visibility.publicProfile ||
+    profile.visibility.activity === "private" ||
+    profile.visibility.collection === "private"
+  ) return null;
+
+  const firestore = getFirebaseAdminFirestore();
+  const now = Timestamp.now();
+  const hourBucket = now.toDate().toISOString().slice(0, 13).replace(/[-T:]/g, "");
+  const reference = firestore
+    .collection("communityActivities")
+    .doc(`collection-${actorId}-${hourBucket}`);
+  const entityKey = `collection:${actorId}:${hourBucket}`;
+  const activity = await firestore.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(reference);
+    const previous = snapshot.exists
+      ? (snapshot.data() as Omit<CommunityActivityDocument, "id">)
+      : null;
+    const previousPayload = previous?.payload as CollectionActivityPayload | undefined;
+    const cards = [...(previousPayload?.cards ?? []), ...payload.cards]
+      .filter((card, index, all) => all.findIndex((candidate) => candidate.cardId === card.cardId) === index)
+      .slice(-4);
+    const next: CommunityActivityDocument = {
+      id: reference.id,
+      kind: "activity",
+      actorId,
+      actor: {
+        userId: actorId,
+        username: profile.username,
+        displayName: profile.displayName,
+        ...(profile.avatarUrl ? { avatarUrl: profile.avatarUrl } : {}),
+      },
+      type: "collection_updated",
+      visibility,
+      published: true,
+      entityKey,
+      createdAt: previous?.createdAt ?? now,
+      payload: {
+        addedCount: (previousPayload?.addedCount ?? 0) + payload.addedCount,
+        cards,
+      },
+    };
+    transaction.set(reference, activityData(next));
+    return next;
   });
+
+  const followers = await firestore.collection("users").doc(actorId).collection("followers").select().get();
+  const recipients = new Set([actorId, ...followers.docs.map((document) => document.id)]);
+  const data = activityData(activity);
+  await writeInChunks([...recipients].map((userId) => (batch) => batch.set(
+    firestore.collection("userFeeds").doc(userId).collection("items").doc(reference.id),
+    data,
+  )));
+  return activity;
 }
 
 export async function setActorActivitiesPublished(

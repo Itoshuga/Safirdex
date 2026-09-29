@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { CODEX_CACHE_TAGS } from "@/features/cards/server/cache-tags";
+import { isCollectibleCard } from "@/features/cards/collectibility";
 import {
   HOME_SEARCH_LIMIT,
   searchHomeCards,
@@ -110,6 +111,20 @@ const getCachedTypes = unstable_cache(
   { tags: [CODEX_CACHE_TAGS.types], revalidate: 86_400 },
 );
 
+const getCachedFactions = unstable_cache(
+  async () => {
+    logCacheMiss("codex factions");
+    return (await factionsRepository.getAll()).map((entity) => ({
+      id: entity.id,
+      slug: entity.slug,
+      translations: entity.translations,
+      color: entity.visual?.color,
+    }));
+  },
+  ["codex-reference-factions-v1"],
+  { tags: [CODEX_CACHE_TAGS.factions], revalidate: 86_400 },
+);
+
 const getCachedGlossary = unstable_cache(
   async () => {
     logCacheMiss("codex glossary");
@@ -150,6 +165,12 @@ function localizeReferences(
       name: getLocalizedName(entity.translations, locale),
       color: entity.color,
     })),
+    factions: sources.factions.map((entity) => ({
+      id: entity.id,
+      slug: entity.slug,
+      name: getLocalizedName(entity.translations, locale),
+      color: entity.color,
+    })),
   };
 }
 
@@ -158,13 +179,14 @@ export async function getCodexFilterOptions(locale: string) {
 }
 
 async function getReferenceSources() {
-  const [seasons, sets, rarities, types] = await Promise.all([
+  const [seasons, sets, rarities, types, factions] = await Promise.all([
     getCachedSeasons(),
     getCachedSets(),
     getCachedRarities(),
     getCachedTypes(),
+    getCachedFactions(),
   ]);
-  return { seasons, sets, rarities, types };
+  return { seasons, sets, rarities, types, factions };
 }
 
 function localizedEntity(
@@ -197,6 +219,7 @@ function toListItem(card: Card, locale: string): CardListItem {
     defense: card.defense,
     isCommander: card.isCommander,
     isPromo: card.isPromo,
+    collectible: isCollectibleCard(card),
     artwork: {
       url: card.artwork.url,
       orientation: card.artwork.orientation,
@@ -227,8 +250,29 @@ function toListItem(card: Card, locale: string): CardListItem {
       setId: card.setId,
       rarityId: card.rarityId,
       typeIds: card.typeIds,
+      factionIds: card.factionIds ?? [],
     },
   };
+}
+
+const getCachedCollectionCatalog = unstable_cache(
+  async (locale: string) => {
+    logCacheMiss(`collection card catalog (${locale})`);
+    return (await cardsRepository.getAll())
+      .filter(isCollectibleCard)
+      .sort((left, right) => left.number - right.number)
+      .map((card) => toListItem(card, locale));
+  },
+  ["collection-card-catalog-v1"],
+  { tags: [CODEX_CACHE_TAGS.cards], revalidate: 3_600 },
+);
+
+export function getCollectionCatalog(locale: string) {
+  return getCachedCollectionCatalog(locale);
+}
+
+export async function getCollectibleCardCount() {
+  return (await getCachedCollectionCatalog("fr")).length;
 }
 
 const getCachedPage = unstable_cache(

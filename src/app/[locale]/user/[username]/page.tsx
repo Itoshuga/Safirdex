@@ -59,6 +59,7 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   if (profile.matchedAlias) return redirect({ href: `/user/@${profile.view.username}`, locale });
   const tab = parseProfileTab(query.tab);
   const cursor = Array.isArray(query.cursor) ? query.cursor[0] : query.cursor;
+  const collectionFilter = query.filter === "trades" ? "trades" as const : "all" as const;
   const isFollowing = session
     ? await followsRepository.isFollowing(session.uid, profile.internal.id)
     : false;
@@ -70,6 +71,7 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
     viewerId: session?.uid ?? null,
     canViewFollowers: isFollowing,
     cursor,
+    collectionFilter,
   });
   const connectionKind: "followers" | "following" | undefined =
     query.connections === "followers" || query.connections === "following"

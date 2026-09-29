@@ -32,6 +32,13 @@ import {
   usernameSchema,
 } from "@/validation/community";
 import { setActorActivitiesPublished } from "@/features/community/server/activity-service";
+import {
+  syncPublicTradeProfileSnapshot,
+  syncUserTradeReadModels,
+  purgeUserTradeReadModels,
+} from "@/features/collection/server/collection-service";
+import { collectionRepository } from "@/features/collection/repositories/collection-repository";
+import { getCollectibleCardCount } from "@/features/cards/server/codex-service";
 
 interface PrivateUserDocument {
   username?: string | null;
@@ -74,6 +81,10 @@ function toProfileView(
           collectionCardsCount:
             profile.visibility.collection === "public"
               ? profile.stats.collectionCardsCount
+              : 0,
+          collectionCompletionPercentage:
+            profile.visibility.collection === "public"
+              ? profile.stats.collectionCompletionPercentage ?? 0
               : 0,
         },
     visibility: profile.visibility,
@@ -133,9 +144,10 @@ export async function ensurePublicProfileForUser(userId: string) {
 
   const profileRef = publicProfilesRepository.reference(userId);
   const usernameRef = firestore.collection("usernames").doc(usernameNormalized);
-  const [deckCountSnapshot, collectionCountSnapshot] = await Promise.all([
+  const [deckCountSnapshot, collectionCountSnapshot, totalCollectibleCards] = await Promise.all([
     firestore.collection("decks").where("authorId", "==", userId).where("visibility", "==", "public").where("status", "==", "published").count().get(),
     userRef.collection("collection").count().get(),
+    getCollectibleCardCount(),
   ]);
 
   await firestore.runTransaction(async (transaction) => {
@@ -165,6 +177,10 @@ export async function ensurePublicProfileForUser(userId: string) {
         followingCount: 0,
         decksCount: deckCountSnapshot.data().count,
         collectionCardsCount: collectionCountSnapshot.data().count,
+        collectionCompletionPercentage: totalCollectibleCards > 0
+          ? (collectionCountSnapshot.data().count / totalCollectibleCards) * 100
+          : 0,
+        tradeCardsCount: 0,
       },
       visibility: {
         publicProfile: true,
@@ -230,7 +246,7 @@ export async function createCommunityProfile(
       bio: "",
       joinedAt: (user.get("createdAt") as Timestamp | undefined) ?? Timestamp.now(),
       updatedAt: FieldValue.serverTimestamp(),
-      stats: { followersCount: 0, followingCount: 0, decksCount: 0, collectionCardsCount: 0 },
+      stats: { followersCount: 0, followingCount: 0, decksCount: 0, collectionCardsCount: 0, collectionCompletionPercentage: 0, tradeCardsCount: 0 },
       visibility: { publicProfile: true, decks: "public", collection: "private", activity: "public" },
     });
     transaction.set(usernameRef, {
@@ -349,12 +365,16 @@ export async function updatePublicProfile(userId: string, input: unknown) {
       getFirebaseAdminStorage().bucket().file(path).delete({ ignoreNotFound: true }),
     ),
   );
+  await syncPublicTradeProfileSnapshot(userId).catch((error) => {
+    console.error("[Collection] Unable to refresh public trade profile snapshots.", error);
+  });
   return { usernameNormalized, previousUsernameNormalized: previous.usernameNormalized };
 }
 
 export async function updateProfilePrivacy(userId: string, input: unknown) {
   const visibility = privacyUpdateSchema.parse(input);
   const profileRef = publicProfilesRepository.reference(userId);
+  if (!visibility.publicProfile) await purgeUserTradeReadModels(userId);
   await profileRef.update({ visibility, updatedAt: FieldValue.serverTimestamp() });
   const updated = await publicProfilesRepository.getById(userId);
   if (!updated) throw new Error("PROFILE_NOT_FOUND");
@@ -364,6 +384,7 @@ export async function updateProfilePrivacy(userId: string, input: unknown) {
     updated.visibility.collection === "private"
       ? setPostAttachmentAvailability(`collection:${userId}`, false)
       : Promise.resolve(),
+    visibility.publicProfile ? syncUserTradeReadModels(userId) : Promise.resolve(),
   ]);
   return updated;
 }
@@ -521,17 +542,36 @@ async function getDecks(
 async function getCollection(
   profile: PublicUserProfileDocument,
   locale: AppLocale,
+  owner: boolean,
+  filter: "all" | "trades",
 ): Promise<ProfileCollectionItem[]> {
-  const snapshot = await getFirebaseAdminFirestore()
-    .collection("users")
-    .doc(profile.id)
-    .collection("collection")
-    .orderBy("updatedAt", "desc")
-    .limit(12)
-    .get();
-  const cards = await cardsRepository.getManyByIds(snapshot.docs.map((document) => document.id));
+  if (!owner && filter === "trades") {
+    const trades = await collectionRepository.getPublicTradesForUser(profile.id, 60);
+    const cards = await cardsRepository.getManyByIds(trades.map((trade) => trade.data.cardId));
+    const byId = new Map(cards.map((card) => [card.id, card]));
+    return trades.flatMap(({ data }) => {
+      const card = byId.get(data.cardId);
+      if (!card) return [];
+      return [{
+        cardId: card.id,
+        slug: card.slug,
+        name: getLocalizedName(card.translations, locale),
+        ...(card.artwork.url ? { artworkUrl: card.artwork.url } : {}),
+        orientation: card.artwork.orientation,
+        ownedQuantity: 0,
+        duplicateQuantity: data.tradeQuantity,
+        tradeQuantity: data.tradeQuantity,
+      }];
+    });
+  }
+  const snapshot = await getFirebaseAdminFirestore().collection("users").doc(profile.id)
+    .collection("collection").orderBy("updatedAt", "desc").limit(60).get();
+  const documents = filter === "trades"
+    ? snapshot.docs.filter((document) => Number(document.get("tradeQuantity") ?? 0) > 0)
+    : snapshot.docs;
+  const cards = await cardsRepository.getManyByIds(documents.map((document) => document.id));
   const byId = new Map(cards.map((card) => [card.id, card]));
-  return snapshot.docs.flatMap((document) => {
+  return documents.flatMap((document) => {
     const card = byId.get(document.id);
     if (!card) return [];
     return [{
@@ -540,7 +580,9 @@ async function getCollection(
       name: getLocalizedName(card.translations, locale),
       ...(card.artwork.url ? { artworkUrl: card.artwork.url } : {}),
       orientation: card.artwork.orientation,
-      quantity: Number(document.get("quantity") ?? 1),
+      ownedQuantity: Number(document.get("ownedQuantity") ?? document.get("quantity") ?? 1),
+      duplicateQuantity: Math.max(Number(document.get("ownedQuantity") ?? document.get("quantity") ?? 1) - 1, 0),
+      tradeQuantity: owner ? Number(document.get("tradeQuantity") ?? 0) : 0,
     }];
   });
 }
@@ -553,6 +595,7 @@ export async function getProfileTabContent({
   viewerId,
   canViewFollowers = false,
   cursor,
+  collectionFilter = "all",
 }: {
   profile: PublicUserProfileDocument;
   tab: ProfileTab;
@@ -561,39 +604,46 @@ export async function getProfileTabContent({
   viewerId: string | null;
   canViewFollowers?: boolean;
   cursor?: string;
+  collectionFilter?: "all" | "trades";
 }): Promise<ProfileTabContent> {
   const feedAccess = owner ? "owner" : canViewFollowers ? "follower" : "public";
   if (tab === "overview") {
     const decksPrivate = !owner && profile.visibility.decks === "private";
     const collectionPrivate = !owner && profile.visibility.collection === "private";
     const activityPrivate = !owner && profile.visibility.activity === "private";
-    const [decks, feed] = await Promise.all([
+    const [decks, feed, totalCollectibleCards] = await Promise.all([
       decksPrivate ? [] : getDecks(profile, owner, locale, 3),
       activityPrivate
         ? { items: [] }
         : activitiesRepository
             .byActor(profile.id, feedAccess, undefined, 3)
             .then((page) => mapFeedPage(page, locale, viewerId)),
+      getCollectibleCardCount(),
     ]);
     return {
       tab,
       decks,
       decksPrivate,
       collectionCount: collectionPrivate ? 0 : profile.stats.collectionCardsCount,
+      collectionCompletionPercentage: collectionPrivate || totalCollectibleCards === 0
+        ? 0
+        : (profile.stats.collectionCardsCount / totalCollectibleCards) * 100,
       collectionPrivate,
       feed,
       activityPrivate,
     };
   }
-  const privateSection = !owner && profile.visibility[tab] === "private";
+  const privateSection = !owner && profile.visibility[tab] === "private" && !(tab === "collection" && collectionFilter === "trades");
   if (privateSection) {
     return tab === "activity"
       ? { tab, private: true, feed: { items: [] } }
-      : { tab, private: true, items: [] };
+      : tab === "collection"
+        ? { tab, private: true, items: [], filter: collectionFilter }
+        : { tab, private: true, items: [] };
   }
   if (tab === "decks") return { tab, private: false, items: await getDecks(profile, owner, locale) };
   if (tab === "collection") {
-    return { tab, private: false, items: await getCollection(profile, locale) };
+    return { tab, private: false, items: await getCollection(profile, locale, owner, collectionFilter), filter: collectionFilter };
   }
   return {
     tab,

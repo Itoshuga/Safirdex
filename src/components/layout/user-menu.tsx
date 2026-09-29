@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { ChevronDown, Library, LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { signOut } from "firebase/auth";
@@ -80,6 +80,9 @@ export function UserMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem className="px-2.5 py-2" onClick={() => router.push("/account")}>
               <UserRound aria-hidden="true" /> {t("profile")}
+            </DropdownMenuItem>
+            <DropdownMenuItem className="px-2.5 py-2" onClick={() => router.push("/collection")}>
+              <Library aria-hidden="true" /> {t("collection")}
             </DropdownMenuItem>
             <DropdownMenuItem className="px-2.5 py-2" onClick={() => router.push("/settings/profile")}>
               <Settings aria-hidden="true" /> {t("settings")}

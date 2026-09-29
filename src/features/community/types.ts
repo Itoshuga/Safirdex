@@ -17,6 +17,8 @@ export interface PublicProfileStats {
   followingCount: number;
   decksCount: number;
   collectionCardsCount: number;
+  collectionCompletionPercentage?: number;
+  tradeCardsCount?: number;
 }
 
 export interface PublicProfileVisibility {
@@ -298,7 +300,9 @@ export interface ProfileCollectionItem {
   name: string;
   artworkUrl?: string;
   orientation: "vertical" | "horizontal";
-  quantity: number;
+  ownedQuantity: number;
+  duplicateQuantity: number;
+  tradeQuantity: number;
 }
 
 export type ProfileTab = "overview" | "decks" | "collection" | "activity";
@@ -309,10 +313,11 @@ export type ProfileTabContent =
       decks: ProfileDeckItem[];
       decksPrivate: boolean;
       collectionCount: number;
+      collectionCompletionPercentage: number;
       collectionPrivate: boolean;
       feed: CommunityFeedPage;
       activityPrivate: boolean;
     }
   | { tab: "decks"; items: ProfileDeckItem[]; private: boolean }
-  | { tab: "collection"; items: ProfileCollectionItem[]; private: boolean }
+  | { tab: "collection"; items: ProfileCollectionItem[]; private: boolean; filter: "all" | "trades" }
   | { tab: "activity"; feed: CommunityFeedPage; private: boolean };

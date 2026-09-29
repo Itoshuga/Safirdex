@@ -3,19 +3,21 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
+import { CollectionQuantityControls } from "@/components/collection/collection-quantity-controls";
 import type { CardListItem } from "@/features/cards/types";
+import type { CollectionEntryState } from "@/features/collection/types";
 import { Link } from "@/i18n/navigation";
 
-export function CardListRow({ card }: { card: CardListItem }) {
+export function CardListRow({ card, collectionEntry }: { card: CardListItem; collectionEntry?: CollectionEntryState }) {
   const labels = useTranslations("Cards.labels");
   const stats = useTranslations("Cards.stats");
 
   return (
-    <article>
+    <article className="overflow-hidden rounded-xl border bg-card sm:grid sm:grid-cols-[minmax(0,1fr)_auto]">
       <Link
         href={`/cards/${card.slug}`}
         prefetch={false}
-        className="group grid grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3 rounded-xl border bg-card p-2.5 transition hover:border-safir/40 hover:bg-muted/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:grid-cols-[4.25rem_minmax(0,1fr)_auto] sm:gap-4 sm:p-3"
+        className="group grid grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3 p-2.5 transition hover:bg-muted/25 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:grid-cols-[4.25rem_minmax(0,1fr)_auto] sm:gap-4 sm:p-3"
         aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
       >
         <div className="relative aspect-[5/7] overflow-hidden rounded-lg border bg-muted/40">
@@ -66,6 +68,11 @@ export function CardListRow({ card }: { card: CardListItem }) {
           ))}
         </dl>
       </Link>
+      {collectionEntry && card.collectible ? (
+        <div className="border-t bg-muted/10 sm:border-t-0 sm:border-l">
+          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="inline" />
+        </div>
+      ) : null}
     </article>
   );
 }

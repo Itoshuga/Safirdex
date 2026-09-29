@@ -13,23 +13,6 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    function isValidCollectionEntry(cardId) {
-      return request.resource.data.keys().hasOnly([
-        'cardId',
-        'quantity',
-        'isFavorite',
-        'createdAt',
-        'updatedAt'
-      ]) &&
-      request.resource.data.cardId == cardId &&
-      request.resource.data.quantity is int &&
-      request.resource.data.quantity >= 1 &&
-      request.resource.data.quantity <= 999 &&
-      request.resource.data.isFavorite is bool &&
-      request.resource.data.createdAt is timestamp &&
-      request.resource.data.updatedAt is timestamp;
-    }
-
     match /cards/{cardId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -95,10 +78,14 @@ service cloud.firestore {
 
       match /collection/{cardId} {
         allow read: if isOwner(userId);
-        allow create, update: if isOwner(userId) &&
-          exists(/databases/$(database)/documents/cards/$(cardId)) &&
-          isValidCollectionEntry(cardId);
-        allow delete: if isOwner(userId);
+        // Quantities, counters, activities and public trade projections must
+        // stay atomic, so every mutation goes through an authenticated action.
+        allow write: if false;
+      }
+
+      match /stats/{statsId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
       }
 
       match /following/{targetId} {
@@ -111,6 +98,12 @@ service cloud.firestore {
     }
 
     match /publicProfiles/{userId} {
+      allow read, write: if false;
+    }
+
+    // Safe public trade projections are delivered by the trusted server only.
+    // Private collection documents and Discord consent are never client-readable.
+    match /cardTrades/{tradeId} {
       allow read, write: if false;
     }
 

@@ -38,10 +38,11 @@ export async function deleteSafirdexAccount(userId: string, confirmation: string
   await inChunks(following.docs, (relation) => unfollowUser(userId, relation.id));
   await inChunks(followers.docs, (relation) => unfollowUser(relation.id, userId));
 
-  const [activities, posts, decks, usernamesByUserId, usernamesByLegacyUid] = await Promise.all([
+  const [activities, posts, decks, trades, usernamesByUserId, usernamesByLegacyUid] = await Promise.all([
     firestore.collection("communityActivities").where("actorId", "==", userId).get(),
     firestore.collection("communityPosts").where("authorId", "==", userId).get(),
     firestore.collection("decks").where("authorId", "==", userId).get(),
+    firestore.collection("cardTrades").where("userId", "==", userId).get(),
     firestore.collection("usernames").where("userId", "==", userId).get(),
     firestore.collection("usernames").where("uid", "==", userId).get(),
   ]);
@@ -49,6 +50,7 @@ export async function deleteSafirdexAccount(userId: string, confirmation: string
     ...activities.docs.map((document) => document.ref),
     ...posts.docs.map((document) => document.ref),
     ...decks.docs.map((document) => document.ref),
+    ...trades.docs.map((document) => document.ref),
     ...usernamesByUserId.docs.map((document) => document.ref),
     ...usernamesByLegacyUid.docs.map((document) => document.ref),
   ];

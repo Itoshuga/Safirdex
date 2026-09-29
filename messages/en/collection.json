@@ -1,0 +1,97 @@
+{
+  "Collection": {
+    "metadata": {
+      "title": "My collection",
+      "description": "Manage your owned cards, duplicates, and cards available for trade."
+    },
+    "hero": {
+      "eyebrow": "Personal space",
+      "title": "My collection",
+      "description": "Browse every Codex card and record the cards you own or trade in seconds."
+    },
+    "stats": {
+      "unique": "Unique cards",
+      "missing": "Missing cards",
+      "copies": "Owned copies",
+      "duplicates": "Duplicates",
+      "trades": "For trade",
+      "bySeason": "Progress by season",
+      "progress": "{owned} of {total} cards",
+      "completion": "Collection {percentage}% complete"
+    },
+    "emptyCollection": {
+      "title": "Your collection is empty",
+      "description": "Add your first cards here or explore the Codex.",
+      "action": "Explore the Codex"
+    },
+    "filters": {
+      "search": "Search for a card",
+      "searchPlaceholder": "Name or number…",
+      "status": "Status",
+      "all": "All",
+      "owned": "Owned",
+      "missing": "Missing",
+      "duplicates": "With duplicates",
+      "trades": "For trade",
+      "season": "Season",
+      "set": "Set",
+      "rarity": "Rarity",
+      "faction": "Faction",
+      "type": "Type",
+      "reset": "Reset",
+      "results": "{count, plural, =0 {No cards} one {# card} other {# cards}}"
+    },
+    "quantity": {
+      "owned": "Owned",
+      "notOwned": "Not owned",
+      "duplicates": "Duplicates: {count}",
+      "trade": "For trade",
+      "add": "Add one copy of {name}",
+      "remove": "Remove one copy of {name}",
+      "addTrade": "Add one copy of {name} to trades",
+      "removeTrade": "Remove one copy of {name} from trades",
+      "quickAdd": "Add to my collection",
+      "quickAddShort": "Collection",
+      "notCollectible": "This card cannot be collected.",
+      "saved": "Collection updated",
+      "error": "The collection could not be updated.",
+      "tradeLimit": "Only duplicate copies can be offered for trade."
+    },
+    "empty": {
+      "title": "No matching cards",
+      "description": "Change the filters to find cards from the Codex."
+    },
+    "detail": {
+      "title": "In my collection",
+      "description": "Manage your copies without leaving this card.",
+      "signIn": "Sign in to add this card to your collection.",
+      "signInAction": "Sign in"
+    },
+    "traders": {
+      "eyebrow": "Trades",
+      "title": "Available from other members",
+      "description": "These members offer at least one copy of this card.",
+      "count": "{count, plural, =0 {No members} one {# member} other {# members}}",
+      "copies": "{count, plural, one {# copy} other {# copies}}",
+      "profile": "View profile",
+      "copyDiscord": "Copy Discord",
+      "copied": "Discord copied",
+      "showAll": "See all members",
+      "next": "Show more",
+      "empty": "No member offers this card for trade yet."
+    },
+    "privacy": {
+      "title": "Card trades",
+      "description": "Choose whether your cards for trade and Discord ID are visible publicly.",
+      "publicLabel": "Show my cards for trade",
+      "publicDescription": "Your profile and card pages may show what you offer.",
+      "discord": "Discord ID",
+      "discordPlaceholder": "your.name",
+      "discordLabel": "Share my Discord for trades",
+      "discordDescription": "Your ID is only published with your consent and for visible trades.",
+      "save": "Save preferences",
+      "saved": "Trade preferences saved.",
+      "error": "Unable to save these preferences."
+    }
+  }
+}

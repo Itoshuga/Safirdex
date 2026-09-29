@@ -303,6 +303,15 @@
         { "fieldPath": "publishedAt", "order": "DESCENDING" },
         { "fieldPath": "__name__", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "cardTrades",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

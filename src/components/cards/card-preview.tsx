@@ -3,29 +3,31 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
+import { CollectionQuantityControls } from "@/components/collection/collection-quantity-controls";
 import { Link } from "@/i18n/navigation";
 import type { CardListItem } from "@/features/cards/types";
+import type { CollectionEntryState } from "@/features/collection/types";
 
 export interface CardPreviewProps {
   card: CardListItem;
   eager?: boolean;
-  owned?: boolean;
-  quantity?: number;
+  collectionEntry?: CollectionEntryState;
 }
 
-export function CardPreview({ card, eager = false }: CardPreviewProps) {
+export function CardPreview({ card, eager = false, collectionEntry }: CardPreviewProps) {
   const labels = useTranslations("Cards.labels");
   const stats = useTranslations("Cards.stats");
   const isHorizontal = card.artwork.orientation === "horizontal";
 
   return (
-    <article className={`group relative min-w-0 ${isHorizontal ? "col-span-2" : ""}`}>
-      <Link
-        href={`/cards/${card.slug}`}
-        prefetch={false}
-        className="block h-full overflow-hidden rounded-2xl border bg-card transition duration-200 motion-reduce:transition-none hover:-translate-y-1 hover:border-safir/45 hover:shadow-[0_20px_45px_-28px_color-mix(in_oklch,var(--safir)_55%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring motion-reduce:hover:translate-y-0"
-        aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
-      >
+    <article className={`relative min-w-0 overflow-hidden rounded-2xl border bg-card transition duration-200 hover:border-safir/35 hover:shadow-[0_18px_40px_-30px_color-mix(in_oklch,var(--safir)_55%,transparent)] ${isHorizontal ? "col-span-2" : ""}`}>
+      <div className="relative">
+        <Link
+          href={`/cards/${card.slug}`}
+          prefetch={false}
+          className="group/artwork block focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+          aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
+        >
         <div
           className={`relative overflow-hidden bg-[radial-gradient(circle_at_50%_25%,color-mix(in_oklch,var(--safir)_14%,transparent),transparent_62%)] ${
             isHorizontal ? "aspect-[37/25]" : "aspect-[5/7]"
@@ -37,7 +39,7 @@ export function CardPreview({ card, eager = false }: CardPreviewProps) {
               alt={card.artwork.alt}
               fill
               loading={eager ? "eager" : "lazy"}
-              className="object-cover"
+              className="object-cover transition duration-300 group-hover/artwork:scale-[1.015]"
               sizes={
                 isHorizontal
                   ? "(max-width: 639px) 100vw, (max-width: 1023px) 66vw, (max-width: 1535px) 50vw, 34vw"
@@ -59,7 +61,18 @@ export function CardPreview({ card, eager = false }: CardPreviewProps) {
             </div>
           </div>
         </div>
-        <div className="p-3 sm:p-4">
+        </Link>
+        {collectionEntry && card.collectible ? (
+          <div className="absolute right-2.5 bottom-2.5 z-10">
+            <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="floating" />
+          </div>
+        ) : null}
+      </div>
+      <Link
+        href={`/cards/${card.slug}`}
+        prefetch={false}
+        className="block p-3 transition hover:bg-muted/15 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:p-4"
+      >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate font-heading text-sm font-semibold tracking-[-0.02em] sm:text-base">
@@ -96,7 +109,6 @@ export function CardPreview({ card, eager = false }: CardPreviewProps) {
               </div>
             ))}
           </dl>
-        </div>
       </Link>
     </article>
   );

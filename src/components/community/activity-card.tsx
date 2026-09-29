@@ -1,3 +1,5 @@
+"use client";
+
 import { Layers3, RefreshCw, Sparkles } from "lucide-react";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 

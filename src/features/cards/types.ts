@@ -37,6 +37,7 @@ export interface CardListItem {
   defense: number;
   isCommander: boolean;
   isPromo: boolean;
+  collectible: boolean;
   artwork: {
     url?: string;
     orientation: CardOrientation;
@@ -54,6 +55,7 @@ export interface CardListItem {
     setId: string | null;
     rarityId: string;
     typeIds: string[];
+    factionIds: string[];
   };
 }
 
@@ -85,6 +87,7 @@ export interface CodexFilterOptions {
   sets: CodexFilterOption[];
   rarities: Array<CodexFilterOption & { color?: string }>;
   types: Array<CodexFilterOption & { color?: string }>;
+  factions: Array<CodexFilterOption & { color?: string }>;
 }
 
 export interface CodexQueryState {

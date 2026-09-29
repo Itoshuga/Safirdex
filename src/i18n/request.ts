@@ -21,6 +21,7 @@ const namespaces = [
   "settings",
   "patch-notes",
   "maintenance",
+  "collection",
 ] as const;
 
 async function loadMessages(locale: string) {

@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/tooltip";
 import type { CardDetailItem } from "@/features/cards/types";
 import { Link } from "@/i18n/navigation";
+import { CardCollectionPanel } from "@/components/collection/card-collection-panel";
+import { CardTradersSection } from "@/components/collection/card-traders-section";
+import type { CardTraderPage, CollectionEntryState } from "@/features/collection/types";
 
 function Artwork({
   url,
@@ -57,7 +60,19 @@ function Artwork({
   );
 }
 
-export function CardDetail({ card }: { card: CardDetailItem }) {
+export function CardDetail({
+  card,
+  collectionEntry,
+  signedIn,
+  traders,
+  tradersExpanded,
+}: {
+  card: CardDetailItem;
+  collectionEntry: CollectionEntryState | null;
+  signedIn: boolean;
+  traders: CardTraderPage;
+  tradersExpanded: boolean;
+}) {
   const labels = useTranslations("Cards.labels");
   const stats = useTranslations("Cards.stats");
   const detail = useTranslations("Cards.detail");
@@ -157,6 +172,7 @@ export function CardDetail({ card }: { card: CardDetailItem }) {
               )}
             </div>
           </section>
+          <CardCollectionPanel cardId={card.id} cardName={card.name} entry={collectionEntry} signedIn={signedIn} collectible={card.collectible} />
         </div>
       </article>
       {card.alternativeArtworks.length ? (
@@ -173,6 +189,7 @@ export function CardDetail({ card }: { card: CardDetailItem }) {
           </div>
         </section>
       ) : null}
+      {card.collectible && traders.total > 0 ? <CardTradersSection traders={traders} cardSlug={card.slug} expanded={tradersExpanded} /> : null}
     </main>
   );
 }

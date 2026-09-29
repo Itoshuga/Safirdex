@@ -516,6 +516,7 @@
       "operationFailed": "L’opération a échoué.",
       "sessionExpired": "Votre session administrateur a expiré."
       ,"factionInUse": "Cette faction est encore utilisée par au moins une carte.",
+      "cardInCollections": "Cette carte appartient encore à une ou plusieurs collections. Retirez ces références avant de la supprimer.",
       "patchNoteSaved": "Brouillon enregistré.",
       "patchNotePublished": "Actualité publiée.",
       "patchNoteScheduled": "Publication planifiée.",

@@ -514,6 +514,7 @@
       "operationFailed": "The operation failed.",
       "sessionExpired": "Your administrator session has expired."
       ,"factionInUse": "This faction is still used by at least one card.",
+      "cardInCollections": "This card still belongs to one or more collections. Remove those references before deleting it.",
       "patchNoteSaved": "Draft saved.",
       "patchNotePublished": "News article published.",
       "patchNoteScheduled": "Publication scheduled.",

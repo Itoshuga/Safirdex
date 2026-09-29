@@ -11,9 +11,12 @@ import {
 import { PublicHeader } from "@/components/layout/public-header";
 import { Button } from "@/components/ui/button";
 import { getCodexPage } from "@/features/cards/server/codex-service";
+import { getCollectionEntriesForCards } from "@/features/collection/server/collection-service";
 import type { CodexQueryState } from "@/features/cards/types";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/lib/i18n/locales";
+import { getUserSession } from "@/lib/auth/user-session";
+import { emptyCollectionEntry } from "@/features/collection/domain";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -81,7 +84,13 @@ export default async function CardsPage({
     getTranslations("Cards.results"),
     getTranslations("Cards.display"),
   ]);
-  const data = await getCodexPage(locale, rawSearchParams);
+  const [data, session] = await Promise.all([
+    getCodexPage(locale, rawSearchParams),
+    getUserSession(),
+  ]);
+  const collectionEntries = session
+    ? await getCollectionEntriesForCards(session.uid, data.items.map((card) => card.id))
+    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,8 +147,8 @@ export default async function CardsPage({
               {data.items.length ? (
                 <div className={data.query.view === "grid" ? "grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6" : "space-y-2.5"}>
                   {data.items.map((card, index) => data.query.view === "grid"
-                    ? <CardPreview key={card.id} card={card} eager={index < 2} />
-                    : <CardListRow key={card.id} card={card} />)}
+                    ? <CardPreview key={card.id} card={card} eager={index < 2} collectionEntry={collectionEntries ? collectionEntries.get(card.id) ?? emptyCollectionEntry(card.id) : undefined} />
+                    : <CardListRow key={card.id} card={card} collectionEntry={collectionEntries ? collectionEntries.get(card.id) ?? emptyCollectionEntry(card.id) : undefined} />)}
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed px-6 py-20 text-center">

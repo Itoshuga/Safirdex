@@ -354,6 +354,15 @@ export async function deleteCardAction(id: string): Promise<AdminActionState> {
   try {
     await requireAdminSession();
     const existing = await cardsRepository.getByIdOrThrow(id);
+    const firestore = getFirebaseAdminFirestore();
+    const [collectionReferences, tradeReferences] = await Promise.all([
+      firestore.collectionGroup("collection").where("cardId", "==", id).limit(1).get(),
+      firestore.collection(FIRESTORE_COLLECTIONS.cardTrades).where("cardId", "==", id).limit(1).get(),
+    ]);
+    if (!collectionReferences.empty || !tradeReferences.empty) {
+      const t = await getTranslations("Admin.feedback");
+      return { status: "error", message: t("cardInCollections") };
+    }
     await cardsRepository.remove(id);
     await deleteStoragePrefix(`cards/${id}/`);
     updateTag(CODEX_CACHE_TAGS.cards);

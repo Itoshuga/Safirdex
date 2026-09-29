@@ -1,0 +1,97 @@
+{
+  "Collection": {
+    "metadata": {
+      "title": "Ma collection",
+      "description": "Gérez vos cartes possédées, vos doublons et les cartes disponibles à l’échange."
+    },
+    "hero": {
+      "eyebrow": "Espace personnel",
+      "title": "Ma collection",
+      "description": "Retrouvez toutes les cartes du Codex et indiquez en quelques secondes celles que vous possédez ou échangez."
+    },
+    "stats": {
+      "unique": "Cartes uniques",
+      "missing": "Cartes manquantes",
+      "copies": "Copies possédées",
+      "duplicates": "Doublons",
+      "trades": "À l’échange",
+      "bySeason": "Progression par saison",
+      "progress": "{owned} sur {total} cartes",
+      "completion": "Collection complétée à {percentage}%"
+    },
+    "emptyCollection": {
+      "title": "Votre collection est vide",
+      "description": "Ajoutez vos premières cartes ici ou explorez le Codex.",
+      "action": "Explorer le Codex"
+    },
+    "filters": {
+      "search": "Rechercher une carte",
+      "searchPlaceholder": "Nom ou numéro…",
+      "status": "Statut",
+      "all": "Toutes",
+      "owned": "Possédées",
+      "missing": "Manquantes",
+      "duplicates": "Avec doublons",
+      "trades": "À l’échange",
+      "season": "Saison",
+      "set": "Set",
+      "rarity": "Rareté",
+      "faction": "Faction",
+      "type": "Type",
+      "reset": "Réinitialiser",
+      "results": "{count, plural, =0 {Aucune carte} one {# carte} other {# cartes}}"
+    },
+    "quantity": {
+      "owned": "Possédées",
+      "notOwned": "Non possédée",
+      "duplicates": "Doublons : {count}",
+      "trade": "À l’échange",
+      "add": "Ajouter une copie de {name}",
+      "remove": "Retirer une copie de {name}",
+      "addTrade": "Ajouter une copie de {name} aux échanges",
+      "removeTrade": "Retirer une copie de {name} des échanges",
+      "quickAdd": "Ajouter à ma collection",
+      "quickAddShort": "Collection",
+      "notCollectible": "Cette carte n’est pas collectionnable.",
+      "saved": "Collection mise à jour",
+      "error": "La collection n’a pas pu être mise à jour.",
+      "tradeLimit": "Seuls les doublons peuvent être proposés à l’échange."
+    },
+    "empty": {
+      "title": "Aucune carte ne correspond",
+      "description": "Modifiez les filtres pour retrouver les cartes du Codex."
+    },
+    "detail": {
+      "title": "Dans ma collection",
+      "description": "Gérez vos copies sans quitter cette carte.",
+      "signIn": "Connectez-vous pour ajouter cette carte à votre collection.",
+      "signInAction": "Se connecter"
+    },
+    "traders": {
+      "eyebrow": "Échanges",
+      "title": "Disponible chez d’autres membres",
+      "description": "Ces membres proposent au moins une copie de cette carte.",
+      "count": "{count, plural, =0 {Aucun membre} one {# membre} other {# membres}}",
+      "copies": "{count, plural, one {# copie} other {# copies}}",
+      "profile": "Voir le profil",
+      "copyDiscord": "Copier le Discord",
+      "copied": "Discord copié",
+      "showAll": "Voir tous les membres",
+      "next": "Afficher la suite",
+      "empty": "Aucun membre ne propose encore cette carte à l’échange."
+    },
+    "privacy": {
+      "title": "Échanges de cartes",
+      "description": "Choisissez si vos cartes à l’échange et votre identifiant Discord sont visibles publiquement.",
+      "publicLabel": "Afficher mes cartes à l’échange",
+      "publicDescription": "Votre profil et les pages des cartes pourront indiquer ce que vous proposez.",
+      "discord": "Identifiant Discord",
+      "discordPlaceholder": "votre.pseudo",
+      "discordLabel": "Partager mon Discord pour les échanges",
+      "discordDescription": "Votre identifiant n’est publié qu’avec votre accord et uniquement pour les échanges visibles.",
+      "save": "Enregistrer les préférences",
+      "saved": "Préférences d’échange enregistrées.",
+      "error": "Impossible d’enregistrer ces préférences."
+    }
+  }
+}

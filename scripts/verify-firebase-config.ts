@@ -49,6 +49,14 @@ async function main() {
     firestoreRules,
     /match \/appConfig\/\{configId\}\s*\{\s*allow read, write: if false;/,
   );
+  assert.match(
+    firestoreRules,
+    /match \/cardTrades\/\{tradeId\}\s*\{\s*allow read, write: if false;/,
+  );
+  assert.match(
+    firestoreRules,
+    /match \/collection\/\{cardId\}[\s\S]*?allow write: if false;/,
+  );
 
   console.info("Firebase configuration checks passed.");
 }

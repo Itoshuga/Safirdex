@@ -55,6 +55,8 @@ export function ProfileTabContentView({
 }) {
   const t = useTranslations("Profile.sections");
   const tFeed = useTranslations("Community.feed");
+  const tCollection = useTranslations("Collection.filters");
+  const tCollectionStats = useTranslations("Collection.stats");
   const deckStatus = useTranslations("Decks.status");
   if (content.tab === "overview") {
     return (
@@ -142,6 +144,7 @@ export function ProfileTabContentView({
                       <span className="pb-1 text-sm text-muted-foreground">{t("collection.unit", { count: content.collectionCount })}</span>
                     </div>
                     <p className="mt-3 text-sm text-muted-foreground">{t("collection.overviewDescription")}</p>
+                    <p className="mt-1 text-xs font-semibold text-safir">{tCollectionStats("completion", { percentage: Math.round(content.collectionCompletionPercentage * 10) / 10 })}</p>
                   </>
                 )}
               </div>
@@ -182,7 +185,12 @@ export function ProfileTabContentView({
     );
   }
   if (content.private) {
-    return <EmptySection icon={LockKeyhole} title={t("privateTitle")} description={t("privateDescription")} />;
+    return content.tab === "collection" ? (
+      <div className="space-y-4">
+        <CollectionProfileFilters basePath={basePath} active={content.filter} allLabel={tCollection("all")} tradesLabel={tCollection("trades")} />
+        <EmptySection icon={LockKeyhole} title={t("privateTitle")} description={t("privateDescription")} />
+      </div>
+    ) : <EmptySection icon={LockKeyhole} title={t("privateTitle")} description={t("privateDescription")} />;
   }
   if (content.tab === "decks") {
     if (!content.items.length) return <EmptySection icon={Layers3} title={t("decks.emptyTitle")} description={t("decks.emptyDescription")} />;
@@ -209,20 +217,26 @@ export function ProfileTabContentView({
     );
   }
   if (content.tab === "collection") {
-    if (!content.items.length) return <EmptySection icon={Library} title={t("collection.emptyTitle")} description={t("collection.emptyDescription")} />;
+    if (!content.items.length) return <div className="space-y-4"><CollectionProfileFilters basePath={basePath} active={content.filter} allLabel={tCollection("all")} tradesLabel={tCollection("trades")} /><EmptySection icon={Library} title={t("collection.emptyTitle")} description={t("collection.emptyDescription")} /></div>;
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-        {content.items.map((card) => (
+      <div className="space-y-4">
+        <CollectionProfileFilters basePath={basePath} active={content.filter} allLabel={tCollection("all")} tradesLabel={tCollection("trades")} />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+          {content.items.map((card) => (
           <Link key={card.cardId} href={`/cards/${card.slug}`} className="group overflow-hidden rounded-xl border bg-card">
             <div className={`relative ${card.orientation === "horizontal" ? "aspect-[3/2]" : "aspect-[5/7]"} overflow-hidden bg-muted`}>
               {card.artworkUrl ? <Image src={card.artworkUrl} alt={card.name} fill sizes="(max-width: 639px) 50vw, 16vw" className="object-cover transition duration-300 group-hover:scale-[1.03]" /> : null}
             </div>
             <div className="flex items-center justify-between gap-2 p-3">
               <span className="truncate text-xs font-semibold">{card.name}</span>
-              <Badge variant="secondary">×{card.quantity}</Badge>
+              <span className="flex shrink-0 gap-1">
+                <Badge variant="secondary">×{card.ownedQuantity}</Badge>
+                {card.tradeQuantity > 0 ? <Badge>↔ {card.tradeQuantity}</Badge> : null}
+              </span>
             </div>
           </Link>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
@@ -241,6 +255,15 @@ export function ProfileTabContentView({
           {tFeed("loadMore")}
         </Button>
       ) : null}
+    </div>
+  );
+}
+
+function CollectionProfileFilters({ basePath, active, allLabel, tradesLabel }: { basePath: string; active: "all" | "trades"; allLabel: string; tradesLabel: string }) {
+  return (
+    <div className="flex w-fit rounded-xl border bg-card p-1">
+      <Button size="sm" variant={active === "all" ? "secondary" : "ghost"} nativeButton={false} render={<Link href={`${basePath}?tab=collection`} />}>{allLabel}</Button>
+      <Button size="sm" variant={active === "trades" ? "secondary" : "ghost"} nativeButton={false} render={<Link href={`${basePath}?tab=collection&filter=trades`} />}>{tradesLabel}</Button>
     </div>
   );
 }
