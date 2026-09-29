@@ -23,6 +23,7 @@ import { logCacheMiss } from "@/lib/firebase/read-logger";
 import { cardTypesRepository } from "@/repositories/card-types.repository";
 import { cardsRepository } from "@/repositories/cards.repository";
 import { glossaryRepository } from "@/repositories/glossary.repository";
+import { factionsRepository } from "@/repositories/factions.repository";
 import { raritiesRepository } from "@/repositories/rarities.repository";
 import { seasonsRepository } from "@/repositories/seasons.repository";
 import { setsRepository } from "@/repositories/sets.repository";
@@ -381,11 +382,12 @@ export async function getCardDetails(
   return unstable_cache(
     async () => {
       logCacheMiss(`codex card detail (${slug}/${locale})`);
-      const [card, glossaryEntries] = await Promise.all([
-        cardsRepository.getBySlug(slug),
-        getCachedGlossary(),
-      ]);
+      const card = await cardsRepository.getBySlug(slug);
       if (!card) return null;
+      const [glossaryEntries, factions] = await Promise.all([
+        getCachedGlossary(),
+        factionsRepository.getManyByIds(card.factionIds),
+      ]);
 
       const item = toListItem(card, locale);
       const description = getLocalizedDescription(card.translations, locale);
@@ -405,6 +407,14 @@ export async function getCardDetails(
       return {
         ...item,
         description,
+        factions: factions.map((faction) => ({
+          id: faction.id,
+          slug: faction.slug,
+          name: getLocalizedName(faction.translations, locale),
+          color: faction.visual?.color,
+          iconStoragePath: faction.visual?.iconStoragePath,
+          iconUrl: faction.visual?.iconUrl,
+        })),
         alternativeArtworks: [...card.alternativeArtworks]
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
           .map((artwork) => {
@@ -420,11 +430,12 @@ export async function getCardDetails(
         glossary,
       };
     },
-    ["codex-card-detail-v1", slug, locale],
+    ["codex-card-detail-v2", slug, locale],
     {
       tags: [
         CODEX_CACHE_TAGS.cards,
         CODEX_CACHE_TAGS.card(slug),
+        CODEX_CACHE_TAGS.factions,
         CODEX_CACHE_TAGS.glossary,
       ],
       revalidate: 3_600,

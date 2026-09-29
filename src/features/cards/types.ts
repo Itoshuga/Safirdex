@@ -8,6 +8,7 @@ export interface CodexEntityItem {
 
 export interface CodexVisualEntityItem extends CodexEntityItem {
   color?: string;
+  iconStoragePath?: string;
   iconUrl?: string;
 }
 
@@ -58,6 +59,7 @@ export interface CardListItem {
 
 export interface CardDetailItem extends CardListItem {
   description: string;
+  factions: CodexVisualEntityItem[];
   alternativeArtworks: Array<{
     id: string;
     url?: string;

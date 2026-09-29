@@ -3,7 +3,13 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { GlossaryText } from "@/components/cards/glossary-text";
+import { StorageImage } from "@/components/admin/storage-image";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { CardDetailItem } from "@/features/cards/types";
 import { Link } from "@/i18n/navigation";
 
@@ -92,7 +98,42 @@ export function CardDetail({ card }: { card: CardDetailItem }) {
             ) : null}
             {card.types.map((type) => <Badge key={type.id} variant="outline">{type.name}</Badge>)}
           </div>
-          <dl className="mt-8 grid max-w-lg grid-cols-3 divide-x rounded-2xl border bg-card py-4">
+          {card.factions.length ? (
+            <div className="mt-3 flex w-fit max-w-full items-center gap-2 rounded-xl border bg-card/55 p-1.5">
+              <span className="shrink-0 px-1.5 text-[0.62rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                {labels("factions", { count: card.factions.length })}
+              </span>
+              <span className="h-5 w-px shrink-0 bg-border" aria-hidden="true" />
+              <div className="flex flex-wrap items-center gap-1.5">
+                {card.factions.map((faction) => faction.iconUrl || faction.iconStoragePath ? (
+                  <Tooltip key={faction.id}>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="inline-flex size-7 items-center justify-center rounded-lg p-1 transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                          aria-label={faction.name}
+                        />
+                      }
+                    >
+                      <StorageImage
+                        storagePath={faction.iconStoragePath}
+                        url={faction.iconUrl}
+                        alt={faction.name}
+                        className="size-full bg-transparent"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>{faction.name}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Badge key={faction.id} variant="outline" style={{ borderColor: faction.color, color: faction.color }}>
+                    {faction.name}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <dl className={`${card.factions.length ? "mt-3" : "mt-8"} grid max-w-lg grid-cols-3 divide-x rounded-2xl border bg-card py-4`}>
             {[
               [stats("attack"), stats("attackShort"), card.attack],
               [stats("value"), stats("valueShort"), card.value],

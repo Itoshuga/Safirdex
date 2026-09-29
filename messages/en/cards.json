@@ -26,6 +26,7 @@
       "set": "Set",
       "rarity": "Rarity",
       "types": "Types",
+      "factions": "{count, plural, one {Faction} other {Factions}}",
       "description": "Description",
       "alternativeArtworks": "Alternative artworks",
       "mainArtwork": "Main artwork",
