@@ -35,6 +35,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Consultation counters are aggregated exclusively by the trusted server.
+    match /cardViews/{cardId} {
+      allow read, write: if false;
+    }
+
     match /seasons/{seasonId} {
       allow read: if true;
       allow write: if isAdmin();

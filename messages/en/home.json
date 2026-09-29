@@ -16,6 +16,8 @@
       "decks": "Decks",
       "community": "Community",
       "results": "Codex cards",
+      "popular": "Most viewed",
+      "loading": "Searching",
       "noResults": "No cards match this search.",
       "clear": "Clear search",
       "count": "{count, plural, =0 {0 cards} =1 {1 card} other {# cards}} in the Codex"

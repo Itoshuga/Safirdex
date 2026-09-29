@@ -10,6 +10,8 @@ import { createSlug, createUniqueSlug } from "@/lib/utils/slug";
 import { hasAdminClaim } from "@/lib/auth/claims";
 import { compactTranslations } from "@/features/admin/form-mapping";
 import { MAX_CARD_STAT } from "@/features/cards/constants";
+import { HOME_SEARCH_LIMIT, searchHomeCards } from "@/features/cards/home-search";
+import type { HomeCardSearchItem } from "@/features/cards/types";
 import {
   cardStatSchema,
   createCardSchema,
@@ -72,6 +74,35 @@ function verifyGlossaryReferences() {
   ]);
 }
 
+function verifyHomeSearch() {
+  const cards = [
+    "Épée céleste",
+    "Épée",
+    "Grande épée",
+    "Porte-épée",
+    "Épée lunaire",
+    "Épée solaire",
+  ].map((name, index): HomeCardSearchItem => ({
+    id: String(index),
+    slug: `card-${index}`,
+    number: index + 1,
+    name,
+    description: "",
+    attack: 0,
+    value: 0,
+    defense: 0,
+    isCommander: false,
+    isPromo: false,
+    rarityName: "",
+    typeNames: [],
+  }));
+  const results = searchHomeCards(cards, "epee");
+
+  assert.equal(results.length, HOME_SEARCH_LIMIT);
+  assert.equal(results[0]?.name, "Épée");
+  assert.equal(searchHomeCards(cards, "introuvable").length, 0);
+}
+
 async function main() {
   assert.equal(hasAdminClaim({ admin: true }), true);
   assert.equal(hasAdminClaim({ roles: ["editor", "admin"] }), true);
@@ -113,6 +144,7 @@ async function main() {
   verifyStats();
   await verifySlugs();
   verifyGlossaryReferences();
+  verifyHomeSearch();
   console.info("Domain checks passed.");
 }
 

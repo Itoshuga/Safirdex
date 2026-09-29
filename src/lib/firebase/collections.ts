@@ -1,5 +1,6 @@
 export const FIRESTORE_COLLECTIONS = {
   cards: "cards",
+  cardViews: "cardViews",
   seasons: "seasons",
   sets: "sets",
   rarities: "rarities",

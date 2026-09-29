@@ -15,14 +15,15 @@ export default async function HomePage({
 
   if (!hasLocale(routing.locales, locale)) notFound();
 
-  const [user, cards] = await Promise.all([
+  const [user, searchData] = await Promise.all([
     getSiteHeaderUser(),
     getHomeCodexCards(locale),
   ]);
 
   return (
     <MinimalHome
-      cards={cards}
+      cards={searchData.cards}
+      totalCardCount={searchData.totalCount}
       user={user}
     />
   );

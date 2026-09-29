@@ -4,25 +4,22 @@ import {
   BookOpen,
   Command,
   Layers3,
+  LoaderCircle,
   Search,
   Users,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
+import {
+  HOME_SEARCH_DEBOUNCE_MS,
+  HOME_SEARCH_LIMIT,
+} from "@/features/cards/home-search";
 import type { HomeCardSearchItem } from "@/features/cards/types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-
-function normalize(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
 
 export function CodexSearch({
   cards,
@@ -33,10 +30,13 @@ export function CodexSearch({
   const stats = useTranslations("Cards.stats");
   const labels = useTranslations("Cards.labels");
   const nav = useTranslations("Navigation");
+  const locale = useLocale();
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [results, setResults] = useState(cards.slice(0, HOME_SEARCH_LIMIT));
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -66,30 +66,42 @@ export function CodexSearch({
     };
   }, []);
 
-  const results = useMemo(() => {
-    const normalizedQuery = normalize(query);
-    return cards.filter((card) => {
-      if (!normalizedQuery) return true;
-      const searchable = normalize(
-        [
-          card.name,
-          card.description,
-          card.number,
-          card.attack,
-          card.value,
-          card.defense,
-          card.rarityName,
-          ...card.typeNames,
-        ]
-          .filter((value) => value !== undefined)
-          .join(" "),
-      );
-      return searchable.includes(normalizedQuery);
-    });
-  }, [cards, query]);
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => {
+      const params = new URLSearchParams({ locale, q: trimmedQuery });
+      void fetch(`/api/cards/search?${params}`, { signal: controller.signal })
+        .then(async (response) => {
+          if (!response.ok) throw new Error("SEARCH_UNAVAILABLE");
+          const payload: unknown = await response.json();
+          if (!Array.isArray(payload)) throw new Error("INVALID_SEARCH_RESPONSE");
+          setResults((payload as HomeCardSearchItem[]).slice(0, HOME_SEARCH_LIMIT));
+        })
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
+          setResults([]);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
+    }, HOME_SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [locale, query]);
+
+  const visibleResults = query.trim()
+    ? results
+    : cards.slice(0, HOME_SEARCH_LIMIT);
 
   function clearSearch() {
     setQuery("");
+    setLoading(false);
     inputRef.current?.focus();
   }
 
@@ -130,6 +142,7 @@ export function CodexSearch({
             onFocus={() => setOpen(true)}
             onChange={(event) => {
               setQuery(event.target.value);
+              setLoading(Boolean(event.target.value.trim()));
               setOpen(true);
             }}
           />
@@ -177,15 +190,17 @@ export function CodexSearch({
         <section className="absolute inset-x-0 top-16 z-50 mt-3 overflow-hidden rounded-xl border border-foreground/12 bg-card/98 text-left shadow-[0_28px_80px_-30px_rgba(10,20,30,0.45)] backdrop-blur-xl sm:top-[4.5rem]">
           <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5">
             <p className="text-[0.68rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-              {t("results")}
+              {query.trim() ? t("results") : t("popular")}
             </p>
-            <span className="text-xs tabular-nums text-muted-foreground">
-              {results.length}
-            </span>
+            {loading ? <LoaderCircle className="size-3.5 animate-spin text-muted-foreground" aria-label={t("loading")} /> : <span className="text-xs tabular-nums text-muted-foreground">{visibleResults.length}</span>}
           </div>
-          <div className="max-h-[min(24rem,55svh)] overflow-y-auto p-1.5">
-            {results.length ? (
-              results.map((card) => {
+          <div className="max-h-[min(24rem,55svh)] overflow-y-auto p-1.5" aria-busy={loading} aria-live="polite">
+            {loading ? (
+              <div className="space-y-1 p-1">
+                {Array.from({ length: 3 }, (_, index) => <div className="flex items-center gap-3 rounded-lg px-3 py-3 sm:px-4" key={index}><span className="size-10 animate-pulse rounded-lg bg-muted" /><span className="flex-1 space-y-2"><span className="block h-3 w-2/5 animate-pulse rounded bg-muted" /><span className="block h-2.5 w-3/5 animate-pulse rounded bg-muted/70" /></span></div>)}
+              </div>
+            ) : visibleResults.length ? (
+              visibleResults.map((card) => {
                 return (
                   <Link
                     key={card.id}

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { GlossaryText } from "@/components/cards/glossary-text";
+import { CardViewTracker } from "@/components/cards/card-view-tracker";
 import { StorageImage } from "@/components/admin/storage-image";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -64,6 +65,7 @@ export function CardDetail({ card }: { card: CardDetailItem }) {
 
   return (
     <main className="site-container py-8 sm:py-12">
+      <CardViewTracker slug={card.slug} />
       <Link href="/cards" className="mb-7 inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition hover:text-foreground">
         <ArrowLeft className="size-4" /> {detail("back")}
       </Link>

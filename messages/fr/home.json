@@ -16,6 +16,8 @@
       "decks": "Decks",
       "community": "Communauté",
       "results": "Cartes du Codex",
+      "popular": "Les plus consultées",
+      "loading": "Recherche en cours",
       "noResults": "Aucune carte ne correspond à cette recherche.",
       "clear": "Effacer la recherche",
       "count": "{count, plural, =0 {0 carte} =1 {1 carte} other {# cartes}} dans le Codex"

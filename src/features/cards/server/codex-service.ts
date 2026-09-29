@@ -4,6 +4,10 @@ import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { CODEX_CACHE_TAGS } from "@/features/cards/server/cache-tags";
+import {
+  HOME_SEARCH_LIMIT,
+  searchHomeCards,
+} from "@/features/cards/home-search";
 import { CARD_PAGE_SIZE } from "@/features/cards/server/query-types";
 import type {
   CardDetailItem,
@@ -14,12 +18,14 @@ import type {
   HomeCardSearchItem,
 } from "@/features/cards/types";
 import { tokenizeGlossaryContent } from "@/lib/glossary/references";
+import { getFirebaseAdminFirestore } from "@/lib/firebase/admin";
+import { FIRESTORE_COLLECTIONS } from "@/lib/firebase/collections";
 import {
   getTranslation,
   getLocalizedDescription,
   getLocalizedName,
 } from "@/lib/i18n/get-localized-value";
-import { logCacheMiss } from "@/lib/firebase/read-logger";
+import { logCacheMiss, logFirestoreRead } from "@/lib/firebase/read-logger";
 import { cardTypesRepository } from "@/repositories/card-types.repository";
 import { cardsRepository } from "@/repositories/cards.repository";
 import { glossaryRepository } from "@/repositories/glossary.repository";
@@ -280,8 +286,45 @@ const getCachedHomeCards = unstable_cache(
   { tags: [CODEX_CACHE_TAGS.cards], revalidate: 3_600 },
 );
 
+const getCachedPopularCardIds = unstable_cache(
+  async () => {
+    logCacheMiss("popular card views");
+    const limit = HOME_SEARCH_LIMIT * 5;
+    logFirestoreRead("popular card views", limit);
+    const snapshot = await getFirebaseAdminFirestore()
+      .collection(FIRESTORE_COLLECTIONS.cardViews)
+      .orderBy("count", "desc")
+      .limit(limit)
+      .get();
+    return snapshot.docs.map((document) => document.id);
+  },
+  ["codex-popular-card-views-v1"],
+  { revalidate: 300 },
+);
+
 export async function getHomeCodexCards(locale: string) {
-  return getCachedHomeCards(locale);
+  const [cards, popularIds] = await Promise.all([
+    getCachedHomeCards(locale),
+    getCachedPopularCardIds(),
+  ]);
+  const cardById = new Map(cards.map((card) => [card.id, card]));
+  const popular = popularIds.flatMap((id) => {
+    const card = cardById.get(id);
+    return card ? [card] : [];
+  });
+  const selectedIds = new Set(popular.map((card) => card.id));
+  const fallback = [...cards]
+    .sort((left, right) => left.number - right.number)
+    .filter((card) => !selectedIds.has(card.id));
+
+  return {
+    cards: [...popular, ...fallback].slice(0, HOME_SEARCH_LIMIT),
+    totalCount: cards.length,
+  };
+}
+
+export async function searchHomeCodexCards(locale: string, query: string) {
+  return searchHomeCards(await getCachedHomeCards(locale), query);
 }
 
 function parseQuery(searchParams: RawSearchParams, options: CodexFilterOptions) {

@@ -7,9 +7,11 @@ import type { HomeCardSearchItem } from "@/features/cards/types";
 
 export function MinimalHome({
   cards,
+  totalCardCount,
   user,
 }: {
   cards: HomeCardSearchItem[];
+  totalCardCount: number;
   user: SiteHeaderUser | null;
 }) {
   const t = useTranslations("Home");
@@ -39,7 +41,7 @@ export function MinimalHome({
 
       <footer className="relative z-10 mx-auto flex min-h-20 w-full max-w-[90rem] flex-col items-center justify-between gap-2 border-t border-border/55 px-5 py-6 text-[0.68rem] text-muted-foreground sm:flex-row sm:px-8 lg:px-12">
         <p>© {new Date().getFullYear()} {t("footer")}</p>
-        <p className="flex items-center gap-2"><span className="size-1.5 bg-emerald-500" />{t("search.count", { count: cards.length })}</p>
+        <p className="flex items-center gap-2"><span className="size-1.5 bg-emerald-500" />{t("search.count", { count: totalCardCount })}</p>
       </footer>
     </div>
   );
