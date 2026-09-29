@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ListTree } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -31,7 +31,15 @@ export default async function PatchNotePage({ params }: { params: Promise<{ loca
   const [note, detail, category, format] = await Promise.all([getPublishedPatchNoteBySlug(slug, locale), getTranslations("PatchNotes.detail"), getTranslations("PatchNotes.category"), getFormatter({ locale })]);
   if (!note) notFound();
   const date = format.dateTime(new Date(note.publishedAtIso), "long");
-  const headings = note.blocks.filter((block): block is PatchNoteHeadingBlock => block.type === "heading" && block.level === 2);
+  const headings = note.blocks.filter((block): block is PatchNoteHeadingBlock => block.type === "heading");
+  const contents: Array<{ heading: PatchNoteHeadingBlock; number: number; children: PatchNoteHeadingBlock[] }> = [];
+  headings.forEach((heading) => {
+    if (heading.level === 2 || contents.length === 0) {
+      contents.push({ heading, number: contents.length + 1, children: [] });
+    } else {
+      contents.at(-1)?.children.push(heading);
+    }
+  });
   return <div className="min-h-screen bg-background">
     <PublicHeader />
     <main>
@@ -48,10 +56,43 @@ export default async function PatchNotePage({ params }: { params: Promise<{ loca
       </header>
       {note.coverImage ? <div className="site-container -mb-2 pt-8 sm:pt-12"><div className="relative mx-auto aspect-[16/8.6] max-w-[76rem] overflow-hidden rounded-[1.5rem] border bg-muted shadow-[0_28px_90px_-58px_rgba(15,23,42,.65)] sm:rounded-[2rem]"><Image src={note.coverImage.url} alt={note.coverImage.alt} fill priority className="object-cover" sizes="(max-width: 1280px) 100vw, 1216px" /></div></div> : null}
       <div className="site-container py-12 sm:py-16 lg:py-24">
-        {headings.length ? <details className="mb-10 rounded-2xl border bg-card p-5 lg:hidden"><summary className="cursor-pointer font-heading font-semibold">{detail("contents")}</summary><nav className="mt-4 space-y-2 border-t pt-4">{headings.map((heading) => <a key={heading.id} href={`#section-${heading.id}`} className="block text-sm text-muted-foreground hover:text-safir">{heading.text}</a>)}</nav></details> : null}
-        <div className="mx-auto w-full max-w-[76rem]">
-          {headings.length ? <nav className="mb-12 hidden w-full flex-wrap items-center gap-x-6 gap-y-3 border-y py-5 lg:flex" aria-label={detail("contents")}><span className="mr-auto text-[0.68rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">{detail("contents")}</span>{headings.map((heading) => <a key={heading.id} href={`#section-${heading.id}`} className="text-sm leading-5 text-muted-foreground transition hover:text-safir">{heading.text}</a>)}</nav> : null}
-          <article className="w-full min-w-0"><PatchNoteContent blocks={note.blocks} /></article>
+        <div className="mx-auto w-full max-w-[960px]">
+          {contents.length ? <>
+            <details className="group mb-10 overflow-hidden rounded-[1.35rem] border border-border/75 bg-card shadow-[0_18px_55px_-42px_rgba(15,23,42,.65)] lg:hidden">
+              <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 select-none [&::-webkit-details-marker]:hidden">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-safir/10 text-safir"><ListTree className="size-4" /></span>
+                <span className="font-heading text-sm font-semibold tracking-[-0.01em]">{detail("contents")}</span>
+                <span className="ml-auto rounded-full border bg-background px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground">{String(headings.length).padStart(2, "0")}</span>
+                <ChevronDown className="size-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+              </summary>
+              <nav className="space-y-1 border-t border-border/70 px-3 py-3" aria-label={detail("contents")}>
+                {contents.map(({ heading, number, children }) => <div key={heading.id} className="rounded-xl px-1 py-1">
+                  <a href={`#section-${heading.id}`} className="group/link flex items-start gap-3 rounded-lg px-2 py-2.5 text-sm text-muted-foreground transition hover:bg-safir/6 hover:text-foreground">
+                    <span className="mt-0.5 w-5 shrink-0 font-mono text-[0.65rem] text-muted-foreground/65 transition group-hover/link:text-safir" aria-hidden="true">{String(number).padStart(2, "0")}</span>
+                    <span className="leading-5">{heading.text}</span>
+                  </a>
+                  {children.map((child) => <a key={child.id} href={`#section-${child.id}`} className="group/link ml-10 flex items-start gap-2 rounded-lg px-2 py-2 text-[0.8rem] text-muted-foreground transition hover:bg-safir/6 hover:text-foreground"><span className="mt-2 size-1 shrink-0 rounded-full bg-current transition group-hover/link:bg-safir" aria-hidden="true" /><span className="leading-5">{child.text}</span></a>)}
+                </div>)}
+              </nav>
+            </details>
+            <nav className="mb-14 hidden overflow-hidden rounded-[1.5rem] border border-border/75 bg-card/80 p-3 shadow-[0_22px_70px_-52px_rgba(15,23,42,.8)] backdrop-blur-xl lg:block" aria-label={detail("contents")}>
+              <div className="flex items-center gap-3 px-3 py-2.5">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-safir/10 text-safir"><ListTree className="size-4" /></span>
+                <span className="font-heading text-sm font-semibold tracking-[-0.015em]">{detail("contents")}</span>
+                <span className="ml-auto rounded-full border bg-background/80 px-2 py-0.5 font-mono text-[0.62rem] text-muted-foreground">{String(headings.length).padStart(2, "0")}</span>
+              </div>
+              <div className="mt-2 grid gap-2 border-t border-border/70 pt-3 lg:grid-cols-2">
+                {contents.map(({ heading, number, children }) => <div key={heading.id} className="rounded-xl border border-transparent p-1 transition hover:border-border/70 hover:bg-background/45">
+                  <a href={`#section-${heading.id}`} className="group/link flex items-start gap-3 rounded-lg px-2.5 py-2.5 text-sm font-medium text-foreground transition hover:text-safir">
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted font-mono text-[0.62rem] text-muted-foreground transition group-hover/link:bg-safir/10 group-hover/link:text-safir" aria-hidden="true">{String(number).padStart(2, "0")}</span>
+                    <span className="pt-1 leading-5">{heading.text}</span>
+                  </a>
+                  {children.length ? <div className="mb-1 ml-[2.85rem] space-y-0.5 border-l border-border/70 pl-3">{children.map((child) => <a key={child.id} href={`#section-${child.id}`} className="block rounded-md px-2 py-1.5 text-xs leading-5 text-muted-foreground transition hover:bg-safir/6 hover:text-safir">{child.text}</a>)}</div> : null}
+                </div>)}
+              </div>
+            </nav>
+          </> : null}
+          <article className="mx-auto w-full min-w-0 max-w-[860px]"><PatchNoteContent blocks={note.blocks} /></article>
         </div>
       </div>
     </main>
