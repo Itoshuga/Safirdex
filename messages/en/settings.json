@@ -60,7 +60,15 @@
         "light": "Light",
         "dark": "Dark"
       },
-      "savedLocally": "This preference is saved on this device."
+      "savedLocally": "This preference is saved on this device.",
+      "cardEffectsTitle": "Holographic card effects",
+      "cardEffectsDescription": "Animates the main card on hover with 3D tilt, moving highlights, and a holographic texture.",
+      "cardEffectsStates": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "cardEffectsHint": "The effect appears when using a mouse or another precise pointer.",
+      "cardEffectsFootnote": "This setting is saved on this device. Your system's reduced-motion preference always takes priority."
     },
     "security": {
       "eyebrow": "Account access",

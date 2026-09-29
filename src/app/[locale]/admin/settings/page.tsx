@@ -45,7 +45,7 @@ export default async function AdminSettingsPage() {
             </div>
           </div>
           <div className="p-5 sm:p-6">
-            <PreferencesControls />
+            <PreferencesControls showCardEffects={false} />
           </div>
         </section>
 

@@ -60,7 +60,15 @@
         "light": "Clair",
         "dark": "Sombre"
       },
-      "savedLocally": "Cette préférence est enregistrée sur cet appareil."
+      "savedLocally": "Cette préférence est enregistrée sur cet appareil.",
+      "cardEffectsTitle": "Effets holographiques des cartes",
+      "cardEffectsDescription": "Anime la carte principale au survol avec une inclinaison 3D, des reflets et une texture holographique.",
+      "cardEffectsStates": {
+        "enabled": "Activés",
+        "disabled": "Désactivés"
+      },
+      "cardEffectsHint": "L’effet apparaît avec une souris ou un pointeur précis.",
+      "cardEffectsFootnote": "Ce réglage est enregistré sur cet appareil. La réduction des animations configurée dans votre système reste toujours prioritaire."
     },
     "security": {
       "eyebrow": "Accès au compte",

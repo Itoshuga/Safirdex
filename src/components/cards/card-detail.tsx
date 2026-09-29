@@ -2,6 +2,7 @@ import { ArrowLeft, ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
+import { HolographicCard } from "@/components/cards/holographic-card";
 import { GlossaryText } from "@/components/cards/glossary-text";
 import { CardViewTracker } from "@/components/cards/card-view-tracker";
 import { StorageImage } from "@/components/admin/storage-image";
@@ -92,7 +93,13 @@ export function CardDetail({
         }`}
       >
         <div className={`mx-auto w-full ${isHorizontal ? "max-w-3xl" : "max-w-[34rem]"}`}>
-          <Artwork {...card.artwork} priority />
+          {card.artwork.url ? (
+            <HolographicCard>
+              <Artwork {...card.artwork} priority />
+            </HolographicCard>
+          ) : (
+            <Artwork {...card.artwork} priority />
+          )}
         </div>
         <div className="flex min-w-0 flex-col justify-center">
           <div className="flex flex-wrap items-center gap-2">
