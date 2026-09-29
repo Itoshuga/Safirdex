@@ -298,7 +298,7 @@ const getCachedPage = unstable_cache(
       items: page.items.map((card) => toListItem(card, locale)),
     };
   },
-  ["codex-card-pages-v2"],
+  ["codex-card-pages-v3"],
   { tags: [CODEX_CACHE_TAGS.cards], revalidate: 300 },
 );
 

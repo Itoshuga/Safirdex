@@ -2,7 +2,6 @@ import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-import { Badge } from "@/components/ui/badge";
 import { CollectionQuantityControls } from "@/components/collection/collection-quantity-controls";
 import type { CardListItem } from "@/features/cards/types";
 import type { CollectionEntryState } from "@/features/collection/types";
@@ -10,14 +9,14 @@ import { Link } from "@/i18n/navigation";
 
 export function CardListRow({ card, collectionEntry }: { card: CardListItem; collectionEntry?: CollectionEntryState }) {
   const labels = useTranslations("Cards.labels");
-  const stats = useTranslations("Cards.stats");
+  const showCollectionAction = Boolean(collectionEntry && card.collectible);
 
   return (
-    <article className="overflow-hidden rounded-xl border bg-card sm:grid sm:grid-cols-[minmax(0,1fr)_auto]">
+    <article className={`overflow-hidden rounded-2xl border bg-card/80 ${showCollectionAction ? "sm:grid sm:grid-cols-[minmax(0,1fr)_12rem]" : ""}`}>
       <Link
         href={`/cards/${card.slug}`}
         prefetch={false}
-        className="group grid grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3 p-2.5 transition hover:bg-muted/25 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:grid-cols-[4.25rem_minmax(0,1fr)_auto] sm:gap-4 sm:p-3"
+        className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-3 p-2.5 transition hover:bg-muted/25 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:grid-cols-[4.25rem_minmax(0,1fr)_auto] sm:gap-4 sm:p-3"
         aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
       >
         <div className="relative aspect-[5/7] overflow-hidden rounded-lg border bg-muted/40">
@@ -46,31 +45,24 @@ export function CardListRow({ card, collectionEntry }: { card: CardListItem; col
             </h2>
           </div>
           <p className="mt-1 truncate text-xs text-muted-foreground">
-            {[card.season?.name, card.set?.name, card.rarity?.name].filter(Boolean).join(" · ") || labels("unknownRelation")}
+            {[card.season?.name, card.set?.name].filter(Boolean).join(" · ") || labels("unknownRelation")}
           </p>
-          <div className="mt-2 flex flex-wrap gap-1">
-            {card.types.map((type) => <Badge key={type.id} variant="secondary" className="text-[0.6rem]">{type.name}</Badge>)}
-            {card.isCommander ? <Badge className="text-[0.6rem]">{labels("commander")}</Badge> : null}
-            {card.isPromo ? <Badge variant="outline" className="text-[0.6rem]">{labels("promo")}</Badge> : null}
-          </div>
         </div>
 
-        <dl className="col-span-2 grid grid-cols-3 divide-x rounded-lg border bg-background/60 py-2 sm:col-span-1 sm:min-w-56">
-          {[
-            [stats("attackShort"), card.attack],
-            [stats("valueShort"), card.value],
-            [stats("defenseShort"), card.defense],
-          ].map(([label, value]) => (
-            <div key={label} className="px-3 text-center">
-              <dt className="text-[0.55rem] font-semibold tracking-wide text-muted-foreground">{label}</dt>
-              <dd className="mt-0.5 font-mono text-sm font-semibold tabular-nums">{value}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className="flex items-center gap-2 pr-1">
+          {card.rarity ? (
+            <span
+              className="size-2.5 shrink-0 rounded-full ring-3 ring-current/10"
+              style={{ color: card.rarity.color, backgroundColor: card.rarity.color ?? "currentColor" }}
+              title={card.rarity.name}
+            />
+          ) : null}
+          <span className="hidden text-xs font-medium text-muted-foreground md:inline">{card.rarity?.name}</span>
+        </div>
       </Link>
       {collectionEntry && card.collectible ? (
-        <div className="border-t bg-muted/10 sm:border-t-0 sm:border-l">
-          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="inline" />
+        <div className="bg-muted/10 sm:border-l sm:[&>div]:h-full sm:[&>div]:border-t-0">
+          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="catalogue" />
         </div>
       ) : null}
     </article>

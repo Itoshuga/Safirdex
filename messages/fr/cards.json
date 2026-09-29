@@ -7,7 +7,16 @@
     "hero": {
       "eyebrow": "Catalogue officiel",
       "title": "Codex",
-      "description": "Explorez toutes les cartes de l’univers Safir, à travers les saisons, les éditions et les raretés."
+      "description": "Explorez toutes les cartes de l’univers Safir, à travers les saisons, les éditions et les raretés.",
+      "summaryEyebrow": "Le catalogue en un regard",
+      "cardCount": "{count, plural, =0 {Aucune carte} =1 {1 carte répertoriée} other {# cartes répertoriées}}",
+      "pageSizeLabel": "Affichage",
+      "pageSize": "{count} par page",
+      "collectionLabel": "Collection",
+      "collectionHint": "Ajout rapide",
+      "navigationLabel": "Navigation du Codex",
+      "allCards": "Toutes les cartes",
+      "myCollection": "Ma collection"
     },
     "stats": {
       "attack": "Attaque",
@@ -62,7 +71,8 @@
       "remove": "Retirer le filtre {filter}"
     },
     "results": {
-      "title": "Cartes",
+      "eyebrow": "Explorer",
+      "title": "Toutes les cartes",
       "loaded": "{count, plural, =0 {Aucune carte chargée} =1 {1 carte chargée} other {# cartes chargées}}",
       "filteredOnPage": "{count, plural, =0 {Aucun résultat sur cette page} =1 {1 résultat sur cette page} other {# résultats sur cette page}}",
       "page": "Page {page} sur {pages}",

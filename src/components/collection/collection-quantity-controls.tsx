@@ -1,6 +1,6 @@
 "use client";
 
-import { LoaderCircle, Minus, Plus } from "lucide-react";
+import { Library, LoaderCircle, Minus, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
@@ -25,7 +25,7 @@ export function CollectionQuantityControls({
   cardName: string;
   initialEntry: CollectionEntryState;
   compact?: boolean;
-  compactVariant?: "bar" | "floating" | "inline";
+  compactVariant?: "bar" | "floating" | "inline" | "catalogue";
   detailLayout?: boolean;
   onChange?: (entry: CollectionEntryState) => void;
 }) {
@@ -78,6 +78,61 @@ export function CollectionQuantityControls({
   }
 
   if (compact) {
+    if (compactVariant === "catalogue") {
+      return entry.ownedQuantity > 0 ? (
+        <div className="flex min-h-11 items-center justify-between gap-2 border-t bg-muted/15 px-2.5 py-1.5 sm:px-3">
+          <span className="flex min-w-0 items-center gap-1.5 truncate text-[0.68rem] font-semibold text-muted-foreground">
+            <Library className="size-3.5 shrink-0 text-safir" aria-hidden="true" />
+            {t("ownedCompact", { count: entry.ownedQuantity })}
+          </span>
+          <div className="flex shrink-0 items-center gap-0.5">
+            <Button
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              className="rounded-full"
+              disabled={pending}
+              onClick={() => adjustOwned(-1)}
+              aria-label={t("remove", { name: cardName })}
+            >
+              <Minus />
+            </Button>
+            <span className="grid min-w-6 place-items-center font-mono text-xs font-semibold tabular-nums">
+              {pending ? <LoaderCircle className="size-3 animate-spin" /> : entry.ownedQuantity}
+            </span>
+            <Button
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              className="rounded-full"
+              disabled={pending}
+              onClick={() => adjustOwned(1)}
+              aria-label={t("add", { name: cardName })}
+            >
+              <Plus />
+            </Button>
+          </div>
+          <span className="sr-only" aria-live="polite">{message}</span>
+        </div>
+      ) : (
+        <div className="border-t bg-muted/10 p-1.5">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-8 w-full rounded-lg text-xs text-safir hover:bg-safir/10 hover:text-safir"
+            disabled={pending}
+            onClick={() => adjustOwned(1)}
+            aria-label={t("add", { name: cardName })}
+          >
+            {pending ? <LoaderCircle className="animate-spin" /> : <Plus />}
+            {t("addShort")}
+          </Button>
+          <span className="sr-only" aria-live="polite">{message}</span>
+        </div>
+      );
+    }
+
     if (compactVariant === "floating") {
       return (
         <div className="inline-flex items-center rounded-full border border-white/20 bg-background/88 p-1 shadow-lg shadow-black/15 backdrop-blur-xl">

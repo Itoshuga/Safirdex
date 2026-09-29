@@ -52,6 +52,8 @@
       "removeTrade": "Retirer une copie de {name} des échanges",
       "quickAdd": "Ajouter à ma collection",
       "quickAddShort": "Collection",
+      "addShort": "Ajouter",
+      "ownedCompact": "Collection · {count}",
       "notCollectible": "Cette carte n’est pas collectionnable.",
       "saved": "Collection mise à jour",
       "error": "La collection n’a pas pu être mise à jour.",

@@ -2,7 +2,6 @@ import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-import { Badge } from "@/components/ui/badge";
 import { CollectionQuantityControls } from "@/components/collection/collection-quantity-controls";
 import { Link } from "@/i18n/navigation";
 import type { CardListItem } from "@/features/cards/types";
@@ -16,18 +15,16 @@ export interface CardPreviewProps {
 
 export function CardPreview({ card, eager = false, collectionEntry }: CardPreviewProps) {
   const labels = useTranslations("Cards.labels");
-  const stats = useTranslations("Cards.stats");
   const isHorizontal = card.artwork.orientation === "horizontal";
 
   return (
-    <article className={`relative min-w-0 overflow-hidden rounded-2xl border bg-card transition duration-200 hover:border-safir/35 hover:shadow-[0_18px_40px_-30px_color-mix(in_oklch,var(--safir)_55%,transparent)] ${isHorizontal ? "col-span-2" : ""}`}>
-      <div className="relative">
-        <Link
-          href={`/cards/${card.slug}`}
-          prefetch={false}
-          className="group/artwork block focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
-          aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
-        >
+    <article className={`relative flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] border bg-card/80 transition duration-200 hover:border-safir/35 hover:shadow-[0_22px_50px_-38px_color-mix(in_oklch,var(--safir)_65%,transparent)] ${isHorizontal ? "col-span-2" : ""}`}>
+      <Link
+        href={`/cards/${card.slug}`}
+        prefetch={false}
+        className="group/artwork block focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
+        aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
+      >
         <div
           className={`relative overflow-hidden bg-[radial-gradient(circle_at_50%_25%,color-mix(in_oklch,var(--safir)_14%,transparent),transparent_62%)] ${
             isHorizontal ? "aspect-[37/25]" : "aspect-[5/7]"
@@ -56,23 +53,12 @@ export function CardPreview({ card, eager = false, collectionEntry }: CardPrevie
               {labels("number", { number: String(card.number).padStart(3, "0") })}
             </span>
             <div className="flex flex-wrap justify-end gap-1">
-              {card.isCommander ? <Badge>{labels("commander")}</Badge> : null}
-              {card.isPromo ? <Badge variant="outline" className="bg-background/85">{labels("promo")}</Badge> : null}
+              {card.isCommander ? <span className="rounded-full bg-safir px-2 py-1 text-[0.6rem] font-semibold text-white shadow-sm">{labels("commander")}</span> : null}
+              {card.isPromo ? <span className="rounded-full border border-white/25 bg-black/55 px-2 py-1 text-[0.6rem] font-semibold text-white backdrop-blur-md">{labels("promo")}</span> : null}
             </div>
           </div>
         </div>
-        </Link>
-        {collectionEntry && card.collectible ? (
-          <div className="absolute right-2.5 bottom-2.5 z-10">
-            <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="floating" />
-          </div>
-        ) : null}
-      </div>
-      <Link
-        href={`/cards/${card.slug}`}
-        prefetch={false}
-        className="block p-3 transition hover:bg-muted/15 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:p-4"
-      >
+        <div className="p-3 transition group-hover/artwork:bg-muted/15 sm:p-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate font-heading text-sm font-semibold tracking-[-0.02em] sm:text-base">
@@ -90,26 +76,13 @@ export function CardPreview({ card, eager = false, collectionEntry }: CardPrevie
               />
             ) : null}
           </div>
-          <div className="mt-3 flex min-h-5 flex-wrap gap-1">
-            {card.types.map((type) => (
-              <Badge key={type.id} variant="secondary" className="text-[0.62rem]">
-                {type.name}
-              </Badge>
-            ))}
-          </div>
-          <dl className="mt-3 grid grid-cols-3 gap-1.5 border-t pt-3">
-            {[
-              [stats("attackShort"), card.attack],
-              [stats("valueShort"), card.value],
-              [stats("defenseShort"), card.defense],
-            ].map(([label, value]) => (
-              <div key={label} className="text-center">
-                <dt className="text-[0.55rem] font-semibold tracking-wide text-muted-foreground">{label}</dt>
-                <dd className="font-mono text-xs font-semibold tabular-nums">{value}</dd>
-              </div>
-            ))}
-          </dl>
+        </div>
       </Link>
+      {collectionEntry && card.collectible ? (
+        <div className="mt-auto">
+          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="catalogue" />
+        </div>
+      ) : null}
     </article>
   );
 }

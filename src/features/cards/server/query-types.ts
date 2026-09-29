@@ -1,6 +1,6 @@
 import type { Card } from "@/types/card";
 
-export const CARD_PAGE_SIZE = 24;
+export const CARD_PAGE_SIZE = 25;
 
 export type CardSort = "number" | "newest" | "oldest";
 export type CardCursorDirection = "after" | "before";

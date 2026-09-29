@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight, LayoutGrid, List, SearchX } from "lucide-react";
+import { ChevronLeft, ChevronRight, GalleryVerticalEnd, LayoutGrid, List, SearchX } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { CardPreview } from "@/components/cards/card-preview";
 import { CardListRow } from "@/components/cards/card-list-row";
+import { CodexHeader } from "@/components/cards/codex-header";
 import {
   CodexActiveFilters,
   CodexFilters,
@@ -11,6 +12,7 @@ import {
 import { PublicHeader } from "@/components/layout/public-header";
 import { Button } from "@/components/ui/button";
 import { getCodexPage } from "@/features/cards/server/codex-service";
+import { CARD_PAGE_SIZE } from "@/features/cards/server/query-types";
 import { getCollectionEntriesForCards } from "@/features/collection/server/collection-service";
 import type { CodexQueryState } from "@/features/cards/types";
 import { Link } from "@/i18n/navigation";
@@ -87,10 +89,9 @@ export default async function CardsPage({
   params: Promise<{ locale: AppLocale }>;
   searchParams: Promise<SearchParams>;
 }) {
-  const [{ locale }, rawSearchParams, hero, results, display] = await Promise.all([
+  const [{ locale }, rawSearchParams, results, display] = await Promise.all([
     params,
     searchParams,
-    getTranslations("Cards.hero"),
     getTranslations("Cards.results"),
     getTranslations("Cards.display"),
   ]);
@@ -106,21 +107,14 @@ export default async function CardsPage({
     <div className="min-h-screen bg-background">
       <PublicHeader />
       <main>
-        <section className="border-b bg-[linear-gradient(180deg,color-mix(in_oklch,var(--safir)_7%,transparent),transparent)]">
-          <div className="site-container py-10 sm:py-14">
-            <p className="eyebrow">{hero("eyebrow")}</p>
-            <div className="mt-3 max-w-3xl">
-              <h1 className="font-heading text-5xl font-semibold tracking-[-0.065em] sm:text-7xl">{hero("title")}</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">{hero("description")}</p>
-            </div>
-          </div>
-        </section>
+        <CodexHeader totalCount={data.totalCount} pageSize={CARD_PAGE_SIZE} />
         <section className="site-container py-8 sm:py-10">
           <div className="min-w-0 space-y-5">
             <div className="flex flex-wrap items-end justify-between gap-4 border-b pb-4">
               <div className="flex items-end gap-4">
                 <div>
-                  <h2 className="font-heading text-2xl font-semibold tracking-[-0.035em]">{results("title")}</h2>
+                  <p className="eyebrow">{results("eyebrow")}</p>
+                  <h2 className="mt-2 font-heading text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">{results("title")}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {data.query.q
                       ? results("filteredOnPage", { count: data.items.length })
@@ -150,12 +144,13 @@ export default async function CardsPage({
                     <List />
                   </Button>
                 </div>
+                <GalleryVerticalEnd className="ml-1 hidden size-5 text-safir lg:block" aria-hidden="true" />
               </div>
             </div>
             <CodexActiveFilters options={data.options} query={data.query} />
             {data.query.q ? <p className="text-[0.68rem] text-muted-foreground md:hidden">{results("searchNote")}</p> : null}
               {data.items.length ? (
-                <div className={data.query.view === "grid" ? "grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-6" : "space-y-2.5"}>
+                <div className={data.query.view === "grid" ? "grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-5" : "space-y-2.5"}>
                   {data.items.map((card, index) => data.query.view === "grid"
                     ? <CardPreview key={card.id} card={card} eager={index < 2} collectionEntry={collectionEntries ? collectionEntries.get(card.id) ?? emptyCollectionEntry(card.id) : undefined} />
                     : <CardListRow key={card.id} card={card} collectionEntry={collectionEntries ? collectionEntries.get(card.id) ?? emptyCollectionEntry(card.id) : undefined} />)}

@@ -7,7 +7,16 @@
     "hero": {
       "eyebrow": "Official catalogue",
       "title": "Codex",
-      "description": "Explore every card from the world of Safir across all seasons, sets and rarities."
+      "description": "Explore every card from the world of Safir across all seasons, sets and rarities.",
+      "summaryEyebrow": "The catalogue at a glance",
+      "cardCount": "{count, plural, =0 {No cards} =1 {1 card listed} other {# cards listed}}",
+      "pageSizeLabel": "Display",
+      "pageSize": "{count} per page",
+      "collectionLabel": "Collection",
+      "collectionHint": "Quick add",
+      "navigationLabel": "Codex navigation",
+      "allCards": "All cards",
+      "myCollection": "My collection"
     },
     "stats": {
       "attack": "Attack",
@@ -62,7 +71,8 @@
       "remove": "Remove {filter} filter"
     },
     "results": {
-      "title": "Cards",
+      "eyebrow": "Browse",
+      "title": "All cards",
       "loaded": "{count, plural, =0 {No cards loaded} =1 {1 card loaded} other {# cards loaded}}",
       "filteredOnPage": "{count, plural, =0 {No results on this page} =1 {1 result on this page} other {# results on this page}}",
       "page": "Page {page} of {pages}",

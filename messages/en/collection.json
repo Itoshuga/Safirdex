@@ -52,6 +52,8 @@
       "removeTrade": "Remove one copy of {name} from trades",
       "quickAdd": "Add to my collection",
       "quickAddShort": "Collection",
+      "addShort": "Add",
+      "ownedCompact": "Collection · {count}",
       "notCollectible": "This card cannot be collected.",
       "saved": "Collection updated",
       "error": "The collection could not be updated.",
