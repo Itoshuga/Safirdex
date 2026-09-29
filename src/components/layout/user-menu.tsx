@@ -81,7 +81,7 @@ export function UserMenu({
             <DropdownMenuItem className="px-2.5 py-2" onClick={() => router.push("/account")}>
               <UserRound aria-hidden="true" /> {t("profile")}
             </DropdownMenuItem>
-            <DropdownMenuItem className="px-2.5 py-2" onClick={() => router.push("/collection")}>
+            <DropdownMenuItem className="px-2.5 py-2" onClick={() => router.push("/account?tab=collection")}>
               <Library aria-hidden="true" /> {t("collection")}
             </DropdownMenuItem>
             <DropdownMenuItem className="px-2.5 py-2" onClick={() => router.push("/settings/profile")}>

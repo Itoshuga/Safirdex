@@ -7,7 +7,46 @@
     "hero": {
       "eyebrow": "Espace personnel",
       "title": "Ma collection",
-      "description": "Retrouvez toutes les cartes du Codex et indiquez en quelques secondes celles que vous possédez ou échangez."
+      "description": "Construisez une collection indépendante pour chaque saison et suivez précisément votre progression.",
+      "summaryEyebrow": "Progression générale",
+      "progress": "{owned} sur {total} cartes",
+      "seasons": "Saisons"
+    },
+    "navigation": {
+      "label": "Navigation des cartes et collections",
+      "cards": "Toutes les cartes",
+      "collection": "Ma collection"
+    },
+    "seasonPage": {
+      "back": "Retour à mes collections",
+      "eyebrow": "Collection indépendante",
+      "description": "Cette collection est entièrement dédiée à cette saison. Seules les cartes que vous possédez sont affichées.",
+      "progress": "Progression de la saison",
+      "ownedEyebrow": "Cartes présentes",
+      "ownedTitle": "Cartes possédées",
+      "emptyTitle": "Cette collection est vide",
+      "emptyDescription": "Ajoutez des cartes de cette saison depuis le Codex pour les voir apparaître ici."
+    },
+    "seasons": {
+      "eyebrow": "Collections",
+      "title": "Une collection par saison",
+      "description": "Chaque saison possède sa propre progression, ses cartes manquantes, ses doublons et ses échanges.",
+      "collection": "Collection de saison",
+      "cards": "{owned} sur {total} cartes",
+      "completion": "{percentage}% complétée",
+      "activeEyebrow": "Collection active",
+      "noneTitle": "Aucune saison disponible",
+      "noneDescription": "Les collections apparaîtront dès qu’une saison contiendra des cartes.",
+      "profileTitle": "Collections par saison",
+      "profileDescription": "Chaque collection est isolée pour montrer clairement la progression de cette saison.",
+      "tradeTitle": "Échanges par saison",
+      "tradeDescription": "Les cartes proposées à l’échange sont regroupées dans leur collection de saison.",
+      "tradeCards": "{count, plural, =0 {Aucune carte à l’échange} one {# carte à l’échange} other {# cartes à l’échange}}",
+      "ownedCards": "{count, plural, =0 {Aucune carte possédée} one {# carte possédée} other {# cartes possédées}}",
+      "owned": "Possédées",
+      "available": "À l’échange",
+      "open": "Ouvrir la collection",
+      "back": "Retour aux collections"
     },
     "stats": {
       "unique": "Cartes uniques",

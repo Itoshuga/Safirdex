@@ -296,6 +296,7 @@ export interface ProfileDeckItem {
 
 export interface ProfileCollectionItem {
   cardId: string;
+  number: number;
   slug: string;
   name: string;
   artworkUrl?: string;
@@ -303,6 +304,19 @@ export interface ProfileCollectionItem {
   ownedQuantity: number;
   duplicateQuantity: number;
   tradeQuantity: number;
+  season: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+}
+
+export interface ProfileSeasonCollection {
+  season: ProfileCollectionItem["season"];
+  totalCards: number;
+  ownedCards: number;
+  completionPercentage: number;
+  items: ProfileCollectionItem[];
 }
 
 export type ProfileTab = "overview" | "decks" | "collection" | "activity";
@@ -319,5 +333,11 @@ export type ProfileTabContent =
       activityPrivate: boolean;
     }
   | { tab: "decks"; items: ProfileDeckItem[]; private: boolean }
-  | { tab: "collection"; items: ProfileCollectionItem[]; private: boolean; filter: "all" | "trades" }
+  | {
+      tab: "collection";
+      collections: ProfileSeasonCollection[];
+      private: boolean;
+      filter: "all" | "trades";
+      selectedSeasonSlug?: string;
+    }
   | { tab: "activity"; feed: CommunityFeedPage; private: boolean };

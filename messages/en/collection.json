@@ -7,7 +7,46 @@
     "hero": {
       "eyebrow": "Personal space",
       "title": "My collection",
-      "description": "Browse every Codex card and record the cards you own or trade in seconds."
+      "description": "Build an independent collection for every season and track your progress precisely.",
+      "summaryEyebrow": "Overall progress",
+      "progress": "{owned} of {total} cards",
+      "seasons": "Seasons"
+    },
+    "navigation": {
+      "label": "Cards and collections navigation",
+      "cards": "All cards",
+      "collection": "My collections"
+    },
+    "seasonPage": {
+      "back": "Back to my collections",
+      "eyebrow": "Independent collection",
+      "description": "This collection is entirely dedicated to this season. Only cards you own are displayed.",
+      "progress": "Season progress",
+      "ownedEyebrow": "Cards in this collection",
+      "ownedTitle": "Owned cards",
+      "emptyTitle": "This collection is empty",
+      "emptyDescription": "Add cards from this season in the Codex to see them appear here."
+    },
+    "seasons": {
+      "eyebrow": "Collections",
+      "title": "One collection per season",
+      "description": "Each season has its own progress, missing cards, duplicates, and trades.",
+      "collection": "Season collection",
+      "cards": "{owned} of {total} cards",
+      "completion": "{percentage}% complete",
+      "activeEyebrow": "Active collection",
+      "noneTitle": "No season available",
+      "noneDescription": "Collections will appear as soon as a season contains cards.",
+      "profileTitle": "Collections by season",
+      "profileDescription": "Each collection is kept separate to clearly show that season's progress.",
+      "tradeTitle": "Trades by season",
+      "tradeDescription": "Cards offered for trade are grouped inside their season collection.",
+      "tradeCards": "{count, plural, =0 {No cards for trade} one {# card for trade} other {# cards for trade}}",
+      "ownedCards": "{count, plural, =0 {No cards owned} one {# card owned} other {# cards owned}}",
+      "owned": "Owned",
+      "available": "For trade",
+      "open": "Open collection",
+      "back": "Back to collections"
     },
     "stats": {
       "unique": "Unique cards",

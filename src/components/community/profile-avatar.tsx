@@ -6,10 +6,12 @@ export function ProfileAvatar({
   src,
   name,
   className,
+  preload = false,
 }: {
   src?: string;
   name: string;
   className?: string;
+  preload?: boolean;
 }) {
   return (
     <span
@@ -20,11 +22,10 @@ export function ProfileAvatar({
       aria-hidden="true"
     >
       {src ? (
-        <Image src={src} alt="" fill sizes="128px" className="object-cover" />
+        <Image src={src} alt="" fill sizes="128px" preload={preload} className="object-cover" />
       ) : (
         name.trim().slice(0, 1).toUpperCase()
       )}
     </span>
   );
 }
-

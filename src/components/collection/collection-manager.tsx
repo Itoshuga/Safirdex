@@ -1,151 +1,238 @@
 "use client";
 
-import { Search, SearchX } from "lucide-react";
+import { ArrowLeft, GalleryVerticalEnd, Library, Search, SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
-import { CollectionCard } from "@/components/collection/collection-card";
+import { CardPreview } from "@/components/cards/card-preview";
 import { Button } from "@/components/ui/button";
 import { calculateCollectionStats } from "@/features/collection/domain";
-import type { CollectionEntryState, CollectionPageData } from "@/features/collection/types";
+import type {
+  CollectionEntryState,
+  CollectionPageData,
+} from "@/features/collection/types";
 import { Link } from "@/i18n/navigation";
-
-type Status = "all" | "owned" | "missing" | "duplicates" | "trades";
 
 const selectClass = "h-10 min-w-0 rounded-xl border bg-card px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-ring";
 
-export function CollectionManager({ data }: { data: CollectionPageData }) {
+export function CollectionManager({
+  data,
+  seasonSlug,
+}: {
+  data: CollectionPageData;
+  seasonSlug: string;
+}) {
   const t = useTranslations("Collection");
   const [items, setItems] = useState(data.items);
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<Status>("all");
-  const [season, setSeason] = useState("");
   const [setId, setSetId] = useState("");
   const [rarity, setRarity] = useState("");
   const [faction, setFaction] = useState("");
   const [type, setType] = useState("");
 
-  const stats = useMemo(
-    () => calculateCollectionStats(items, data.stats.totalCollectibleCards),
-    [items, data.stats.totalCollectibleCards],
+  const season = data.options.seasons.find((option) => option.slug === seasonSlug)!;
+  const seasonItems = useMemo(
+    () => items.filter((item) => item.card.relationIds.seasonId === season.id),
+    [items, season.id],
   );
-  const seasonStats = useMemo(() => {
-    const groups = new Map<string, { id: string; name: string; total: number; owned: number }>();
-    for (const item of items) {
-      if (!item.card.season) continue;
-      const current = groups.get(item.card.season.id) ?? { id: item.card.season.id, name: item.card.season.name, total: 0, owned: 0 };
-      current.total += 1;
-      if (item.ownedQuantity > 0) current.owned += 1;
-      groups.set(current.id, current);
-    }
-    return [...groups.values()];
-  }, [items]);
+  const stats = useMemo(
+    () => calculateCollectionStats(seasonItems, seasonItems.length),
+    [seasonItems],
+  );
+  const ownedItems = useMemo(
+    () => seasonItems.filter((item) => item.ownedQuantity > 0),
+    [seasonItems],
+  );
+  const visibleSets = data.options.sets.filter((option) => option.seasonId === season.id);
   const filtered = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
-    return items.filter((item) => {
-      const matchesQuery = !normalized || item.card.name.toLocaleLowerCase().includes(normalized) || String(item.card.number).includes(normalized);
-      const matchesStatus = status === "all" ||
-        (status === "owned" && item.ownedQuantity > 0) ||
-        (status === "missing" && item.ownedQuantity === 0) ||
-        (status === "duplicates" && item.duplicateQuantity > 0) ||
-        (status === "trades" && item.tradeQuantity > 0);
-      return matchesQuery && matchesStatus &&
-        (!season || item.card.relationIds.seasonId === season) &&
+    return ownedItems.filter((item) => {
+      const matchesQuery = !normalized ||
+        item.card.name.toLocaleLowerCase().includes(normalized) ||
+        String(item.card.number).includes(normalized);
+      return matchesQuery &&
         (!setId || item.card.relationIds.setId === setId) &&
         (!rarity || item.card.relationIds.rarityId === rarity) &&
         (!faction || item.card.relationIds.factionIds.includes(faction)) &&
         (!type || item.card.relationIds.typeIds.includes(type));
     });
-  }, [items, query, status, season, setId, rarity, faction, type]);
+  }, [ownedItems, query, setId, rarity, faction, type]);
+  const percentage = Math.round(stats.completionPercentage * 10) / 10;
 
   function updateEntry(entry: CollectionEntryState) {
-    setItems((current) => current.map((item) => item.cardId === entry.cardId ? { ...item, ...entry } : item));
+    setItems((current) => current.map((item) =>
+      item.cardId === entry.cardId ? { ...item, ...entry } : item,
+    ));
   }
 
-  function reset() {
-    setQuery(""); setStatus("all"); setSeason(""); setSetId(""); setRarity(""); setFaction(""); setType("");
+  function resetFilters() {
+    setQuery("");
+    setSetId("");
+    setRarity("");
+    setFaction("");
+    setType("");
   }
 
-  const percentage = Math.round(stats.completionPercentage * 10) / 10;
   return (
     <>
-      <section className="border-b bg-[linear-gradient(180deg,color-mix(in_oklch,var(--safir)_8%,transparent),transparent)]">
-        <div className="site-container py-10 sm:py-14">
-          <p className="eyebrow">{t("hero.eyebrow")}</p>
-          <h1 className="mt-3 font-heading text-5xl font-semibold tracking-[-0.06em] sm:text-7xl">{t("hero.title")}</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{t("hero.description")}</p>
-          <div className="mt-8 grid grid-cols-2 gap-2 lg:grid-cols-5">
-            {[
-              [t("stats.unique"), stats.uniqueOwnedCards],
-              [t("stats.missing"), Math.max(stats.totalCollectibleCards - stats.uniqueOwnedCards, 0)],
-              [t("stats.copies"), stats.totalOwnedCopies],
-              [t("stats.duplicates"), stats.duplicateCopies],
-              [t("stats.trades"), stats.tradeCopies],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-2xl border bg-card/75 p-4 backdrop-blur">
-                <p className="text-[0.68rem] font-semibold text-muted-foreground">{label}</p>
-                <p className="mt-2 font-mono text-2xl font-semibold tabular-nums">{value}</p>
+      <section className="relative border-b">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          <div className="surface-grid absolute inset-0 opacity-35 [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+          <div className="absolute -top-44 left-[12%] size-80 rounded-full bg-safir/10 blur-3xl" />
+        </div>
+
+        <div className="site-container relative py-9 sm:py-12">
+          <Link
+            href="/account?tab=collection"
+            className="mb-7 inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            {t("seasonPage.back")}
+          </Link>
+
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(26rem,1.1fr)] lg:items-end">
+            <div>
+              <p className="eyebrow">{t("seasonPage.eyebrow")}</p>
+              <h1 className="mt-3 font-heading text-4xl font-semibold tracking-[-0.055em] sm:text-6xl">
+                {season.name}
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+                {t("seasonPage.description")}
+              </p>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl border border-border/70 bg-background/88 shadow-sm backdrop-blur-xl">
+              <div className="flex items-center gap-4 px-5 py-5 sm:px-6">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-safir/10 text-safir">
+                  <Library className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.68rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+                    {t("seasonPage.progress")}
+                  </p>
+                  <p className="mt-1 font-heading text-xl font-semibold tracking-[-0.025em] sm:text-2xl">
+                    {t("seasons.cards", {
+                      owned: stats.uniqueOwnedCards,
+                      total: stats.totalCollectibleCards,
+                    })}
+                  </p>
+                  <div
+                    className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-label={t("stats.completion", { percentage })}
+                    aria-valuenow={percentage}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    <div className="h-full rounded-full bg-safir" style={{ width: `${Math.min(100, percentage)}%` }} />
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-          {stats.uniqueOwnedCards === 0 ? (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-safir/20 bg-safir/5 p-4">
-              <div><p className="text-sm font-semibold">{t("emptyCollection.title")}</p><p className="mt-1 text-xs text-muted-foreground">{t("emptyCollection.description")}</p></div>
-              <Button variant="outline" nativeButton={false} render={<Link href="/cards" />}>{t("emptyCollection.action")}</Button>
-            </div>
-          ) : null}
-          <div className="mt-4 rounded-2xl border bg-card/75 p-4">
-            <div className="flex items-center justify-between gap-4 text-xs">
-              <span className="font-semibold">{t("stats.progress", { owned: stats.uniqueOwnedCards, total: stats.totalCollectibleCards })}</span>
-              <span className="font-mono text-muted-foreground">{percentage}%</span>
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={t("stats.completion", { percentage })} aria-valuenow={percentage} aria-valuemin={0} aria-valuemax={100}>
-              <div className="h-full rounded-full bg-safir transition-[width]" style={{ width: `${Math.min(100, percentage)}%` }} />
-            </div>
-          </div>
-          {seasonStats.length ? (
-            <div className="mt-4">
-              <p className="mb-2 text-[0.68rem] font-semibold text-muted-foreground">{t("stats.bySeason")}</p>
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {seasonStats.map((item) => {
-                  const value = item.total ? Math.round((item.owned / item.total) * 100) : 0;
-                  return <button key={item.id} type="button" onClick={() => setSeason(item.id)} className="min-w-36 rounded-xl border bg-card/75 p-3 text-left transition hover:border-safir/40"><span className="block truncate text-xs font-semibold">{item.name}</span><span className="mt-1 block font-mono text-sm tabular-nums">{value}%</span></button>;
-                })}
+              <div className="grid grid-cols-3 border-t bg-muted/15">
+                {[
+                  [t("stats.copies"), stats.totalOwnedCopies],
+                  [t("stats.duplicates"), stats.duplicateCopies],
+                  [t("stats.trades"), stats.tradeCopies],
+                ].map(([label, value], index) => (
+                  <div key={label} className={`px-4 py-3.5 sm:px-5 ${index ? "border-l" : ""}`}>
+                    <p className="truncate text-[0.62rem] font-medium text-muted-foreground">{label}</p>
+                    <p className="mt-0.5 font-mono text-sm font-semibold tabular-nums">{value}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          ) : null}
+          </div>
+
+          <div className="mt-8 border-t pt-4">
+            <nav aria-label={t("navigation.label")} className="flex gap-1 overflow-x-auto">
+              <Link
+                href={`/cards?season=${encodeURIComponent(season.slug)}`}
+                className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              >
+                <GalleryVerticalEnd className="size-4" aria-hidden="true" />
+                {t("navigation.cards")}
+              </Link>
+              <Link
+                href="/account?tab=collection"
+                className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-foreground px-4 text-sm font-semibold text-background shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              >
+                <Library className="size-4" aria-hidden="true" />
+                {t("navigation.collection")}
+              </Link>
+            </nav>
+          </div>
         </div>
       </section>
-      <section className="site-container py-8 sm:py-10">
-        <div className="sticky top-2 z-20 rounded-2xl border bg-background/92 p-3 shadow-sm backdrop-blur-xl">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("filters.searchPlaceholder")} aria-label={t("filters.search")} className="h-11 w-full rounded-xl border bg-card pl-10 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
+
+      <section className="site-container py-8 sm:py-10" aria-labelledby="owned-cards-title">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b pb-4">
+          <div>
+            <p className="eyebrow">{t("seasonPage.ownedEyebrow")}</p>
+            <h2 id="owned-cards-title" className="mt-2 font-heading text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+              {t("seasonPage.ownedTitle")}
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("seasons.ownedCards", { count: ownedItems.length })}
+            </p>
           </div>
-          <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1" aria-label={t("filters.status")}>
-            {(["all", "owned", "missing", "duplicates", "trades"] as const).map((value) => (
-              <Button key={value} type="button" size="sm" variant={status === value ? "secondary" : "ghost"} className="rounded-full px-3" onClick={() => setStatus(value)}>{t(`filters.${value}`)}</Button>
-            ))}
-          </div>
-          <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
-            <FilterSelect label={t("filters.season")} value={season} onChange={setSeason} options={data.options.seasons} />
-            <FilterSelect label={t("filters.set")} value={setId} onChange={setSetId} options={data.options.sets.filter((option) => !season || option.seasonId === season)} />
-            <FilterSelect label={t("filters.rarity")} value={rarity} onChange={setRarity} options={data.options.rarities} />
-            <FilterSelect label={t("filters.faction")} value={faction} onChange={setFaction} options={data.options.factions} />
-            <FilterSelect label={t("filters.type")} value={type} onChange={setType} options={data.options.types} />
-            <Button variant="outline" className="h-10" onClick={reset}>{t("filters.reset")}</Button>
-          </div>
+          <p className="font-mono text-sm font-semibold text-safir tabular-nums">
+            {t("seasons.completion", { percentage })}
+          </p>
         </div>
-        <p className="my-5 text-xs font-semibold text-muted-foreground">{t("filters.results", { count: filtered.length })}</p>
-        {filtered.length ? (
-          <div className="grid grid-flow-dense grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-            {filtered.map((item) => <CollectionCard key={item.cardId} item={item} onChange={updateEntry} />)}
-          </div>
+
+        {ownedItems.length ? (
+          <>
+            <div className="sticky top-2 z-20 rounded-2xl border bg-background/92 p-3 shadow-sm backdrop-blur-xl">
+              <div className="relative">
+                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder={t("filters.searchPlaceholder")}
+                  aria-label={t("filters.search")}
+                  className="h-11 w-full rounded-xl border bg-card pr-3 pl-10 text-sm outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-5">
+                <FilterSelect label={t("filters.set")} value={setId} onChange={setSetId} options={visibleSets} />
+                <FilterSelect label={t("filters.rarity")} value={rarity} onChange={setRarity} options={data.options.rarities} />
+                <FilterSelect label={t("filters.faction")} value={faction} onChange={setFaction} options={data.options.factions} />
+                <FilterSelect label={t("filters.type")} value={type} onChange={setType} options={data.options.types} />
+                <Button variant="outline" className="h-10" onClick={resetFilters}>{t("filters.reset")}</Button>
+              </div>
+            </div>
+
+            <p className="my-5 text-xs font-semibold text-muted-foreground">
+              {t("filters.results", { count: filtered.length })}
+            </p>
+            {filtered.length ? (
+              <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 2xl:grid-cols-5">
+                {filtered.map((item, index) => (
+                  <CardPreview
+                    key={item.cardId}
+                    card={item.card}
+                    eager={index < 2}
+                    collectionEntry={item}
+                    onCollectionChange={updateEntry}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed py-20 text-center">
+                <SearchX className="mx-auto size-9 text-muted-foreground/50" aria-hidden="true" />
+                <h3 className="mt-4 font-heading text-xl font-semibold">{t("empty.title")}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{t("empty.description")}</p>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="rounded-2xl border border-dashed py-20 text-center">
-            <SearchX className="mx-auto size-9 text-muted-foreground/50" />
-            <h2 className="mt-4 font-heading text-xl font-semibold">{t("empty.title")}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{t("empty.description")}</p>
+          <div className="rounded-2xl border border-dashed px-6 py-16 text-center">
+            <Library className="mx-auto size-8 text-muted-foreground/45" aria-hidden="true" />
+            <h3 className="mt-4 font-heading text-xl font-semibold">{t("seasonPage.emptyTitle")}</h3>
+            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{t("seasonPage.emptyDescription")}</p>
+            <Button className="mt-6" nativeButton={false} render={<Link href={`/cards?season=${encodeURIComponent(season.slug)}`} />}>
+              {t("emptyCollection.action")}
+            </Button>
           </div>
         )}
       </section>
@@ -153,7 +240,17 @@ export function CollectionManager({ data }: { data: CollectionPageData }) {
   );
 }
 
-function FilterSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<{ id: string; name: string }> }) {
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ id: string; name: string }>;
+}) {
   return (
     <select value={value} onChange={(event) => onChange(event.target.value)} aria-label={label} className={selectClass}>
       <option value="">{label}</option>

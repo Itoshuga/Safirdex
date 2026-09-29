@@ -11,9 +11,10 @@ export interface CardPreviewProps {
   card: CardListItem;
   eager?: boolean;
   collectionEntry?: CollectionEntryState;
+  onCollectionChange?: (entry: CollectionEntryState) => void;
 }
 
-export function CardPreview({ card, eager = false, collectionEntry }: CardPreviewProps) {
+export function CardPreview({ card, eager = false, collectionEntry, onCollectionChange }: CardPreviewProps) {
   const labels = useTranslations("Cards.labels");
   const isHorizontal = card.artwork.orientation === "horizontal";
 
@@ -80,7 +81,7 @@ export function CardPreview({ card, eager = false, collectionEntry }: CardPrevie
       </Link>
       {collectionEntry && card.collectible ? (
         <div className="mt-auto">
-          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="catalogue" />
+          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="catalogue" onChange={onCollectionChange} />
         </div>
       ) : null}
     </article>

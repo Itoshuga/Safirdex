@@ -88,6 +88,7 @@ export function ProfileHeader({
             <ProfileAvatar
               src={profile.avatarUrl}
               name={profile.displayName}
+              preload
               className="-mt-11 size-24 border-[5px] shadow-lg sm:-mt-14 sm:size-28 md:-mt-16 md:size-36 md:border-[6px]"
             />
           </div>

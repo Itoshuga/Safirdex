@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, Layers3, Library, LockKeyhole, Plus } from "lucide-react";
+import { Activity, ArrowLeft, ArrowRight, Layers3, Library, LockKeyhole, Plus } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -55,8 +55,8 @@ export function ProfileTabContentView({
 }) {
   const t = useTranslations("Profile.sections");
   const tFeed = useTranslations("Community.feed");
-  const tCollection = useTranslations("Collection.filters");
   const tCollectionStats = useTranslations("Collection.stats");
+  const tSeasons = useTranslations("Collection.seasons");
   const deckStatus = useTranslations("Decks.status");
   if (content.tab === "overview") {
     return (
@@ -185,12 +185,7 @@ export function ProfileTabContentView({
     );
   }
   if (content.private) {
-    return content.tab === "collection" ? (
-      <div className="space-y-4">
-        <CollectionProfileFilters basePath={basePath} active={content.filter} allLabel={tCollection("all")} tradesLabel={tCollection("trades")} />
-        <EmptySection icon={LockKeyhole} title={t("privateTitle")} description={t("privateDescription")} />
-      </div>
-    ) : <EmptySection icon={LockKeyhole} title={t("privateTitle")} description={t("privateDescription")} />;
+    return <EmptySection icon={LockKeyhole} title={t("privateTitle")} description={t("privateDescription")} />;
   }
   if (content.tab === "decks") {
     if (!content.items.length) return <EmptySection icon={Layers3} title={t("decks.emptyTitle")} description={t("decks.emptyDescription")} />;
@@ -217,26 +212,143 @@ export function ProfileTabContentView({
     );
   }
   if (content.tab === "collection") {
-    if (!content.items.length) return <div className="space-y-4"><CollectionProfileFilters basePath={basePath} active={content.filter} allLabel={tCollection("all")} tradesLabel={tCollection("trades")} /><EmptySection icon={Library} title={t("collection.emptyTitle")} description={t("collection.emptyDescription")} /></div>;
+    const selectedCollection = content.selectedSeasonSlug ? content.collections[0] : undefined;
+    const tradeSuffix = content.filter === "trades" ? "&filter=trades" : "";
+
+    if (!content.selectedSeasonSlug) {
+      return (
+        <section aria-labelledby="profile-season-collections-title">
+          <div className="mb-5 flex items-end justify-between gap-4 border-b pb-4">
+            <div>
+              <p className="eyebrow">{tSeasons("eyebrow")}</p>
+              <h2 id="profile-season-collections-title" className="mt-2 font-heading text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+                {tSeasons(content.filter === "trades" ? "tradeTitle" : "profileTitle")}
+              </h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+                {tSeasons(content.filter === "trades" ? "tradeDescription" : "profileDescription")}
+              </p>
+            </div>
+            <Library className="hidden size-5 text-safir sm:block" aria-hidden="true" />
+          </div>
+
+          {content.collections.length ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {content.collections.map((collection) => {
+                const percentage = Math.round(collection.completionPercentage * 10) / 10;
+                const href = owner
+                  ? `/collection?season=${encodeURIComponent(collection.season.slug)}`
+                  : `${basePath}?tab=collection&season=${encodeURIComponent(collection.season.slug)}${tradeSuffix}`;
+                return (
+                  <Link
+                    key={collection.season.id}
+                    href={href}
+                    className="group relative min-h-64 overflow-hidden rounded-[1.75rem] border bg-card/55 p-6 transition duration-300 hover:-translate-y-0.5 hover:border-safir/30 hover:shadow-xl hover:shadow-black/5"
+                  >
+                    <div className="pointer-events-none absolute -right-16 -bottom-20 size-56 rounded-full bg-safir/10 blur-3xl transition group-hover:bg-safir/15" />
+                    <div className="relative flex h-full flex-col">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="grid size-11 place-items-center rounded-2xl bg-safir/10 text-safir">
+                          <Library className="size-5" aria-hidden="true" />
+                        </span>
+                        <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" aria-hidden="true" />
+                      </div>
+                      <div className="mt-auto pt-8">
+                        <p className="text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">{tSeasons("collection")}</p>
+                        <h3 className="mt-2 truncate font-heading text-2xl font-semibold">{collection.season.name}</h3>
+                        {content.filter === "trades" ? (
+                          <p className="mt-4 text-sm font-semibold text-safir">{tSeasons("tradeCards", { count: collection.items.length })}</p>
+                        ) : (
+                          <>
+                            <div className="mt-4 flex items-end gap-3">
+                              <strong className="font-heading text-4xl font-semibold tracking-tight">{collection.ownedCards}</strong>
+                              <span className="pb-1 text-sm text-muted-foreground">{t("collection.unit", { count: collection.ownedCards })}</span>
+                            </div>
+                            <p className="mt-3 text-sm text-muted-foreground">
+                              {tSeasons("cards", { owned: collection.ownedCards, total: collection.totalCards })}
+                            </p>
+                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                              <div className="h-full rounded-full bg-safir transition-[width]" style={{ width: `${Math.min(100, percentage)}%` }} />
+                            </div>
+                            <p className="mt-2 text-xs font-semibold text-safir">{tSeasons("completion", { percentage })}</p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptySection icon={Library} title={t("collection.emptyTitle")} description={t("collection.emptyDescription")} />
+          )}
+        </section>
+      );
+    }
+
     return (
-      <div className="space-y-4">
-        <CollectionProfileFilters basePath={basePath} active={content.filter} allLabel={tCollection("all")} tradesLabel={tCollection("trades")} />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-          {content.items.map((card) => (
-          <Link key={card.cardId} href={`/cards/${card.slug}`} className="group overflow-hidden rounded-xl border bg-card">
-            <div className={`relative ${card.orientation === "horizontal" ? "aspect-[3/2]" : "aspect-[5/7]"} overflow-hidden bg-muted`}>
-              {card.artworkUrl ? <Image src={card.artworkUrl} alt={card.name} fill sizes="(max-width: 639px) 50vw, 16vw" className="object-cover transition duration-300 group-hover:scale-[1.03]" /> : null}
+      <div className="space-y-6">
+        <Link
+          href={`${basePath}?tab=collection${tradeSuffix}`}
+          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          {tSeasons("back")}
+        </Link>
+
+        {selectedCollection ? (
+          <section aria-labelledby="selected-season-title">
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-4 border-b pb-4">
+              <div>
+                <p className="eyebrow">{tSeasons("collection")}</p>
+                <h2 id="selected-season-title" className="mt-2 font-heading text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+                  {selectedCollection.season.name}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {content.filter === "trades"
+                    ? tSeasons("tradeCards", { count: selectedCollection.items.length })
+                    : tSeasons("ownedCards", { count: selectedCollection.ownedCards })}
+                </p>
+              </div>
+              <Library className="hidden size-5 text-safir sm:block" aria-hidden="true" />
             </div>
-            <div className="flex items-center justify-between gap-2 p-3">
-              <span className="truncate text-xs font-semibold">{card.name}</span>
-              <span className="flex shrink-0 gap-1">
-                <Badge variant="secondary">×{card.ownedQuantity}</Badge>
-                {card.tradeQuantity > 0 ? <Badge>↔ {card.tradeQuantity}</Badge> : null}
-              </span>
-            </div>
-          </Link>
-          ))}
-        </div>
+
+            {selectedCollection.items.length ? (
+              <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+                {selectedCollection.items.map((card) => (
+                  <article key={card.cardId} className={`flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] border bg-card/80 transition hover:border-safir/35 hover:shadow-[0_22px_50px_-38px_color-mix(in_oklch,var(--safir)_65%,transparent)] ${card.orientation === "horizontal" ? "col-span-2" : ""}`}>
+                    <Link href={`/cards/${card.slug}`} prefetch={false} className="group block focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring">
+                      <div className={`relative overflow-hidden bg-muted/40 ${card.orientation === "horizontal" ? "aspect-[37/25]" : "aspect-[5/7]"}`}>
+                        {card.artworkUrl ? (
+                          <Image src={card.artworkUrl} alt={card.name} fill sizes="(max-width: 639px) 50vw, (max-width: 1024px) 33vw, 20vw" className="object-cover transition duration-300 group-hover:scale-[1.015]" />
+                        ) : null}
+                        <span className="absolute top-2.5 left-2.5 rounded-md border border-white/15 bg-black/62 px-2 py-1 font-mono text-[0.65rem] font-semibold text-white backdrop-blur-md">
+                          N°{String(card.number).padStart(3, "0")}
+                        </span>
+                      </div>
+                      <div className="p-3 sm:p-3.5">
+                        <h3 className="truncate font-heading text-sm font-semibold tracking-[-0.02em] sm:text-base">{card.name}</h3>
+                        <p className="mt-1 truncate text-[0.68rem] text-muted-foreground">{selectedCollection.season.name}</p>
+                      </div>
+                    </Link>
+                    <div className="mt-auto flex min-h-11 items-center justify-between gap-2 border-t bg-muted/15 px-3 py-2">
+                      <span className="text-[0.68rem] font-semibold text-muted-foreground">
+                        {content.filter === "trades" ? tSeasons("available") : tSeasons("owned")}
+                      </span>
+                      <span className="flex shrink-0 gap-1">
+                        {card.ownedQuantity > 0 ? <Badge variant="secondary">×{card.ownedQuantity}</Badge> : null}
+                        {card.tradeQuantity > 0 ? <Badge>↔ {card.tradeQuantity}</Badge> : null}
+                      </span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptySection icon={Library} title={t("collection.emptyTitle")} description={t("collection.emptyDescription")} />
+            )}
+          </section>
+        ) : (
+          <EmptySection icon={Library} title={t("collection.emptyTitle")} description={t("collection.emptyDescription")} />
+        )}
       </div>
     );
   }
@@ -255,15 +367,6 @@ export function ProfileTabContentView({
           {tFeed("loadMore")}
         </Button>
       ) : null}
-    </div>
-  );
-}
-
-function CollectionProfileFilters({ basePath, active, allLabel, tradesLabel }: { basePath: string; active: "all" | "trades"; allLabel: string; tradesLabel: string }) {
-  return (
-    <div className="flex w-fit rounded-xl border bg-card p-1">
-      <Button size="sm" variant={active === "all" ? "secondary" : "ghost"} nativeButton={false} render={<Link href={`${basePath}?tab=collection`} />}>{allLabel}</Button>
-      <Button size="sm" variant={active === "trades" ? "secondary" : "ghost"} nativeButton={false} render={<Link href={`${basePath}?tab=collection&filter=trades`} />}>{tradesLabel}</Button>
     </div>
   );
 }

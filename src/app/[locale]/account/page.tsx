@@ -50,6 +50,7 @@ export default async function AccountPage({
   const tab = parseProfileTab(query.tab);
   const cursor = Array.isArray(query.cursor) ? query.cursor[0] : query.cursor;
   const collectionFilter = query.filter === "trades" ? "trades" as const : "all" as const;
+  const collectionSeason = Array.isArray(query.season) ? query.season[0] : query.season;
   const content = await getProfileTabContent({
     profile: profile.internal,
     tab,
@@ -58,6 +59,7 @@ export default async function AccountPage({
     viewerId: session.uid,
     cursor,
     collectionFilter,
+    collectionSeason,
   });
   const connectionKind: "followers" | "following" | undefined =
     query.connections === "followers" || query.connections === "following"

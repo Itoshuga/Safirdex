@@ -60,6 +60,7 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
   const tab = parseProfileTab(query.tab);
   const cursor = Array.isArray(query.cursor) ? query.cursor[0] : query.cursor;
   const collectionFilter = query.filter === "trades" ? "trades" as const : "all" as const;
+  const collectionSeason = Array.isArray(query.season) ? query.season[0] : query.season;
   const isFollowing = session
     ? await followsRepository.isFollowing(session.uid, profile.internal.id)
     : false;
@@ -72,6 +73,7 @@ export default async function PublicProfilePage({ params, searchParams }: PagePr
     canViewFollowers: isFollowing,
     cursor,
     collectionFilter,
+    collectionSeason,
   });
   const connectionKind: "followers" | "following" | undefined =
     query.connections === "followers" || query.connections === "following"

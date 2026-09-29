@@ -13,6 +13,7 @@ import type {
   CommunityFeedPage,
   ProfileCollectionItem,
   ProfileDeckItem,
+  ProfileSeasonCollection,
   ProfileTab,
   ProfileTabContent,
   PublicProfileView,
@@ -23,7 +24,6 @@ import { firestoreDateIso } from "@/lib/firebase/timestamp";
 import { getLocalizedName } from "@/lib/i18n/get-localized-value";
 import type { AppLocale } from "@/lib/i18n/locales";
 import { activitiesRepository } from "@/repositories/activities.repository";
-import { cardsRepository } from "@/repositories/cards.repository";
 import { followsRepository } from "@/repositories/follows.repository";
 import { publicProfilesRepository } from "@/repositories/public-profiles.repository";
 import {
@@ -38,7 +38,7 @@ import {
   purgeUserTradeReadModels,
 } from "@/features/collection/server/collection-service";
 import { collectionRepository } from "@/features/collection/repositories/collection-repository";
-import { getCollectibleCardCount } from "@/features/cards/server/codex-service";
+import { getCollectibleCardCount, getCollectionCatalog } from "@/features/cards/server/codex-service";
 
 interface PrivateUserDocument {
   username?: string | null;
@@ -544,47 +544,103 @@ async function getCollection(
   locale: AppLocale,
   owner: boolean,
   filter: "all" | "trades",
-): Promise<ProfileCollectionItem[]> {
-  if (!owner && filter === "trades") {
-    const trades = await collectionRepository.getPublicTradesForUser(profile.id, 60);
-    const cards = await cardsRepository.getManyByIds(trades.map((trade) => trade.data.cardId));
-    const byId = new Map(cards.map((card) => [card.id, card]));
-    return trades.flatMap(({ data }) => {
-      const card = byId.get(data.cardId);
-      if (!card) return [];
-      return [{
-        cardId: card.id,
-        slug: card.slug,
-        name: getLocalizedName(card.translations, locale),
-        ...(card.artwork.url ? { artworkUrl: card.artwork.url } : {}),
-        orientation: card.artwork.orientation,
-        ownedQuantity: 0,
-        duplicateQuantity: data.tradeQuantity,
-        tradeQuantity: data.tradeQuantity,
-      }];
-    });
-  }
-  const snapshot = await getFirebaseAdminFirestore().collection("users").doc(profile.id)
-    .collection("collection").orderBy("updatedAt", "desc").limit(60).get();
-  const documents = filter === "trades"
-    ? snapshot.docs.filter((document) => Number(document.get("tradeQuantity") ?? 0) > 0)
-    : snapshot.docs;
-  const cards = await cardsRepository.getManyByIds(documents.map((document) => document.id));
-  const byId = new Map(cards.map((card) => [card.id, card]));
-  return documents.flatMap((document) => {
-    const card = byId.get(document.id);
-    if (!card) return [];
-    return [{
+  seasonSlug?: string,
+): Promise<ProfileSeasonCollection[]> {
+  const groupBySeason = (
+    catalog: Awaited<ReturnType<typeof getCollectionCatalog>>,
+    items: ProfileCollectionItem[],
+  ) => {
+    const groups = new Map<string, {
+      season: ProfileCollectionItem["season"];
+      totalCards: number;
+      items: ProfileCollectionItem[];
+    }>();
+
+    for (const card of catalog) {
+      if (!card.season) continue;
+      const current = groups.get(card.season.id) ?? {
+        season: {
+          id: card.season.id,
+          slug: card.season.slug,
+          name: card.season.name,
+        },
+        totalCards: 0,
+        items: [],
+      };
+      current.totalCards += 1;
+      groups.set(card.season.id, current);
+    }
+    for (const item of items) groups.get(item.season.id)?.items.push(item);
+
+    return [...groups.values()]
+      .filter((group) => (!seasonSlug || group.season.slug === seasonSlug) && (filter === "all" || group.items.length > 0))
+      .map((group) => {
+        const ownedCards = filter === "trades"
+          ? group.items.length
+          : group.items.filter((item) => item.ownedQuantity > 0).length;
+        return {
+          ...group,
+          ownedCards,
+          completionPercentage: group.totalCards > 0
+            ? (ownedCards / group.totalCards) * 100
+            : 0,
+        };
+      });
+  };
+
+  const toItem = (
+    card: Awaited<ReturnType<typeof getCollectionCatalog>>[number],
+    ownedQuantity: number,
+    tradeQuantity: number,
+  ): ProfileCollectionItem | null => {
+    if (!card.season) return null;
+    return {
       cardId: card.id,
+      number: card.number,
       slug: card.slug,
-      name: getLocalizedName(card.translations, locale),
+      name: card.name,
       ...(card.artwork.url ? { artworkUrl: card.artwork.url } : {}),
       orientation: card.artwork.orientation,
-      ownedQuantity: Number(document.get("ownedQuantity") ?? document.get("quantity") ?? 1),
-      duplicateQuantity: Math.max(Number(document.get("ownedQuantity") ?? document.get("quantity") ?? 1) - 1, 0),
-      tradeQuantity: owner ? Number(document.get("tradeQuantity") ?? 0) : 0,
-    }];
+      ownedQuantity,
+      duplicateQuantity: Math.max(ownedQuantity - 1, 0),
+      tradeQuantity,
+      season: {
+        id: card.season.id,
+        slug: card.season.slug,
+        name: card.season.name,
+      },
+    };
+  };
+
+  if (!owner && filter === "trades") {
+    const [trades, catalog] = await Promise.all([
+      collectionRepository.getPublicTradesForUser(profile.id),
+      getCollectionCatalog(locale),
+    ]);
+    const byId = new Map(catalog.map((card) => [card.id, card]));
+    const items = trades.flatMap(({ data }) => {
+      const card = byId.get(data.cardId);
+      const item = card ? toItem(card, 0, data.tradeQuantity) : null;
+      return item ? [item] : [];
+    });
+    return groupBySeason(catalog, items);
+  }
+  const [entries, catalog] = await Promise.all([
+    collectionRepository.getAllEntries(profile.id),
+    getCollectionCatalog(locale),
+  ]);
+  const visibleEntries = filter === "trades"
+    ? entries.filter((entry) => entry.tradeQuantity > 0)
+    : entries;
+  const byId = new Map(catalog.map((card) => [card.id, card]));
+  const items = visibleEntries.flatMap((entry) => {
+    const card = byId.get(entry.cardId);
+    const item = card
+      ? toItem(card, entry.ownedQuantity, owner ? entry.tradeQuantity : 0)
+      : null;
+    return item ? [item] : [];
   });
+  return groupBySeason(catalog, items);
 }
 
 export async function getProfileTabContent({
@@ -596,6 +652,7 @@ export async function getProfileTabContent({
   canViewFollowers = false,
   cursor,
   collectionFilter = "all",
+  collectionSeason,
 }: {
   profile: PublicUserProfileDocument;
   tab: ProfileTab;
@@ -605,6 +662,7 @@ export async function getProfileTabContent({
   canViewFollowers?: boolean;
   cursor?: string;
   collectionFilter?: "all" | "trades";
+  collectionSeason?: string;
 }): Promise<ProfileTabContent> {
   const feedAccess = owner ? "owner" : canViewFollowers ? "follower" : "public";
   if (tab === "overview") {
@@ -638,12 +696,18 @@ export async function getProfileTabContent({
     return tab === "activity"
       ? { tab, private: true, feed: { items: [] } }
       : tab === "collection"
-        ? { tab, private: true, items: [], filter: collectionFilter }
+        ? { tab, private: true, collections: [], filter: collectionFilter, ...(collectionSeason ? { selectedSeasonSlug: collectionSeason } : {}) }
         : { tab, private: true, items: [] };
   }
   if (tab === "decks") return { tab, private: false, items: await getDecks(profile, owner, locale) };
   if (tab === "collection") {
-    return { tab, private: false, items: await getCollection(profile, locale, owner, collectionFilter), filter: collectionFilter };
+    return {
+      tab,
+      private: false,
+      collections: await getCollection(profile, locale, owner, collectionFilter, collectionSeason),
+      filter: collectionFilter,
+      ...(collectionSeason ? { selectedSeasonSlug: collectionSeason } : {}),
+    };
   }
   return {
     tab,
