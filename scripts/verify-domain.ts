@@ -15,6 +15,7 @@ import type { HomeCardSearchItem } from "@/features/cards/types";
 import {
   cardStatSchema,
   createCardSchema,
+  createSeasonSchema,
   updateCardSchema,
 } from "@/validation/schemas";
 
@@ -36,6 +37,20 @@ function verifyStats() {
   assert.equal(cardStatSchema.safeParse(-1).success, false);
   assert.equal(cardStatSchema.safeParse(MAX_CARD_STAT + 1).success, false);
   assert.equal(cardStatSchema.safeParse(2.5).success, false);
+}
+
+function verifySeasonOrder() {
+  const season = {
+    slug: "season-2-5",
+    number: 2.5,
+    translations: { fr: { name: "Saison 2.5" } },
+    releaseDate: null,
+    isActive: true,
+    isFeatured: false,
+  };
+
+  assert.equal(createSeasonSchema.safeParse(season).success, true);
+  assert.equal(createSeasonSchema.safeParse({ ...season, number: 0 }).success, false);
 }
 
 async function verifySlugs() {
@@ -142,6 +157,7 @@ async function main() {
   assert.equal(updateCardSchema.safeParse({ defense: 0 }).success, true);
   verifyTranslations();
   verifyStats();
+  verifySeasonOrder();
   await verifySlugs();
   verifyGlossaryReferences();
   verifyHomeSearch();

@@ -106,7 +106,7 @@ export const cardSchema = createCardSchema.extend(entityFieldsSchema.shape);
 
 export const createSeasonSchema = z.object({
   slug: slugSchema,
-  number: z.number().int().positive(),
+  number: z.number().positive().finite(),
   translations: translationsSchema(nameDescriptionTranslationSchema),
   artwork: storedAssetSchema.optional(),
   releaseDate: timestampSchema.nullable(),

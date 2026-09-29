@@ -32,6 +32,9 @@ function one(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value ?? "";
 }
 
+const CARD_SORTS = ["catalog", "updated", "created", "number"] as const;
+type CardSort = (typeof CARD_SORTS)[number];
+
 export default async function CardsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
   const [t, entities, table, filters, common, states, labels, locale, cards, seasons, sets, rarities, types] = await Promise.all([
@@ -51,9 +54,13 @@ export default async function CardsPage({ searchParams }: { searchParams: Promis
   const type = one(params.type);
   const commander = one(params.commander);
   const promo = one(params.promo);
-  const sort = one(params.sort) || "updated";
+  const requestedSort = one(params.sort);
+  const sort: CardSort = CARD_SORTS.includes(requestedSort as CardSort)
+    ? requestedSort as CardSort
+    : "catalog";
   const pageSizeCandidate = Number(one(params.limit) || 25);
   const pageSize = [25, 50, 100].includes(pageSizeCandidate) ? pageSizeCandidate : 25;
+  const seasonEntityById = new Map(seasons.map((entry) => [entry.id, entry]));
 
   const filtered = cards.filter((card) => {
     const names = Object.values(card.translations).map((translation) => translation.name.toLowerCase());
@@ -64,12 +71,29 @@ export default async function CardsPage({ searchParams }: { searchParams: Promis
       && (!type || card.typeIds.includes(type))
       && (!commander || String(card.isCommander) === commander)
       && (!promo || String(card.isPromo) === promo);
-  }).sort((a, b) => sort === "number" ? a.number - b.number : sort === "created" ? b.createdAt.toMillis() - a.createdAt.toMillis() : b.updatedAt.toMillis() - a.updatedAt.toMillis());
+  }).sort((a, b) => {
+    if (sort === "catalog") {
+      const leftSeason = seasonEntityById.get(a.seasonId);
+      const rightSeason = seasonEntityById.get(b.seasonId);
+      const seasonOrder = (leftSeason?.number ?? Number.POSITIVE_INFINITY) - (rightSeason?.number ?? Number.POSITIVE_INFINITY);
+      if (seasonOrder !== 0) return seasonOrder;
+      if (a.seasonId !== b.seasonId) {
+        const seasonNameOrder = (leftSeason ? localizedLabel(leftSeason.translations, locale) : a.seasonId)
+          .localeCompare(rightSeason ? localizedLabel(rightSeason.translations, locale) : b.seasonId, locale);
+        if (seasonNameOrder !== 0) return seasonNameOrder;
+        return a.seasonId.localeCompare(b.seasonId);
+      }
+      return a.number - b.number || a.slug.localeCompare(b.slug, locale);
+    }
+    if (sort === "number") return a.number - b.number;
+    if (sort === "created") return b.createdAt.toMillis() - a.createdAt.toMillis();
+    return b.updatedAt.toMillis() - a.updatedAt.toMillis();
+  });
 
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const page = Math.min(Math.max(1, Number(one(params.page) || 1)), pages);
   const visible = filtered.slice((page - 1) * pageSize, page * pageSize);
-  const hasFilters = Boolean(search || season || set || rarity || type || commander || promo || sort !== "updated" || pageSize !== 25);
+  const hasFilters = Boolean(search || season || set || rarity || type || commander || promo || sort !== "catalog" || pageSize !== 25);
   const seasonById = new Map(seasons.map((entry) => [entry.id, localizedLabel(entry.translations, locale)]));
   const setById = new Map(sets.map((entry) => [entry.id, localizedLabel(entry.translations, locale)]));
   const rarityById = new Map(rarities.map((entry) => [entry.id, entry]));
@@ -97,7 +121,7 @@ export default async function CardsPage({ searchParams }: { searchParams: Promis
           <select className="admin-input h-9" name="set" defaultValue={set} aria-label={filters("filterBySet")}><option value="">{filters("allSets")}</option>{sets.filter((entry) => !season || entry.seasonId === season).map((entry) => <option key={entry.id} value={entry.id}>{localizedLabel(entry.translations, locale)}</option>)}</select>
           <select className="admin-input h-9" name="commander" defaultValue={commander} aria-label={filters("filterCommanders")}><option value="">{filters("commanderAny")}</option><option value="true">{filters("commanderOnly")}</option><option value="false">{filters("notCommander")}</option></select>
           <select className="admin-input h-9" name="promo" defaultValue={promo} aria-label={filters("filterPromos")}><option value="">{filters("promoAny")}</option><option value="true">{filters("promoOnly")}</option><option value="false">{filters("notPromo")}</option></select>
-          <select className="admin-input h-9" name="sort" defaultValue={sort} aria-label={filters("sortCards")}><option value="updated">{filters("recentlyUpdated")}</option><option value="created">{filters("recentlyCreated")}</option><option value="number">{filters("cardNumber")}</option></select>
+          <select className="admin-input h-9" name="sort" defaultValue={sort} aria-label={filters("sortCards")}><option value="catalog">{filters("catalogOrder")}</option><option value="updated">{filters("recentlyUpdated")}</option><option value="created">{filters("recentlyCreated")}</option><option value="number">{filters("cardNumber")}</option></select>
           <select className="admin-input h-9" name="limit" defaultValue={pageSize} aria-label={filters("itemsPerPage")}><option value="25">{filters("perPage", { count: 25 })}</option><option value="50">{filters("perPage", { count: 50 })}</option><option value="100">{filters("perPage", { count: 100 })}</option></select>
           {hasFilters ? <Link href="/admin/cards" className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"><X className="size-3.5" /> {filters("clearFilters")}</Link> : null}
         </div>

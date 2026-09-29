@@ -110,6 +110,7 @@
       "notPromo": "Not promo",
       "recentlyUpdated": "Recently updated",
       "recentlyCreated": "Recently created",
+      "catalogOrder": "Season then number",
       "cardNumber": "Card number",
       "perPage": "{count} / page",
       "filterBySeason": "Filter by season",

@@ -112,6 +112,7 @@
       "notPromo": "Non promos",
       "recentlyUpdated": "Récemment modifiées",
       "recentlyCreated": "Récemment créées",
+      "catalogOrder": "Saison puis numéro",
       "cardNumber": "Numéro de carte",
       "perPage": "{count} / page",
       "filterBySeason": "Filtrer par saison",

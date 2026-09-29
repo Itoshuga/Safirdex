@@ -77,7 +77,7 @@ export function SeasonForm({ action, mode, initial }: { action: FormAction; mode
         <div className="space-y-5">
           <FormSection title={t("general")} description={t("generalSeasonDescription")}>
             <div className="grid gap-5 sm:grid-cols-2">
-              <div className="space-y-2"><label className="admin-label" htmlFor="season-number">{t("number")}</label><input id="season-number" className="admin-input" type="number" min="1" value={value.number} onChange={(event) => update({ number: Number(event.target.value) })} /></div>
+              <div className="space-y-2"><label className="admin-label" htmlFor="season-number">{t("number")}</label><input id="season-number" className="admin-input" type="number" min="0.1" step="0.1" value={value.number} onChange={(event) => update({ number: Number(event.target.value) })} /></div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between"><label className="admin-label" htmlFor="season-slug">{t("slug")}</label>{mode === "create" ? <label className="text-xs text-muted-foreground"><input className="mr-1" type="checkbox" checked={autoSlug} onChange={(event) => setAutoSlug(event.target.checked)} />{t("auto")}</label> : null}</div>
                 <input id="season-slug" className="admin-input" value={value.slug} onChange={(event) => { setAutoSlug(false); update({ slug: event.target.value }); }} />
