@@ -1,4 +1,4 @@
-import { LayoutGrid, List, SearchX } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, List, SearchX } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -44,7 +44,15 @@ export async function generateMetadata({
   };
 }
 
-function nextPageHref(query: CodexQueryState, cursor: string) {
+function cardsHref(
+  query: CodexQueryState,
+  overrides: {
+    view?: CodexQueryState["view"];
+    page?: number;
+    cursor?: string;
+    cursorDirection?: CodexQueryState["cursorDirection"];
+  } = {},
+) {
   const params = new URLSearchParams();
   if (query.q) params.set("q", query.q);
   if (query.season) params.set("season", query.season);
@@ -54,20 +62,22 @@ function nextPageHref(query: CodexQueryState, cursor: string) {
   if (query.commander !== undefined) params.set("commander", String(query.commander));
   if (query.promo !== undefined) params.set("promo", String(query.promo));
   if (query.sort !== "number") params.set("sort", query.sort);
-  if (query.view !== "grid") params.set("view", query.view);
-  params.set("cursor", cursor);
-  return `/cards?${params.toString()}`;
+  const view = overrides.view ?? query.view;
+  const page = overrides.page ?? query.page;
+  const cursor = overrides.cursor ?? query.cursor;
+  const cursorDirection = overrides.cursorDirection ?? query.cursorDirection;
+  if (view !== "grid") params.set("view", view);
+  if (page > 1 && cursor) {
+    params.set("page", String(page));
+    params.set("cursor", cursor);
+    if (cursorDirection === "before") params.set("direction", "before");
+  }
+  const serialized = params.toString();
+  return serialized ? `/cards?${serialized}` : "/cards";
 }
 
 function viewHref(query: CodexQueryState, view: CodexQueryState["view"]) {
-  const href = nextPageHref(query, query.cursor ?? "");
-  const params = new URLSearchParams(href.split("?")[1]);
-  params.delete("cursor");
-  if (query.cursor) params.set("cursor", query.cursor);
-  if (view === "grid") params.delete("view");
-  else params.set("view", view);
-  const serialized = params.toString();
-  return serialized ? `/cards?${serialized}` : "/cards";
+  return cardsHref(query, { view });
 }
 
 export default async function CardsPage({
@@ -115,7 +125,7 @@ export default async function CardsPage({
                     {data.query.q
                       ? results("filteredOnPage", { count: data.items.length })
                       : results("loaded", { count: data.fetchedCount })}
-                    {data.hasMore ? ` ${results("moreAvailable")}` : ""}
+                    {data.pageCount > 1 ? ` ${results("page", { page: data.query.page, pages: data.pageCount })}` : ""}
                   </p>
                 </div>
                 {data.query.q ? <p className="hidden text-[0.68rem] text-muted-foreground md:block">{results("searchNote")}</p> : null}
@@ -160,12 +170,59 @@ export default async function CardsPage({
                   </Button>
                 </div>
               )}
-              {data.nextCursor ? (
-                <div className="flex justify-center border-t pt-6">
-                  <Button size="lg" variant="outline" nativeButton={false} render={<Link href={nextPageHref(data.query, data.nextCursor)} prefetch={false} />}>
-                    {results("loadMore")}
-                  </Button>
-                </div>
+              {data.pageCount > 1 ? (
+                <nav className="flex items-center justify-between gap-4 border-t pt-6" aria-label={results("paginationLabel")}>
+                  {data.previousCursor ? (
+                    <Button
+                      variant="outline"
+                      nativeButton={false}
+                      render={
+                        <Link
+                          href={cardsHref(data.query, {
+                            page: data.query.page - 1,
+                            cursor: data.query.page - 1 === 1 ? undefined : data.previousCursor,
+                            cursorDirection: "before",
+                          })}
+                          prefetch={false}
+                          aria-label={results("previous")}
+                        />
+                      }
+                    >
+                      <ChevronLeft /> <span className="hidden sm:inline">{results("previous")}</span>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" disabled aria-label={results("previous")}>
+                      <ChevronLeft /> <span className="hidden sm:inline">{results("previous")}</span>
+                    </Button>
+                  )}
+                  <div className="text-center">
+                    <p className="text-sm font-semibold tabular-nums">{results("page", { page: data.query.page, pages: data.pageCount })}</p>
+                    <p className="mt-0.5 text-[0.68rem] text-muted-foreground">{results("perPage", { count: data.fetchedCount })}</p>
+                  </div>
+                  {data.nextCursor ? (
+                    <Button
+                      variant="outline"
+                      nativeButton={false}
+                      render={
+                        <Link
+                          href={cardsHref(data.query, {
+                            page: data.query.page + 1,
+                            cursor: data.nextCursor,
+                            cursorDirection: "after",
+                          })}
+                          prefetch={false}
+                          aria-label={results("next")}
+                        />
+                      }
+                    >
+                      <span className="hidden sm:inline">{results("next")}</span> <ChevronRight />
+                    </Button>
+                  ) : (
+                    <Button variant="outline" disabled aria-label={results("next")}>
+                      <span className="hidden sm:inline">{results("next")}</span> <ChevronRight />
+                    </Button>
+                  )}
+                </nav>
               ) : null}
           </div>
         </section>

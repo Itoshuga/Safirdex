@@ -100,7 +100,9 @@ export interface CodexQueryState {
   promo?: boolean;
   sort: "number" | "newest" | "oldest";
   view: "grid" | "list";
+  page: number;
   cursor?: string;
+  cursorDirection?: "after" | "before";
 }
 
 export interface CodexPageData {
@@ -108,6 +110,8 @@ export interface CodexPageData {
   options: CodexFilterOptions;
   query: CodexQueryState;
   nextCursor: string | null;
-  hasMore: boolean;
+  previousCursor: string | null;
+  pageCount: number;
+  totalCount: number;
   fetchedCount: number;
 }

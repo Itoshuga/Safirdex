@@ -66,10 +66,33 @@ function decodeCursor(cursor: string, sort: CardsPageQuery["sort"]) {
   }
 }
 
+function applyPrimaryFilter(query: Query<Card>, filters: CardsPageQuery["filters"]) {
+  if (filters.typeId) {
+    return query.where("typeIds", "array-contains", filters.typeId);
+  }
+  if (filters.seasonId) {
+    return query.where("seasonId", "==", filters.seasonId);
+  }
+  if (filters.setId) {
+    return query.where("setId", "==", filters.setId);
+  }
+  if (filters.rarityId) {
+    return query.where("rarityId", "==", filters.rarityId);
+  }
+  if (filters.isCommander !== undefined) {
+    return query.where("isCommander", "==", filters.isCommander);
+  }
+  if (filters.isPromo !== undefined) {
+    return query.where("isPromo", "==", filters.isPromo);
+  }
+  return query;
+}
+
 async function getPage({
   filters,
   sort,
   cursor,
+  cursorDirection,
   limit,
 }: CardsPageQuery): Promise<CardsRepositoryPage> {
   const orderField = sort === "number" ? "number" : "createdAt";
@@ -82,21 +105,7 @@ async function getPage({
       cardConverter,
     );
 
-    if (includeFilter) {
-      if (filters.typeId) {
-        query = query.where("typeIds", "array-contains", filters.typeId);
-      } else if (filters.seasonId) {
-        query = query.where("seasonId", "==", filters.seasonId);
-      } else if (filters.setId) {
-        query = query.where("setId", "==", filters.setId);
-      } else if (filters.rarityId) {
-        query = query.where("rarityId", "==", filters.rarityId);
-      } else if (filters.isCommander !== undefined) {
-        query = query.where("isCommander", "==", filters.isCommander);
-      } else if (filters.isPromo !== undefined) {
-        query = query.where("isPromo", "==", filters.isPromo);
-      }
-    }
+    if (includeFilter) query = applyPrimaryFilter(query, filters);
 
     query = query
       .orderBy(orderField, direction)
@@ -107,13 +116,17 @@ async function getPage({
         orderField === "createdAt"
           ? Timestamp.fromMillis(decodedCursor.value)
           : decodedCursor.value;
-      query = query.startAfter(cursorValue, decodedCursor.id);
+      query = cursorDirection === "before"
+        ? query.endBefore(cursorValue, decodedCursor.id)
+        : query.startAfter(cursorValue, decodedCursor.id);
     }
 
-    return query.limit(limit + 1);
+    return decodedCursor && cursorDirection === "before"
+      ? query.limitToLast(limit)
+      : query.limit(limit);
   };
 
-  logFirestoreRead("cardsRepository.getPage()", limit + 1);
+  logFirestoreRead("cardsRepository.getPage()", limit);
   let snapshot: QuerySnapshot<Card>;
   try {
     snapshot = await buildQuery(true).get();
@@ -127,12 +140,13 @@ async function getPage({
     }
     snapshot = await buildQuery(false).get();
   }
-  const hasMore = snapshot.docs.length > limit;
-  const documents = snapshot.docs.slice(0, limit);
+  const documents = snapshot.docs;
+  const firstDocument = documents.at(0);
+  const firstCard = firstDocument?.data();
   const lastDocument = documents.at(-1);
   const lastCard = lastDocument?.data();
   const nextCursor =
-    hasMore && lastDocument && lastCard
+    lastDocument && lastCard
       ? encodeCursor({
           version: 1,
           sort,
@@ -143,17 +157,54 @@ async function getPage({
           id: lastDocument.id,
         })
       : null;
+  const previousCursor =
+    firstDocument && firstCard
+      ? encodeCursor({
+          version: 1,
+          sort,
+          value:
+            orderField === "number"
+              ? firstCard.number
+              : firstCard.createdAt.toMillis(),
+          id: firstDocument.id,
+        })
+      : null;
 
   return {
     items: documents.map((document) => document.data()),
     nextCursor,
-    hasMore,
+    previousCursor,
   };
+}
+
+async function count(filters: CardsPageQuery["filters"]) {
+  const buildQuery = (includeFilter: boolean) => {
+    const collection = getTypedAdminCollection(
+      FIRESTORE_COLLECTIONS.cards,
+      cardConverter,
+    );
+    return includeFilter ? applyPrimaryFilter(collection, filters) : collection;
+  };
+
+  logFirestoreRead("cardsRepository.count() aggregate");
+  try {
+    return (await buildQuery(true).count().get()).data().count;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (!/requires an index/i.test(message)) throw error;
+    if (process.env.NODE_ENV === "development") {
+      console.info(
+        "[Firestore] count index unavailable; using the unfiltered aggregate count",
+      );
+    }
+    return (await buildQuery(false).count().get()).data().count;
+  }
 }
 
 export const cardsRepository = {
   ...repository,
   getPage,
+  count,
   getAll: () => repository.getAll({ orderBy: "createdAt", direction: "desc" }),
   getBySlug: (slug: string) =>
     repository.findOne({

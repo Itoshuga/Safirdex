@@ -46,7 +46,9 @@ const rawQuerySchema = z.object({
   promo: z.enum(["true", "false"]).optional().catch(undefined),
   sort: z.enum(["number", "newest", "oldest"]).catch("number").default("number"),
   view: z.enum(["grid", "list"]).catch("grid").default("grid"),
+  page: z.coerce.number().int().min(1).max(10_000).catch(1).default(1),
   cursor: z.string().trim().max(1_000).optional().catch(undefined),
+  direction: z.enum(["after", "before"]).optional().catch(undefined),
 });
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
@@ -281,12 +283,14 @@ const getCachedPage = unstable_cache(
     filters: Parameters<typeof cardsRepository.getPage>[0]["filters"],
     sort: CodexQueryState["sort"],
     cursor?: string,
+    cursorDirection?: CodexQueryState["cursorDirection"],
   ) => {
     logCacheMiss(`codex cards (${locale}/${sort})`);
     const page = await cardsRepository.getPage({
       filters,
       sort,
       cursor,
+      cursorDirection,
       limit: CARD_PAGE_SIZE,
     });
     return {
@@ -294,7 +298,16 @@ const getCachedPage = unstable_cache(
       items: page.items.map((card) => toListItem(card, locale)),
     };
   },
-  ["codex-card-pages-v1"],
+  ["codex-card-pages-v2"],
+  { tags: [CODEX_CACHE_TAGS.cards], revalidate: 300 },
+);
+
+const getCachedCardCount = unstable_cache(
+  async (filters: Parameters<typeof cardsRepository.count>[0]) => {
+    logCacheMiss("codex card count");
+    return cardsRepository.count(filters);
+  },
+  ["codex-card-count-v1"],
   { tags: [CODEX_CACHE_TAGS.cards], revalidate: 300 },
 );
 
@@ -379,6 +392,7 @@ function parseQuery(searchParams: RawSearchParams, options: CodexFilterOptions) 
   );
   const known = (slug: string | undefined, values: Array<{ slug: string }>) =>
     slug && values.some((value) => value.slug === slug) ? slug : undefined;
+  const page = parsed.cursor ? parsed.page : 1;
 
   return {
     q: parsed.q,
@@ -391,7 +405,10 @@ function parseQuery(searchParams: RawSearchParams, options: CodexFilterOptions) 
     promo: parsed.promo === undefined ? undefined : parsed.promo === "true",
     sort: parsed.sort,
     view: parsed.view,
-    cursor: parsed.cursor,
+    page,
+    cursor: page > 1 ? parsed.cursor : undefined,
+    cursorDirection:
+      page > 1 && parsed.cursor ? parsed.direction ?? "after" : undefined,
   } satisfies CodexQueryState;
 }
 
@@ -429,12 +446,18 @@ export async function getCodexPage(
             : resolvedFilters.isPromo !== undefined
               ? { isPromo: resolvedFilters.isPromo }
               : {};
-  const page = await getCachedPage(
-    locale,
-    firestoreFilters,
-    query.sort,
-    query.cursor,
-  );
+  const [page, totalCount] = await Promise.all([
+    getCachedPage(
+      locale,
+      firestoreFilters,
+      query.sort,
+      query.cursor,
+      query.cursorDirection,
+    ),
+    getCachedCardCount(firestoreFilters),
+  ]);
+  const pageCount = Math.max(1, Math.ceil(totalCount / CARD_PAGE_SIZE));
+  const currentPage = Math.min(query.page, pageCount);
 
   const normalizedSearch = query.q.toLocaleLowerCase(locale);
   const items = page.items.filter((card) => {
@@ -455,9 +478,11 @@ export async function getCodexPage(
   return {
     items,
     options,
-    query,
-    nextCursor: page.nextCursor,
-    hasMore: page.hasMore,
+    query: { ...query, page: currentPage },
+    nextCursor: currentPage < pageCount ? page.nextCursor : null,
+    previousCursor: currentPage > 1 ? page.previousCursor : null,
+    pageCount,
+    totalCount,
     fetchedCount: page.items.length,
   };
 }
