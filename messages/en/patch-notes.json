@@ -11,7 +11,8 @@
     },
     "listing": {
       "latest": "Featured",
-      "archive": "All news",
+      "timeline": "Release log",
+      "archive": "Update history",
       "readArticle": "Read the article",
       "loadMore": "View older news",
       "emptyTitle": "The first update is coming soon",

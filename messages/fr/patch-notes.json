@@ -11,7 +11,8 @@
     },
     "listing": {
       "latest": "À la une",
-      "archive": "Toutes les actualités",
+      "timeline": "Journal des versions",
+      "archive": "Historique des mises à jour",
       "readArticle": "Lire l’article",
       "loadMore": "Voir les actualités précédentes",
       "emptyTitle": "La première actualité arrive bientôt",

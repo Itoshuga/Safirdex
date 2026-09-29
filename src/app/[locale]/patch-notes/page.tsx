@@ -31,17 +31,17 @@ export default async function PatchNotesPage({ params, searchParams }: { params:
     <PublicHeader />
     <main>
       <section className="relative overflow-hidden border-b bg-[linear-gradient(180deg,color-mix(in_oklch,var(--safir)_7%,transparent),transparent)]">
-        <div className="pointer-events-none absolute -top-56 left-1/2 size-[34rem] -translate-x-1/2 rounded-full bg-safir/8 blur-3xl" />
-        <div className="site-container relative py-14 sm:py-20 lg:py-24">
+        <div className="pointer-events-none absolute -top-64 right-0 size-[30rem] rounded-full bg-safir/7 blur-3xl" />
+        <div className="site-container relative py-10 sm:py-14 lg:py-16">
           <p className="eyebrow flex items-center gap-2"><Newspaper className="size-3.5" />{hero("eyebrow")}</p>
-          <h1 className="mt-4 max-w-4xl font-heading text-5xl leading-[.95] font-semibold tracking-[-0.065em] text-balance sm:text-7xl lg:text-8xl">{hero("title")}</h1>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">{hero("description")}</p>
+          <h1 className="mt-3 max-w-3xl font-heading text-4xl leading-tight font-semibold tracking-[-0.055em] text-balance sm:text-5xl lg:text-6xl">{hero("title")}</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">{hero("description")}</p>
         </div>
       </section>
-      <div className="site-container py-10 sm:py-14 lg:py-20">
-        {page.items.length === 0 ? <div className="rounded-[2rem] border border-dashed px-6 py-24 text-center"><Newspaper className="mx-auto size-9 text-muted-foreground/50" /><h2 className="mt-5 font-heading text-2xl font-semibold">{listing("emptyTitle")}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{listing("emptyDescription")}</p></div> : <>
-          {featured ? <section aria-labelledby="latest-title"><p id="latest-title" className="eyebrow mb-4">{listing("latest")}</p><PatchNoteCard item={featured} locale={locale} featured /></section> : null}
-          {archive.length ? <section className={featured ? "mt-16 sm:mt-20" : ""} aria-labelledby="archive-title"><div className="mb-6 flex items-end justify-between border-b pb-4"><h2 id="archive-title" className="font-heading text-3xl font-semibold tracking-[-0.045em]">{listing("archive")}</h2></div><div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{archive.map((item) => <PatchNoteCard key={item.id} item={item} locale={locale} />)}</div></section> : null}
+      <div className="site-container py-10 sm:py-14 lg:py-16">
+        {page.items.length === 0 ? <div className="rounded-[1.75rem] border border-dashed bg-card/35 px-6 py-16 text-center sm:py-20"><div className="mx-auto grid size-12 place-items-center rounded-2xl border bg-background text-safir"><Newspaper className="size-5" /></div><h2 className="mt-5 font-heading text-2xl font-semibold tracking-[-0.035em]">{listing("emptyTitle")}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{listing("emptyDescription")}</p></div> : <>
+          {featured ? <section aria-labelledby="latest-title"><h2 id="latest-title" className="sr-only">{listing("latest")}</h2><PatchNoteCard item={featured} locale={locale} featured /></section> : null}
+          {archive.length ? <section className={featured ? "mt-12 sm:mt-16" : ""} aria-labelledby="archive-title"><div className="mb-2 flex items-end justify-between gap-4"><div><p className="eyebrow">{listing("timeline")}</p><h2 id="archive-title" className="mt-2 font-heading text-2xl font-semibold tracking-[-0.04em] sm:text-3xl">{listing("archive")}</h2></div></div><div className="mt-5 border-t">{archive.map((item) => <PatchNoteCard key={item.id} item={item} locale={locale} />)}</div></section> : null}
           {page.nextCursor ? <div className="mt-12 flex justify-center border-t pt-8"><Button variant="outline" size="lg" nativeButton={false} render={<Link href={`/patch-notes?cursor=${encodeURIComponent(page.nextCursor)}`} prefetch={false} />}>{listing("loadMore")}</Button></div> : null}
         </>}
       </div>
