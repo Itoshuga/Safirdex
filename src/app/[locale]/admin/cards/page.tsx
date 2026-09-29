@@ -84,7 +84,7 @@ export default async function CardsPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <NoticeToast message={one(params.notice)} />
-      <AdminPageHeader title={entities("cards")} description={t("description")} action={{ href: "/admin/cards/new", label: t("add") }} />
+      <AdminPageHeader title={entities("cards")} description={t("description")} secondaryAction={{ href: "/admin/cards/import", label: t("import.action") }} action={{ href: "/admin/cards/new", label: t("add") }} />
       <form className="mb-4 rounded-xl border bg-card p-3" method="get">
         <div className="grid gap-2 lg:grid-cols-[minmax(15rem,1fr)_repeat(3,minmax(9rem,auto))_auto]">
           <label className="relative"><Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" /><span className="sr-only">{filters("searchCards")}</span><input className="admin-input pl-9" name="q" defaultValue={search} placeholder={filters("searchPlaceholder")} /></label>

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { MAX_CARD_STAT } from "@/features/cards/constants";
 import {
   entityFieldsSchema,
   nonEmptyUpdate,
@@ -74,7 +75,7 @@ export const cardDisplaySnapshotSchema = z.object({
   types: z.array(cardDisplayVisualEntitySchema).max(20),
 });
 
-export const cardStatSchema = z.number().int().min(0).max(9);
+export const cardStatSchema = z.number().int().min(0).max(MAX_CARD_STAT);
 
 export const createCardSchema = z.object({
   number: z.number().int().nonnegative(),

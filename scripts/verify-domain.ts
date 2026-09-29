@@ -9,6 +9,7 @@ import { getTranslation } from "@/lib/i18n/get-localized-value";
 import { createSlug, createUniqueSlug } from "@/lib/utils/slug";
 import { hasAdminClaim } from "@/lib/auth/claims";
 import { compactTranslations } from "@/features/admin/form-mapping";
+import { MAX_CARD_STAT } from "@/features/cards/constants";
 import {
   cardStatSchema,
   createCardSchema,
@@ -22,16 +23,16 @@ function verifyTranslations() {
   };
 
   assert.equal(getTranslation(translations, "fr-CA")?.name, "Gardienne");
-  assert.equal(getTranslation(translations, "de")?.name, "Warden");
+  assert.equal(getTranslation(translations, "de")?.name, "Gardienne");
   assert.equal(getTranslation({ ja: { name: "守護者" } }, "de")?.name, "守護者");
   assert.equal(getTranslation({}, "fr"), undefined);
 }
 
 function verifyStats() {
   assert.equal(cardStatSchema.parse(0), 0);
-  assert.equal(cardStatSchema.parse(9), 9);
+  assert.equal(cardStatSchema.parse(MAX_CARD_STAT), MAX_CARD_STAT);
   assert.equal(cardStatSchema.safeParse(-1).success, false);
-  assert.equal(cardStatSchema.safeParse(10).success, false);
+  assert.equal(cardStatSchema.safeParse(MAX_CARD_STAT + 1).success, false);
   assert.equal(cardStatSchema.safeParse(2.5).success, false);
 }
 
@@ -105,7 +106,7 @@ async function main() {
     alternativeArtworks: [],
   };
   assert.equal(createCardSchema.safeParse(validCard).success, true);
-  assert.equal(createCardSchema.safeParse({ ...validCard, attack: 10 }).success, false);
+  assert.equal(createCardSchema.safeParse({ ...validCard, attack: MAX_CARD_STAT + 1 }).success, false);
   assert.equal(updateCardSchema.safeParse({}).success, false);
   assert.equal(updateCardSchema.safeParse({ defense: 0 }).success, true);
   verifyTranslations();

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MAX_CARD_STAT } from "@/features/cards/constants";
 import {
   Sheet,
   SheetClose,
@@ -26,11 +27,11 @@ export const EMPTY_DECK_FILTERS: DeckCatalogFilters = {
   seasonId: "",
   setId: "",
   attackMin: 0,
-  attackMax: 9,
+  attackMax: MAX_CARD_STAT,
   valueMin: 0,
-  valueMax: 9,
+  valueMax: MAX_CARD_STAT,
   defenseMin: 0,
-  defenseMax: 9,
+  defenseMax: MAX_CARD_STAT,
   compatibleOnly: false,
   membership: "all",
   sort: "number",
@@ -83,8 +84,8 @@ function StatRange({
   return (
     <div className="grid grid-cols-[2.5rem_1fr_1fr] items-center gap-2">
       <span className="text-xs font-semibold">{label}</span>
-      <label><span className="sr-only">Minimum {label}</span><input className="admin-input h-9" type="number" min={0} max={9} value={minimum} onChange={(event) => onMinimum(Math.min(Number(event.target.value), maximum))} /></label>
-      <label><span className="sr-only">Maximum {label}</span><input className="admin-input h-9" type="number" min={0} max={9} value={maximum} onChange={(event) => onMaximum(Math.max(Number(event.target.value), minimum))} /></label>
+      <label><span className="sr-only">Minimum {label}</span><input className="admin-input h-9" type="number" min={0} max={MAX_CARD_STAT} value={minimum} onChange={(event) => onMinimum(Math.min(Number(event.target.value), maximum))} /></label>
+      <label><span className="sr-only">Maximum {label}</span><input className="admin-input h-9" type="number" min={0} max={MAX_CARD_STAT} value={maximum} onChange={(event) => onMaximum(Math.max(Number(event.target.value), minimum))} /></label>
     </div>
   );
 }
@@ -109,9 +110,9 @@ export function DeckFiltersSheet({
   const visibleSets = options.sets.filter((set) => !selectedSeasonId || set.seasonId === selectedSeasonId);
   const activeCount = filters.factionIds.length + filters.typeIds.length + filters.rarityIds.length +
     Number(Boolean(filters.seasonId)) + Number(Boolean(filters.setId)) +
-    Number(filters.attackMin > 0 || filters.attackMax < 9) +
-    Number(filters.valueMin > 0 || filters.valueMax < 9) +
-    Number(filters.defenseMin > 0 || filters.defenseMax < 9);
+    Number(filters.attackMin > 0 || filters.attackMax < MAX_CARD_STAT) +
+    Number(filters.valueMin > 0 || filters.valueMax < MAX_CARD_STAT) +
+    Number(filters.defenseMin > 0 || filters.defenseMax < MAX_CARD_STAT);
   const patch = (value: Partial<DeckCatalogFilters>) => onChange({ ...filters, ...value });
 
   return (

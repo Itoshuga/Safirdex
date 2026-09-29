@@ -63,7 +63,20 @@ export function translationsSchema<TSchema extends z.ZodType>(
 export function nonEmptyUpdate<TSchema extends z.ZodRawShape>(
   schema: z.ZodObject<TSchema>,
 ) {
-  return schema.partial().refine((value) => Object.keys(value).length > 0, {
-    message: "At least one field must be provided.",
-  });
+  const knownKeys = new Set(Object.keys(schema.shape));
+
+  return z.preprocess(
+    (value) => {
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value) &&
+        !Object.keys(value).some((key) => knownKeys.has(key))
+      ) {
+        return null;
+      }
+      return value;
+    },
+    schema.partial(),
+  );
 }

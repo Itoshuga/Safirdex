@@ -23,6 +23,7 @@ import {
   INITIAL_ADMIN_ACTION_STATE,
   type AdminActionState,
 } from "@/features/admin/action-state";
+import { MAX_CARD_STAT } from "@/features/cards/constants";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { tokenizeGlossaryContent } from "@/lib/glossary/references";
 import { getTranslation } from "@/lib/i18n/get-localized-value";
@@ -410,11 +411,11 @@ export function CardForm({
           <FormSection title={t("statistics")} description={t("statsDescription")}>
             <div className="grid gap-4 sm:grid-cols-3">
               {(["attack", "value", "defense"] as const).map((stat) => {
-                const invalid = value[stat] < 0 || value[stat] > 9 || !Number.isInteger(value[stat]);
+                const invalid = value[stat] < 0 || value[stat] > MAX_CARD_STAT || !Number.isInteger(value[stat]);
                 return (
                   <div className="rounded-xl border bg-muted/20 p-4" key={stat}>
                     <label className="mb-3 block text-xs font-semibold tracking-[0.12em] uppercase" htmlFor={`stat-${stat}`}>{stats(stat)}</label>
-                    <input id={`stat-${stat}`} className="admin-input h-12 text-center text-xl font-semibold" type="number" min="0" max="9" step="1" value={value[stat]} aria-invalid={invalid} onChange={(event) => update(stat, Number(event.target.value))} />
+                    <input id={`stat-${stat}`} className="admin-input h-12 text-center text-xl font-semibold" type="number" min="0" max={MAX_CARD_STAT} step="1" value={value[stat]} aria-invalid={invalid} onChange={(event) => update(stat, Number(event.target.value))} />
                     {invalid ? <p className="admin-error mt-2">{t("statRange")}</p> : null}
                   </div>
                 );

@@ -375,7 +375,15 @@ export async function duplicateCardAction(id: string): Promise<AdminActionState>
     const slug = await createUniqueSlug(`${original.slug}-copy`, async (candidate) =>
       Boolean(await cardsRepository.getBySlug(candidate)),
     );
-    const rewrite = async (storagePath: string, nextPath: string) => {
+    const rewrite = async (
+      storagePath: string,
+      url: string | undefined,
+      nextPath: string,
+      externalPath: string,
+    ) => {
+      if (storagePath.startsWith("external/") && url) {
+        return { storagePath: externalPath, url };
+      }
       const bucket = getFirebaseAdminStorage().bucket();
       const [copiedFile] = await bucket.file(storagePath).copy(nextPath);
       const downloadToken = randomUUID();
@@ -387,17 +395,23 @@ export async function duplicateCardAction(id: string): Promise<AdminActionState>
         url: buildFirebaseStorageUrl(bucket.name, nextPath, downloadToken),
       };
     };
-    const mainExtension = original.artwork.storagePath.split(".").pop() ?? "webp";
+    const mainExtension = original.artwork.storagePath.startsWith("external/")
+      ? "webp"
+      : original.artwork.storagePath.split(".").pop() ?? "webp";
     const artwork = {
       ...original.artwork,
       ...(await rewrite(
         original.artwork.storagePath,
+        original.artwork.url,
         storagePaths.cardMainArtwork(newId, mainExtension),
+        `external/cards/${newId}/main`,
       )),
     };
     const alternativeArtworks = await Promise.all(
       original.alternativeArtworks.map(async (entry, index) => {
-        const extension = entry.storagePath.split(".").pop() ?? "webp";
+        const extension = entry.storagePath.startsWith("external/")
+          ? "webp"
+          : entry.storagePath.split(".").pop() ?? "webp";
         const artworkId = `alt_${randomUUID().replaceAll("-", "")}`;
         return {
           ...entry,
@@ -405,11 +419,13 @@ export async function duplicateCardAction(id: string): Promise<AdminActionState>
           order: index,
           ...(await rewrite(
             entry.storagePath,
+            entry.url,
             storagePaths.cardAlternativeArtwork(
               newId,
               artworkId,
               extension,
             ),
+            `external/cards/${newId}/alternatives/${artworkId}`,
           )),
         };
       }),

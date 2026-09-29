@@ -28,6 +28,7 @@ import { DeckFiltersSheet, EMPTY_DECK_FILTERS } from "@/components/decks/deck-fi
 import { DeckSidebar } from "@/components/decks/deck-sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MAX_CARD_STAT } from "@/features/cards/constants";
 import type { CodexFilterOptions } from "@/features/cards/types";
 import { INITIAL_DECK_ACTION_STATE } from "@/features/decks/action-state";
 import { SAFIR_STANDARD_RULESET } from "@/features/decks/rules/ruleset";
@@ -159,11 +160,11 @@ export function DeckBuilder({
     ...(filters.seasonId ? { seasonId: filters.seasonId } : {}),
     ...(filters.setId ? { setId: filters.setId } : {}),
     ...(filters.attackMin > 0 ? { attackMin: filters.attackMin } : {}),
-    ...(filters.attackMax < 9 ? { attackMax: filters.attackMax } : {}),
+    ...(filters.attackMax < MAX_CARD_STAT ? { attackMax: filters.attackMax } : {}),
     ...(filters.valueMin > 0 ? { valueMin: filters.valueMin } : {}),
-    ...(filters.valueMax < 9 ? { valueMax: filters.valueMax } : {}),
+    ...(filters.valueMax < MAX_CARD_STAT ? { valueMax: filters.valueMax } : {}),
     ...(filters.defenseMin > 0 ? { defenseMin: filters.defenseMin } : {}),
-    ...(filters.defenseMax < 9 ? { defenseMax: filters.defenseMax } : {}),
+    ...(filters.defenseMax < MAX_CARD_STAT ? { defenseMax: filters.defenseMax } : {}),
     ...(filters.sort !== "number" ? { sort: filters.sort } : {}),
   }), [filters]);
   const serverQueryKey = JSON.stringify(serverQuery);
@@ -273,9 +274,9 @@ export function DeckBuilder({
     ...filters.rarityIds.map((id) => ({ key: `rarity-${id}`, label: filterOptions.rarities.find((item) => item.id === id)?.name ?? id, remove: () => setFilters((current) => ({ ...current, rarityIds: current.rarityIds.filter((item) => item !== id) })) })),
     ...(filters.seasonId ? [{ key: `season-${filters.seasonId}`, label: filterOptions.seasons.find((item) => item.id === filters.seasonId)?.name ?? filters.seasonId, remove: () => setFilters((current) => ({ ...current, seasonId: "", setId: "" })) }] : []),
     ...(filters.setId ? [{ key: `set-${filters.setId}`, label: filterOptions.sets.find((item) => item.id === filters.setId)?.name ?? filters.setId, remove: () => setFilters((current) => ({ ...current, setId: "" })) }] : []),
-    ...(filters.attackMin > 0 || filters.attackMax < 9 ? [{ key: "attack-range", label: `ATK ${filters.attackMin}–${filters.attackMax}`, remove: () => setFilters((current) => ({ ...current, attackMin: 0, attackMax: 9 })) }] : []),
-    ...(filters.valueMin > 0 || filters.valueMax < 9 ? [{ key: "value-range", label: `VAL ${filters.valueMin}–${filters.valueMax}`, remove: () => setFilters((current) => ({ ...current, valueMin: 0, valueMax: 9 })) }] : []),
-    ...(filters.defenseMin > 0 || filters.defenseMax < 9 ? [{ key: "defense-range", label: `DEF ${filters.defenseMin}–${filters.defenseMax}`, remove: () => setFilters((current) => ({ ...current, defenseMin: 0, defenseMax: 9 })) }] : []),
+    ...(filters.attackMin > 0 || filters.attackMax < MAX_CARD_STAT ? [{ key: "attack-range", label: `ATK ${filters.attackMin}–${filters.attackMax}`, remove: () => setFilters((current) => ({ ...current, attackMin: 0, attackMax: MAX_CARD_STAT })) }] : []),
+    ...(filters.valueMin > 0 || filters.valueMax < MAX_CARD_STAT ? [{ key: "value-range", label: `VAL ${filters.valueMin}–${filters.valueMax}`, remove: () => setFilters((current) => ({ ...current, valueMin: 0, valueMax: MAX_CARD_STAT })) }] : []),
+    ...(filters.defenseMin > 0 || filters.defenseMax < MAX_CARD_STAT ? [{ key: "defense-range", label: `DEF ${filters.defenseMin}–${filters.defenseMax}`, remove: () => setFilters((current) => ({ ...current, defenseMin: 0, defenseMax: MAX_CARD_STAT })) }] : []),
   ];
 
   const sidebar = (
