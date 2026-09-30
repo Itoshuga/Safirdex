@@ -12,9 +12,11 @@
     "navigation": {
       "label": "Admin navigation",
       "overview": "Overview",
+      "moderation": "Moderation",
       "content": "Content",
       "system": "System",
       "dashboard": "Dashboard",
+      "users": "Users",
       "cards": "Cards",
       "seasons": "Seasons",
       "sets": "Sets",
@@ -270,6 +272,122 @@
       "createDescription": "Add a stable technical key, a slug, and localized definitions.",
       "editEyebrow": "Edit entry",
       "editDescription": "The technical key stays stable while labels and definitions are localized."
+    },
+    "users": {
+      "eyebrow": "Moderation",
+      "title": "Users",
+      "description": "Review Safirdex accounts, their access and activity, then manage their public information.",
+      "searchLabel": "Search users",
+      "searchPlaceholder": "Name, username, email address, or UID…",
+      "searchAction": "Search",
+      "clearSearch": "Clear",
+      "noResultsTitle": "No user found",
+      "noResultsDescription": "Try another name, username, email, or Firebase identifier.",
+      "emptyTitle": "No users",
+      "emptyDescription": "New accounts will appear here after they sign up.",
+      "missingUsername": "No username",
+      "verified": "Verified",
+      "unverified": "Unverified",
+      "disabled": "Disabled",
+      "active": "Active",
+      "onboardingPending": "Incomplete profile",
+      "cardsCount": "{count, plural, =0 {No cards} one {# card} other {# cards}}",
+      "openUser": "Open {name}'s account",
+      "truncated": "The list shows the first 1,000 accounts returned by Firebase Auth. Cursor pagination can be added if this volume is exceeded.",
+      "roles": {
+        "user": "User",
+        "admin": "Administrator"
+      },
+      "table": {
+        "user": "User",
+        "email": "Email address",
+        "role": "Role",
+        "status": "Status",
+        "collection": "Collection",
+        "lastSignIn": "Last sign-in",
+        "open": "Open"
+      },
+      "detail": {
+        "eyebrow": "Moderation / User",
+        "description": "Edit the public identity and role, and review information associated with this account.",
+        "viewPublicProfile": "View public profile",
+        "accountTitle": "Account information",
+        "accountDescription": "Read-only technical data provided by Firebase Auth.",
+        "email": "Email address",
+        "providers": "Sign-in methods",
+        "createdAt": "Account created",
+        "lastSignIn": "Last sign-in",
+        "locale": "Preferred language"
+      },
+      "stats": {
+        "uniqueCards": "Unique cards",
+        "completion": "{value}% of the Codex",
+        "totalCopies": "Owned copies",
+        "duplicates": "{count, plural, =0 {No duplicates} one {# duplicate} other {# duplicates}}",
+        "decks": "Public decks",
+        "trades": "{count, plural, =0 {No cards for trade} one {# card for trade} other {# cards for trade}}",
+        "community": "Followers",
+        "following": "{count, plural, =0 {Not following anyone} one {# following} other {# following}}"
+      },
+      "form": {
+        "identityTitle": "Public identity",
+        "identityDescription": "This information appears on the profile, in the community, and in collection previews.",
+        "username": "Username",
+        "usernameHelp": "3 to 24 characters: letters, numbers, periods, hyphens, or underscores.",
+        "displayName": "Display name",
+        "bio": "Biography",
+        "bioLimit": "280 characters maximum",
+        "roleTitle": "Access and role",
+        "roleDescription": "The role is synchronized with Firebase Custom Claims and the private profile.",
+        "role": "Account role",
+        "roles": {
+          "user": "User",
+          "admin": "Administrator"
+        },
+        "roleHelp": "Changing the role invalidates the account's existing sessions. The user will need to sign in again.",
+        "selfRoleWarning": "You are editing your own account. Removing your administrator role will end your access to this interface after saving.",
+        "save": "Save user"
+      },
+      "security": {
+        "title": "Security",
+        "subtitle": "Actions related to account authentication.",
+        "description": "Send a password reset email to {email}.",
+        "missingEmail": "No email address is associated with this account.",
+        "providerManaged": "This account uses an external provider and does not have a Firebase password.",
+        "action": "Send password reset email",
+        "sent": "The password reset email has been sent.",
+        "failed": "The email could not be sent right now."
+      },
+      "visibility": {
+        "title": "Profile visibility",
+        "description": "Preferences currently selected by the user.",
+        "public": "Public",
+        "private": "Private",
+        "fields": {
+          "publicProfile": "Profile",
+          "decks": "Decks",
+          "collection": "Collection",
+          "activity": "Activity"
+        }
+      },
+      "collection": {
+        "title": "Card collection",
+        "description": "Complete administrative view, regardless of the profile's privacy preferences.",
+        "emptyTitle": "Empty collection",
+        "emptyDescription": "This user has not added any cards yet.",
+        "card": "Card",
+        "season": "Season",
+        "owned": "Owned",
+        "duplicates": "Duplicates",
+        "trades": "For trade"
+      },
+      "feedback": {
+        "invalid": "Review the information entered.",
+        "updated": "The user account has been updated.",
+        "usernameTaken": "This username is already in use.",
+        "unauthorized": "Your administrator session has expired.",
+        "failed": "The account could not be updated. Please try again."
+      }
     },
     "settings": {
       "eyebrow": "Administration",

@@ -14,9 +14,11 @@
     "navigation": {
       "label": "Navigation de l’administration",
       "overview": "Vue d’ensemble",
+      "moderation": "Modération",
       "content": "Contenu",
       "system": "Système",
       "dashboard": "Tableau de bord",
+      "users": "Utilisateurs",
       "cards": "Cartes",
       "seasons": "Saisons",
       "sets": "Éditions",
@@ -272,6 +274,122 @@
       "createDescription": "Ajoutez une clé technique stable, un slug et des définitions traduites.",
       "editEyebrow": "Modifier l’entrée",
       "editDescription": "La clé technique reste stable tandis que les libellés et définitions sont traduits."
+    },
+    "users": {
+      "eyebrow": "Modération",
+      "title": "Utilisateurs",
+      "description": "Consultez les comptes Safirdex, leurs accès et leur activité, puis gérez leurs informations publiques.",
+      "searchLabel": "Rechercher un utilisateur",
+      "searchPlaceholder": "Nom, pseudonyme, adresse e-mail ou UID…",
+      "searchAction": "Rechercher",
+      "clearSearch": "Effacer",
+      "noResultsTitle": "Aucun utilisateur trouvé",
+      "noResultsDescription": "Essayez un autre nom, pseudonyme, e-mail ou identifiant Firebase.",
+      "emptyTitle": "Aucun utilisateur",
+      "emptyDescription": "Les nouveaux comptes apparaîtront ici dès leur inscription.",
+      "missingUsername": "Pseudonyme non renseigné",
+      "verified": "Vérifié",
+      "unverified": "Non vérifié",
+      "disabled": "Désactivé",
+      "active": "Actif",
+      "onboardingPending": "Profil incomplet",
+      "cardsCount": "{count, plural, =0 {Aucune carte} one {# carte} other {# cartes}}",
+      "openUser": "Ouvrir le compte de {name}",
+      "truncated": "La liste affiche les 1 000 premiers comptes renvoyés par Firebase Auth. Une pagination par curseur pourra être ajoutée si ce volume est dépassé.",
+      "roles": {
+        "user": "Utilisateur",
+        "admin": "Administrateur"
+      },
+      "table": {
+        "user": "Utilisateur",
+        "email": "Adresse e-mail",
+        "role": "Rôle",
+        "status": "Statut",
+        "collection": "Collection",
+        "lastSignIn": "Dernière connexion",
+        "open": "Ouvrir"
+      },
+      "detail": {
+        "eyebrow": "Modération / Utilisateur",
+        "description": "Modifiez l’identité publique, le rôle et consultez les informations liées à ce compte.",
+        "viewPublicProfile": "Voir le profil public",
+        "accountTitle": "Informations du compte",
+        "accountDescription": "Données techniques en lecture seule issues de Firebase Auth.",
+        "email": "Adresse e-mail",
+        "providers": "Méthodes de connexion",
+        "createdAt": "Compte créé le",
+        "lastSignIn": "Dernière connexion",
+        "locale": "Langue préférée"
+      },
+      "stats": {
+        "uniqueCards": "Cartes différentes",
+        "completion": "{value}% du Codex",
+        "totalCopies": "Exemplaires possédés",
+        "duplicates": "{count, plural, =0 {Aucun doublon} one {# doublon} other {# doublons}}",
+        "decks": "Decks publics",
+        "trades": "{count, plural, =0 {Aucune carte à l’échange} one {# carte à l’échange} other {# cartes à l’échange}}",
+        "community": "Abonnés",
+        "following": "{count, plural, =0 {Aucun abonnement} one {# abonnement} other {# abonnements}}"
+      },
+      "form": {
+        "identityTitle": "Identité publique",
+        "identityDescription": "Ces informations sont visibles sur le profil, la communauté et les aperçus de collection.",
+        "username": "Pseudonyme",
+        "usernameHelp": "3 à 24 caractères : lettres, chiffres, point, tiret ou tiret bas.",
+        "displayName": "Nom d’affichage",
+        "bio": "Biographie",
+        "bioLimit": "280 caractères maximum",
+        "roleTitle": "Accès et rôle",
+        "roleDescription": "Le rôle est synchronisé avec les Custom Claims Firebase et le profil privé.",
+        "role": "Rôle du compte",
+        "roles": {
+          "user": "Utilisateur",
+          "admin": "Administrateur"
+        },
+        "roleHelp": "Un changement de rôle invalide les sessions existantes du compte. La personne devra se reconnecter.",
+        "selfRoleWarning": "Vous modifiez votre propre compte. Retirer votre rôle administrateur fermera votre accès à cette interface après l’enregistrement.",
+        "save": "Enregistrer l’utilisateur"
+      },
+      "security": {
+        "title": "Sécurité",
+        "subtitle": "Actions liées à l’authentification du compte.",
+        "description": "Envoyez un e-mail de réinitialisation du mot de passe à {email}.",
+        "missingEmail": "Aucune adresse e-mail n’est associée à ce compte.",
+        "providerManaged": "Ce compte utilise un fournisseur externe et ne possède pas de mot de passe Firebase.",
+        "action": "Envoyer l’e-mail de réinitialisation",
+        "sent": "L’e-mail de réinitialisation a été envoyé.",
+        "failed": "L’e-mail n’a pas pu être envoyé pour le moment."
+      },
+      "visibility": {
+        "title": "Visibilité du profil",
+        "description": "Préférences actuellement choisies par l’utilisateur.",
+        "public": "Public",
+        "private": "Privé",
+        "fields": {
+          "publicProfile": "Profil",
+          "decks": "Decks",
+          "collection": "Collection",
+          "activity": "Activité"
+        }
+      },
+      "collection": {
+        "title": "Collection de cartes",
+        "description": "Vue administrative complète, indépendamment des préférences de confidentialité du profil.",
+        "emptyTitle": "Collection vide",
+        "emptyDescription": "Cet utilisateur n’a encore ajouté aucune carte.",
+        "card": "Carte",
+        "season": "Saison",
+        "owned": "Possédées",
+        "duplicates": "Doublons",
+        "trades": "À l’échange"
+      },
+      "feedback": {
+        "invalid": "Vérifiez les informations saisies.",
+        "updated": "Le compte utilisateur a été mis à jour.",
+        "usernameTaken": "Ce pseudonyme est déjà utilisé.",
+        "unauthorized": "Votre session administrateur a expiré.",
+        "failed": "Le compte n’a pas pu être mis à jour. Réessayez."
+      }
     },
     "settings": {
       "eyebrow": "Administration",

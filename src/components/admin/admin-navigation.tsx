@@ -12,6 +12,7 @@ import {
   Settings,
   Shapes,
   Sparkles,
+  UsersRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -23,6 +24,10 @@ const sections = [
   {
     label: "overview",
     items: [{ href: "/admin", label: "dashboard", icon: CircleGauge }],
+  },
+  {
+    label: "moderation",
+    items: [{ href: "/admin/users", label: "users", icon: UsersRound }],
   },
   {
     label: "content",

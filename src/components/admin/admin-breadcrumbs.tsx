@@ -29,7 +29,7 @@ export function AdminBreadcrumbs() {
           const href = `/${segments.slice(0, index + 1).join("/")}`;
           const last = index === segments.length - 1;
           const pageTitle = customTitle.pathname === pathname ? customTitle.title : "";
-          const knownSegments = ["admin", "cards", "seasons", "sets", "rarities", "types", "glossary", "patch-notes", "settings", "system", "new"] as const;
+          const knownSegments = ["admin", "users", "cards", "seasons", "sets", "rarities", "types", "glossary", "patch-notes", "settings", "system", "new"] as const;
           const label = knownSegments.includes(segment as (typeof knownSegments)[number])
             ? t(segment as (typeof knownSegments)[number])
             : last
