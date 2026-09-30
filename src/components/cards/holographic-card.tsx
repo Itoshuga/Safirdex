@@ -3,7 +3,10 @@
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { useCallback, useEffect, useRef } from "react";
 
-import { useCardEffectsPreference } from "@/hooks/use-card-effects-preference";
+import {
+  useCardEffectsPreference,
+  useCardEffectStylePreference,
+} from "@/hooks/use-card-effects-preference";
 
 import styles from "./holographic-card.module.css";
 
@@ -62,6 +65,7 @@ function supportsInteractiveEffects(pointerType: string) {
 
 export function HolographicCard({ children }: { children: ReactNode }) {
   const effectsEnabled = useCardEffectsPreference();
+  const effectStyle = useCardEffectStylePreference();
   const sceneRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const boundsRef = useRef<DOMRect | null>(null);
@@ -210,6 +214,7 @@ export function HolographicCard({ children }: { children: ReactNode }) {
       ref={sceneRef}
       className={styles.scene}
       data-effects={effectsEnabled ? "enabled" : "disabled"}
+      data-holo-style={effectStyle}
       onPointerEnter={effectsEnabled ? handlePointerEnter : undefined}
       onPointerMove={effectsEnabled ? handlePointerMove : undefined}
       onPointerLeave={effectsEnabled ? resetCard : undefined}

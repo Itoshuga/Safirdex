@@ -62,13 +62,43 @@
       },
       "savedLocally": "Cette préférence est enregistrée sur cet appareil.",
       "cardEffectsTitle": "Effets holographiques des cartes",
-      "cardEffectsDescription": "Anime la carte principale au survol avec une inclinaison 3D, des reflets et une texture holographique.",
+      "cardEffectsBetaLabel": "BETA",
+      "cardEffectsBetaDescription": "Cette fonctionnalité est encore en cours d’ajustement.",
+      "cardEffectsDescription": "Anime la carte principale au survol avec une inclinaison 3D, des reflets et la finition holographique de votre choix.",
       "cardEffectsStates": {
         "enabled": "Activés",
         "disabled": "Désactivés"
       },
       "cardEffectsHint": "L’effet apparaît avec une souris ou un pointeur précis.",
-      "cardEffectsFootnote": "Ce réglage est enregistré sur cet appareil. La réduction des animations configurée dans votre système reste toujours prioritaire."
+      "cardEffectStyleTitle": "Style holographique",
+      "cardEffectStyleDescription": "Choisissez la finition appliquée aux cartes lorsque les effets sont activés.",
+      "cardEffectStyles": {
+        "classic": {
+          "label": "Classique",
+          "description": "Le reflet arc-en-ciel original."
+        },
+        "cosmos": {
+          "label": "Cosmos",
+          "description": "Un ciel profond constellé d’éclats."
+        },
+        "aurora": {
+          "label": "Aurore",
+          "description": "De larges rubans irisés et doux."
+        },
+        "radiant": {
+          "label": "Rayonnant",
+          "description": "Une diffraction géométrique intense."
+        },
+        "light": {
+          "label": "Lumière",
+          "description": "Un reflet blanc diagonal qui traverse la carte."
+        },
+        "none": {
+          "label": "Aucun",
+          "description": "L’inclinaison 3D seule, sans reflet."
+        }
+      },
+      "cardEffectsFootnote": "Ces réglages sont enregistrés sur cet appareil. La réduction des animations configurée dans votre système reste toujours prioritaire."
     },
     "security": {
       "eyebrow": "Accès au compte",

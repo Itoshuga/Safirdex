@@ -62,13 +62,43 @@
       },
       "savedLocally": "This preference is saved on this device.",
       "cardEffectsTitle": "Holographic card effects",
-      "cardEffectsDescription": "Animates the main card on hover with 3D tilt, moving highlights, and a holographic texture.",
+      "cardEffectsBetaLabel": "BETA",
+      "cardEffectsBetaDescription": "This feature is still being fine-tuned.",
+      "cardEffectsDescription": "Animates the main card on hover with 3D tilt, moving highlights, and your chosen holographic finish.",
       "cardEffectsStates": {
         "enabled": "Enabled",
         "disabled": "Disabled"
       },
       "cardEffectsHint": "The effect appears when using a mouse or another precise pointer.",
-      "cardEffectsFootnote": "This setting is saved on this device. Your system's reduced-motion preference always takes priority."
+      "cardEffectStyleTitle": "Holographic style",
+      "cardEffectStyleDescription": "Choose the finish applied to cards while effects are enabled.",
+      "cardEffectStyles": {
+        "classic": {
+          "label": "Classic",
+          "description": "The original rainbow shine."
+        },
+        "cosmos": {
+          "label": "Cosmos",
+          "description": "A deep sky filled with glints."
+        },
+        "aurora": {
+          "label": "Aurora",
+          "description": "Wide, softly iridescent ribbons."
+        },
+        "radiant": {
+          "label": "Radiant",
+          "description": "An intense geometric diffraction."
+        },
+        "light": {
+          "label": "White light",
+          "description": "A diagonal white highlight sweeping across the card."
+        },
+        "none": {
+          "label": "None",
+          "description": "3D tilt only, without any shine."
+        }
+      },
+      "cardEffectsFootnote": "These settings are saved on this device. Your system's reduced-motion preference always takes priority."
     },
     "security": {
       "eyebrow": "Account access",

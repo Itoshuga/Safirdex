@@ -1,24 +1,40 @@
 "use client";
 
-import { Laptop, Moon, Sparkles, Sun } from "lucide-react";
+import { Check, Laptop, Moon, Sparkles, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { useSyncExternalStore } from "react";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Badge } from "@/components/ui/badge";
 import {
+  CARD_EFFECT_STYLES,
+  setCardEffectStylePreference,
   setCardEffectsPreference,
+  useCardEffectStylePreference,
   useCardEffectsPreference,
 } from "@/hooks/use-card-effects-preference";
 import { cn } from "@/lib/utils";
 
+import previewStyles from "./card-effect-style-preview.module.css";
+
 const emptySubscribe = () => () => undefined;
+
+const effectStylePreviews = {
+  classic: previewStyles.classic,
+  cosmos: previewStyles.cosmos,
+  aurora: previewStyles.aurora,
+  radiant: previewStyles.radiant,
+  light: previewStyles.light,
+  none: previewStyles.none,
+} as const;
 
 export function PreferencesControls({ showCardEffects = true }: { showCardEffects?: boolean }) {
   const t = useTranslations("Settings.preferences");
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const { theme, setTheme } = useTheme();
   const cardEffectsEnabled = useCardEffectsPreference();
+  const cardEffectStyle = useCardEffectStylePreference();
   const selectedTheme = mounted ? theme ?? "system" : "system";
   const themes = [
     { key: "system", icon: Laptop },
@@ -60,7 +76,17 @@ export function PreferencesControls({ showCardEffects = true }: { showCardEffect
       </div>
       {showCardEffects ? (
         <div className="border-t pt-6">
-          <p className="text-sm font-semibold">{t("cardEffectsTitle")}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold">{t("cardEffectsTitle")}</p>
+            <Badge
+              variant="outline"
+              aria-label={`${t("cardEffectsBetaLabel")} — ${t("cardEffectsBetaDescription")}`}
+              title={t("cardEffectsBetaDescription")}
+              className="h-5 rounded-full border-safir/25 bg-safir/10 px-2 font-mono text-[9px] font-bold tracking-[0.12em] text-safir"
+            >
+              {t("cardEffectsBetaLabel")}
+            </Badge>
+          </div>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">{t("cardEffectsDescription")}</p>
           <div className="mt-4 flex items-center gap-3 rounded-2xl border bg-muted/20 p-4 sm:gap-4">
             <span
@@ -99,6 +125,75 @@ export function PreferencesControls({ showCardEffects = true }: { showCardEffect
                 )}
               />
             </button>
+          </div>
+          <div
+            className={cn(
+              "mt-5 transition-opacity",
+              !cardEffectsEnabled && "opacity-50",
+            )}
+          >
+            <p className="text-sm font-semibold">{t("cardEffectStyleTitle")}</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              {t("cardEffectStyleDescription")}
+            </p>
+            <div
+              role="radiogroup"
+              aria-label={t("cardEffectStyleTitle")}
+              aria-disabled={!cardEffectsEnabled}
+              className="mt-3 grid gap-3 sm:grid-cols-2"
+            >
+              {CARD_EFFECT_STYLES.map((style) => {
+                const selected = cardEffectStyle === style;
+
+                return (
+                  <label
+                    key={style}
+                    className={cn(
+                      "group flex min-h-20 items-center gap-3 rounded-2xl border bg-background p-3 text-left transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring",
+                      cardEffectsEnabled ? "cursor-pointer" : "cursor-not-allowed",
+                      selected
+                        ? "border-safir/40 bg-safir/6 ring-2 ring-safir/10"
+                        : cardEffectsEnabled
+                          ? "hover:border-foreground/15 hover:bg-muted/35"
+                          : "border-border",
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="card-effect-style"
+                      value={style}
+                      checked={selected}
+                      disabled={!cardEffectsEnabled}
+                      onChange={() => setCardEffectStylePreference(style)}
+                      className="sr-only"
+                    />
+                    <span
+                      className={cn(previewStyles.preview, effectStylePreviews[style])}
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold">
+                        {t(`cardEffectStyles.${style}.label`)}
+                      </span>
+                      <span className="mt-0.5 block text-xs leading-4 text-muted-foreground">
+                        {t(`cardEffectStyles.${style}.description`)}
+                      </span>
+                    </span>
+                    <span
+                      className={cn(
+                        "grid size-5 shrink-0 place-items-center rounded-full border transition",
+                        selected
+                          ? "border-safir bg-safir text-white"
+                          : "border-border text-transparent group-hover:border-foreground/30",
+                      )}
+                      aria-hidden="true"
+                    >
+                      <Check className="size-3" />
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{t("cardEffectsFootnote")}</p>
         </div>

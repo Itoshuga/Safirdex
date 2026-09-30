@@ -131,6 +131,254 @@
   mix-blend-mode: screen;
 }
 
+/*
+ * Alternate finishes use original, procedural gradients so the card keeps a
+ * small asset footprint. The default "classic" finish is the existing design
+ * above and remains untouched for backwards compatibility.
+ */
+
+.scene[data-holo-style="cosmos"] .foil {
+  background-image:
+    radial-gradient(
+      farthest-corner circle at var(--holo-pointer-x) var(--holo-pointer-y),
+      rgb(255 255 255 / 0.96) 0%,
+      rgb(166 220 255 / 0.48) 9%,
+      transparent 34%
+    ),
+    linear-gradient(145deg, rgb(14 20 55 / 0.9), rgb(40 17 72 / 0.72) 48%, rgb(6 49 72 / 0.82)),
+    repeating-linear-gradient(
+      118deg,
+      rgb(102 196 255 / 0.72) 0% 7%,
+      rgb(164 112 255 / 0.7) 12% 19%,
+      rgb(255 104 180 / 0.68) 24% 31%,
+      rgb(102 242 207 / 0.68) 36% 43%,
+      rgb(102 196 255 / 0.72) 48% 55%
+    );
+  background-position: center, center, var(--holo-background-x) var(--holo-background-y);
+  background-size: 100% 100%, 100% 100%, 280% 280%;
+  background-blend-mode: screen, multiply, color;
+  filter: brightness(0.82) contrast(1.45) saturate(1.5);
+  opacity: calc(var(--holo-opacity) * 0.68);
+}
+
+.scene[data-holo-style="cosmos"] .foil::before {
+  position: absolute;
+  inset: -12%;
+  content: "";
+  background-image:
+    radial-gradient(circle at 18% 22%, rgb(255 255 255 / 0.95) 0 0.7px, transparent 1.5px),
+    radial-gradient(circle at 72% 38%, rgb(187 225 255 / 0.9) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 42% 78%, rgb(255 196 239 / 0.82) 0 0.8px, transparent 1.7px);
+  background-position:
+    var(--holo-background-x) var(--holo-background-y),
+    calc(100% - var(--holo-background-x)) var(--holo-background-y),
+    var(--holo-background-x) calc(100% - var(--holo-background-y));
+  background-size: 31px 37px, 47px 53px, 67px 71px;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+.scene[data-holo-style="cosmos"] .prism {
+  background-image:
+    repeating-conic-gradient(
+      from 8deg at var(--holo-pointer-x) var(--holo-pointer-y),
+      rgb(255 255 255 / 0.36) 0deg 0.8deg,
+      transparent 1.6deg 15deg
+    ),
+    radial-gradient(
+      circle at var(--holo-pointer-x) var(--holo-pointer-y),
+      rgb(255 255 255 / 0.72) 0 1.2%,
+      transparent 3.8% 100%
+    );
+  background-position: center;
+  background-size: 100% 100%;
+  mix-blend-mode: screen;
+  opacity: calc(var(--holo-opacity) * 0.36);
+}
+
+.scene[data-holo-style="cosmos"] .glare {
+  background: radial-gradient(
+    farthest-corner circle at var(--holo-pointer-x) var(--holo-pointer-y),
+    rgb(230 246 255 / 0.92) 0%,
+    rgb(148 180 255 / 0.28) 18%,
+    rgb(99 48 178 / 0.12) 36%,
+    transparent 58%
+  );
+  opacity: calc(var(--holo-opacity) * 0.7);
+}
+
+.scene[data-holo-style="aurora"] .foil {
+  background-image:
+    radial-gradient(
+      farthest-corner circle at var(--holo-pointer-x) var(--holo-pointer-y),
+      rgb(255 255 255 / 0.9) 0%,
+      rgb(226 248 255 / 0.35) 13%,
+      transparent 46%
+    ),
+    repeating-linear-gradient(
+      124deg,
+      rgb(80 235 210 / 0.78) 0% 9%,
+      rgb(83 172 255 / 0.75) 16% 26%,
+      rgb(151 105 255 / 0.76) 34% 44%,
+      rgb(255 116 196 / 0.72) 52% 62%,
+      rgb(255 216 116 / 0.72) 70% 80%,
+      rgb(80 235 210 / 0.78) 88% 100%
+    );
+  background-position: center, var(--holo-background-x) var(--holo-background-y);
+  background-size: 100% 100%, 300% 260%;
+  background-blend-mode: screen, color;
+  filter: brightness(0.95) contrast(1.28) saturate(1.36);
+  opacity: calc(var(--holo-opacity) * 0.58);
+}
+
+.scene[data-holo-style="aurora"] .prism {
+  background-image:
+    repeating-linear-gradient(
+      68deg,
+      transparent 0% 8%,
+      rgb(255 255 255 / 0.3) 12%,
+      transparent 17% 28%
+    ),
+    repeating-linear-gradient(
+      112deg,
+      rgb(136 255 229 / 0.14) 0% 12%,
+      rgb(185 151 255 / 0.2) 20%,
+      rgb(255 171 219 / 0.14) 30% 42%
+    );
+  background-position:
+    var(--holo-background-x) var(--holo-background-y),
+    calc(100% - var(--holo-background-x)) calc(100% - var(--holo-background-y));
+  background-size: 240% 240%, 210% 210%;
+  mix-blend-mode: screen;
+  opacity: calc(var(--holo-opacity) * 0.64);
+}
+
+.scene[data-holo-style="aurora"] .glare {
+  background: radial-gradient(
+    farthest-corner ellipse at var(--holo-pointer-x) var(--holo-pointer-y),
+    rgb(255 255 255 / 0.82) 0%,
+    rgb(206 251 255 / 0.3) 14%,
+    transparent 52%
+  );
+  opacity: calc(var(--holo-opacity) * 0.68);
+}
+
+.scene[data-holo-style="radiant"] .foil {
+  background-image:
+    radial-gradient(
+      farthest-corner ellipse at var(--holo-pointer-x) var(--holo-pointer-y),
+      rgb(255 255 255 / 0.94) 0%,
+      rgb(177 215 255 / 0.32) 22%,
+      transparent 62%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgb(255 255 255 / 0.38) 0 1px,
+      rgb(12 17 36 / 0.5) 1px 5px,
+      rgb(255 255 255 / 0.16) 5px 7px,
+      transparent 7px 12px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgb(255 255 255 / 0.32) 0 1px,
+      rgb(10 14 30 / 0.46) 1px 5px,
+      rgb(255 255 255 / 0.12) 5px 7px,
+      transparent 7px 12px
+    ),
+    conic-gradient(
+      from 30deg at var(--holo-pointer-x) var(--holo-pointer-y),
+      rgb(104 214 255 / 0.72),
+      rgb(176 112 255 / 0.7),
+      rgb(255 107 182 / 0.68),
+      rgb(255 221 111 / 0.68),
+      rgb(86 236 196 / 0.68),
+      rgb(104 214 255 / 0.72)
+    );
+  background-position:
+    center,
+    var(--holo-background-x) var(--holo-background-y),
+    calc(100% - var(--holo-background-x)) calc(100% - var(--holo-background-y)),
+    center;
+  background-size: 100% 100%, 180% 180%, 180% 180%, 140% 140%;
+  background-blend-mode: screen, overlay, overlay, color;
+  filter: brightness(0.86) contrast(1.5) saturate(1.45);
+  opacity: calc(var(--holo-opacity) * 0.62);
+}
+
+.scene[data-holo-style="radiant"] .prism {
+  background-image:
+    repeating-conic-gradient(
+      from 0deg at var(--holo-pointer-x) var(--holo-pointer-y),
+      transparent 0deg 7deg,
+      rgb(255 255 255 / 0.3) 8deg 8.8deg,
+      transparent 10deg 18deg
+    ),
+    radial-gradient(
+      circle at var(--holo-pointer-x) var(--holo-pointer-y),
+      rgb(255 255 255 / 0.58) 0%,
+      transparent 52%
+    );
+  background-position: center;
+  background-size: 100% 100%;
+  mix-blend-mode: screen;
+  opacity: calc(var(--holo-opacity) * 0.42);
+}
+
+.scene[data-holo-style="radiant"] .glare {
+  background: radial-gradient(
+    farthest-corner circle at var(--holo-pointer-x) var(--holo-pointer-y),
+    rgb(255 255 255 / 0.88) 0%,
+    rgb(193 226 255 / 0.26) 17%,
+    transparent 49%
+  );
+  mix-blend-mode: hard-light;
+  opacity: calc(var(--holo-opacity) * 0.64);
+}
+
+.scene[data-holo-style="radiant"] .edge {
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / calc(0.1 + var(--holo-opacity) * 0.24)),
+    inset 0 0 28px rgb(126 190 255 / calc(var(--holo-opacity) * 0.2));
+}
+
+.scene[data-holo-style="light"] .surface {
+  box-shadow: var(--holo-shadow-x) var(--holo-shadow-y) 38px -18px rgb(6 10 28 / var(--holo-shadow-opacity));
+}
+
+.scene[data-holo-style="light"] .glare {
+  background-image: linear-gradient(
+    118deg,
+    transparent 24%,
+    rgb(255 255 255 / 0.04) 36%,
+    rgb(255 255 255 / 0.28) 43%,
+    rgb(255 255 255 / 0.82) 49%,
+    rgb(255 255 255 / 0.34) 54%,
+    rgb(255 255 255 / 0.06) 61%,
+    transparent 74%
+  );
+  background-position: var(--holo-pointer-x) var(--holo-pointer-y);
+  background-size: 230% 230%;
+  mix-blend-mode: screen;
+  opacity: calc(var(--holo-opacity) * 0.78);
+}
+
+.scene[data-holo-style="light"] .foil,
+.scene[data-holo-style="light"] .prism,
+.scene[data-holo-style="light"] .edge {
+  display: none;
+}
+
+.scene[data-holo-style="none"] .surface {
+  box-shadow: var(--holo-shadow-x) var(--holo-shadow-y) 38px -18px rgb(6 10 28 / var(--holo-shadow-opacity));
+}
+
+.scene[data-holo-style="none"] .foil,
+.scene[data-holo-style="none"] .prism,
+.scene[data-holo-style="none"] .glare,
+.scene[data-holo-style="none"] .edge {
+  display: none;
+}
+
 .scene[data-effects="disabled"] .surface {
   transform: none;
   box-shadow: none;

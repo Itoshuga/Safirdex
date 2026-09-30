@@ -1,0 +1,89 @@
+.preview {
+  position: relative;
+  display: block;
+  width: 3rem;
+  height: 3.5rem;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.3);
+  border-radius: 0.7rem;
+  background-color: #11182e;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.08),
+    0 8px 20px -13px rgb(24 38 86 / 0.75);
+}
+
+.preview::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: radial-gradient(circle at 28% 24%, rgb(255 255 255 / 0.82), transparent 32%);
+  mix-blend-mode: screen;
+}
+
+.classic {
+  background-image: repeating-linear-gradient(
+    122deg,
+    #ff5fa2 0% 12%,
+    #8d6aff 20% 32%,
+    #4ed8ff 40% 52%,
+    #56edba 60% 72%,
+    #ffe174 80% 92%,
+    #ff795f 100%
+  );
+  background-size: 230% 230%;
+  background-position: 62% 42%;
+}
+
+.cosmos {
+  background-image:
+    radial-gradient(circle at 18% 28%, #fff 0 0.7px, transparent 1.6px),
+    radial-gradient(circle at 72% 36%, #bce4ff 0 1px, transparent 2px),
+    radial-gradient(circle at 44% 78%, #ffc7ef 0 0.8px, transparent 1.7px),
+    linear-gradient(145deg, #09152f, #31175b 54%, #073d58);
+  background-size: 17px 19px, 27px 31px, 37px 41px, 100% 100%;
+}
+
+.aurora {
+  background-image: repeating-linear-gradient(
+    128deg,
+    #54e6c9 0% 15%,
+    #56a9ff 24% 38%,
+    #a46eff 48% 62%,
+    #ff79c7 72% 84%,
+    #ffe08a 94% 100%
+  );
+  background-size: 280% 240%;
+  background-position: 58% 48%;
+}
+
+.radiant {
+  background-image:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 0.6) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.45) 0 1px, transparent 1px 6px),
+    conic-gradient(from 20deg, #6ad9ff, #a36fff, #ff76b9, #ffe070, #58ebbc, #6ad9ff);
+  background-blend-mode: screen, screen, normal;
+}
+
+.light {
+  background-image: linear-gradient(145deg, #343b49, #171c27 52%, #0a0c12);
+}
+
+.light::after {
+  background: linear-gradient(
+    118deg,
+    transparent 22%,
+    rgb(255 255 255 / 0.18) 38%,
+    rgb(255 255 255 / 0.94) 49%,
+    rgb(255 255 255 / 0.22) 58%,
+    transparent 74%
+  );
+}
+
+.none {
+  background-image: linear-gradient(145deg, #303747, #11151f 52%, #080a10);
+}
+
+.none::after {
+  display: none;
+}
