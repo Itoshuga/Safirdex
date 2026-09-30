@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { after } from "next/server";
 
 import {
@@ -28,13 +28,8 @@ import {
 } from "@/features/maintenance/server/maintenance-service";
 import { getUserSession } from "@/lib/auth/user-session";
 
-function invalidateCollectionPages() {
+function invalidateCollectionProfileCache() {
   updateTag(COMMUNITY_CACHE_TAGS.profiles);
-  revalidatePath("/[locale]/collection", "page");
-  revalidatePath("/[locale]/cards", "page");
-  revalidatePath("/[locale]/cards/[slug]", "page");
-  revalidatePath("/[locale]/account", "page");
-  revalidatePath("/[locale]/user/[username]", "page");
 }
 
 function scheduleCollectionSideEffects(
@@ -43,9 +38,9 @@ function scheduleCollectionSideEffects(
 ) {
   after(async () => {
     try {
-      invalidateCollectionPages();
+      invalidateCollectionProfileCache();
     } catch (error) {
-      console.error("[Collection] Unable to invalidate collection pages.", error);
+      console.error("[Collection] Unable to invalidate the profile cache.", error);
     }
     if (!activityPayload) return;
     await recordCollectionUpdatedActivity(userId, activityPayload).catch((error) => {
@@ -149,7 +144,7 @@ export async function updateTradeSettingsAction(input: {
       authorization.userId,
       parsed.data,
     );
-    invalidateCollectionPages();
+    invalidateCollectionProfileCache();
     return { ok: true as const, settings };
   } catch {
     return { ok: false as const, code: "COLLECTION_UPDATE_FAILED" as const };
