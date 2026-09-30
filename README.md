@@ -1,6 +1,6 @@
 # Safir Codex
 
-The official card archive for Safir. The project includes a responsive landing page, a typed Firestore architecture, and a secure administration panel for managing the TCG catalogue.
+A card archive for Safir. The project includes a responsive landing page, a typed Firestore architecture, and a secure administration panel for managing the TCG catalogue.
 
 ## Local development
 
