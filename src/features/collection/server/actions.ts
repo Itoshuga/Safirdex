@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
+import { after } from "next/server";
 
 import {
   collectionAdjustmentSchema,
@@ -18,6 +19,8 @@ import type {
   CollectionActionCode,
   CollectionActionResult,
 } from "@/features/collection/types";
+import { recordCollectionUpdatedActivity } from "@/features/community/server/activity-service";
+import type { CollectionActivityPayload } from "@/features/community/types";
 import { COMMUNITY_CACHE_TAGS } from "@/features/community/server/cache-tags";
 import {
   assertApplicationAvailable,
@@ -32,6 +35,23 @@ function invalidateCollectionPages() {
   revalidatePath("/[locale]/cards/[slug]", "page");
   revalidatePath("/[locale]/account", "page");
   revalidatePath("/[locale]/user/[username]", "page");
+}
+
+function scheduleCollectionSideEffects(
+  userId: string,
+  activityPayload: CollectionActivityPayload | null,
+) {
+  after(async () => {
+    try {
+      invalidateCollectionPages();
+    } catch (error) {
+      console.error("[Collection] Unable to invalidate collection pages.", error);
+    }
+    if (!activityPayload) return;
+    await recordCollectionUpdatedActivity(userId, activityPayload).catch((error) => {
+      console.error("[Collection] Unable to publish the collection activity.", error);
+    });
+  });
 }
 
 function actionError(error: unknown): CollectionActionCode {
@@ -71,14 +91,14 @@ async function runEntryMutation(
     return { ok: false, code: "INVALID_COLLECTION_INPUT" };
   }
   try {
-    const result = await mutateCollectionEntry(
+    const { activityPayload, ...result } = await mutateCollectionEntry(
       authorization.userId,
       parsed.data.cardId,
       "quantity" in parsed.data
         ? { kind: mode as "set-owned" | "set-trade", quantity: parsed.data.quantity }
         : { kind: mode as "adjust-owned" | "adjust-trade", delta: parsed.data.delta },
     );
-    invalidateCollectionPages();
+    scheduleCollectionSideEffects(authorization.userId, activityPayload);
     return { ok: true, ...result };
   } catch (error) {
     return { ok: false, code: actionError(error) };

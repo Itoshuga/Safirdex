@@ -29,8 +29,10 @@ import type {
   TradePrivacySettings,
   UserCollectionStats,
 } from "@/features/collection/types";
-import { recordCollectionUpdatedActivity } from "@/features/community/server/activity-service";
-import type { PublicUserProfileDocument } from "@/features/community/types";
+import type {
+  CollectionActivityPayload,
+  PublicUserProfileDocument,
+} from "@/features/community/types";
 import { getFirebaseAdminFirestore } from "@/lib/firebase/admin";
 import { FIRESTORE_COLLECTIONS } from "@/lib/firebase/collections";
 import { firestoreDateIso } from "@/lib/firebase/timestamp";
@@ -308,20 +310,20 @@ export async function mutateCollectionEntry(
     return { previous, next, stats, card };
   });
 
-  if (result.previous.ownedQuantity === 0 && result.next.ownedQuantity > 0) {
-    await recordCollectionUpdatedActivity(userId, {
-      addedCount: 1,
-      cards: [{
-        cardId: result.card.id,
-        slug: result.card.slug,
-        translations: result.card.translations,
-        ...(result.card.artwork.url ? { artworkUrl: result.card.artwork.url } : {}),
-      }],
-    }).catch((error) => {
-      console.error("[Collection] Unable to publish the collection activity.", error);
-    });
-  }
-  return { entry: result.next, stats: result.stats };
+  const activityPayload: CollectionActivityPayload | null =
+    result.previous.ownedQuantity === 0 && result.next.ownedQuantity > 0
+      ? {
+          addedCount: 1,
+          cards: [{
+            cardId: result.card.id,
+            slug: result.card.slug,
+            translations: result.card.translations,
+            ...(result.card.artwork.url ? { artworkUrl: result.card.artwork.url } : {}),
+          }],
+        }
+      : null;
+
+  return { entry: result.next, stats: result.stats, activityPayload };
 }
 
 async function commitOperations(

@@ -1,14 +1,14 @@
 "use client";
 
-import { Library, LoaderCircle, Minus, Plus } from "lucide-react";
+import { Library, Minus, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { collectionEntryState } from "@/features/collection/domain";
 import {
-  adjustOwnedQuantityAction,
-  adjustTradeQuantityAction,
+  setOwnedQuantityAction,
+  setTradeQuantityAction,
 } from "@/features/collection/server/actions";
 import type { CollectionEntryState } from "@/features/collection/types";
 
@@ -32,55 +32,94 @@ export function CollectionQuantityControls({
   const t = useTranslations("Collection.quantity");
   const [entry, setEntry] = useState(initialEntry);
   const [message, setMessage] = useState("");
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
+  const desiredEntry = useRef(initialEntry);
+  const persistedEntry = useRef(initialEntry);
+  const synchronizing = useRef(false);
 
   function commit(next: CollectionEntryState) {
+    desiredEntry.current = next;
     setEntry(next);
     onChange?.(next);
   }
 
-  function adjustOwned(delta: -1 | 1) {
-    if (pending || (delta < 0 && entry.ownedQuantity === 0)) return;
-    const previous = entry;
-    commit(collectionEntryState(cardId, entry.ownedQuantity + delta, entry.tradeQuantity));
-    setMessage("");
-    startTransition(async () => {
-      const result = await adjustOwnedQuantityAction({ cardId, delta });
-      if (!result.ok) {
-        commit(previous);
-        setMessage(t("error"));
-        return;
+  function isSameEntry(left: CollectionEntryState, right: CollectionEntryState) {
+    return left.ownedQuantity === right.ownedQuantity &&
+      left.tradeQuantity === right.tradeQuantity;
+  }
+
+  async function synchronize() {
+    if (synchronizing.current) return;
+    synchronizing.current = true;
+    setPending(true);
+
+    try {
+      while (!isSameEntry(desiredEntry.current, persistedEntry.current)) {
+        const desired = desiredEntry.current;
+        const persisted = persistedEntry.current;
+        const result = desired.ownedQuantity !== persisted.ownedQuantity
+          ? await setOwnedQuantityAction({
+              cardId,
+              quantity: desired.ownedQuantity,
+            })
+          : await setTradeQuantityAction({
+              cardId,
+              quantity: desired.tradeQuantity,
+            });
+
+        if (!result.ok) {
+          commit(persistedEntry.current);
+          setMessage(result.code === "TRADE_EXCEEDS_DUPLICATES" ? t("tradeLimit") : t("error"));
+          return;
+        }
+
+        persistedEntry.current = result.entry;
+        if (isSameEntry(desiredEntry.current, result.entry)) {
+          commit(result.entry);
+        }
       }
-      commit(result.entry);
+
       setMessage(t("saved"));
-    });
+    } finally {
+      synchronizing.current = false;
+      setPending(false);
+    }
+  }
+
+  function adjustOwned(delta: -1 | 1) {
+    const current = desiredEntry.current;
+    if (delta < 0 && current.ownedQuantity === 0) return;
+    const next = collectionEntryState(
+      cardId,
+      current.ownedQuantity + delta,
+      current.tradeQuantity,
+    );
+    if (isSameEntry(current, next)) return;
+    commit(next);
+    setMessage("");
+    void synchronize();
   }
 
   function adjustTrade(delta: -1 | 1) {
+    const current = desiredEntry.current;
     if (
-      pending ||
-      (delta < 0 && entry.tradeQuantity === 0) ||
-      (delta > 0 && entry.tradeQuantity >= entry.duplicateQuantity)
+      (delta < 0 && current.tradeQuantity === 0) ||
+      (delta > 0 && current.tradeQuantity >= current.duplicateQuantity)
     ) return;
-    const previous = entry;
-    commit(collectionEntryState(cardId, entry.ownedQuantity, entry.tradeQuantity + delta));
+    const next = collectionEntryState(
+      cardId,
+      current.ownedQuantity,
+      current.tradeQuantity + delta,
+    );
+    commit(next);
     setMessage("");
-    startTransition(async () => {
-      const result = await adjustTradeQuantityAction({ cardId, delta });
-      if (!result.ok) {
-        commit(previous);
-        setMessage(result.code === "TRADE_EXCEEDS_DUPLICATES" ? t("tradeLimit") : t("error"));
-        return;
-      }
-      commit(result.entry);
-      setMessage(t("saved"));
-    });
+    void synchronize();
   }
 
   if (compact) {
     if (compactVariant === "catalogue") {
       return entry.ownedQuantity > 0 ? (
-        <div className="flex min-h-11 items-center justify-between gap-2 border-t bg-muted/15 px-2.5 py-1.5 sm:px-3">
+        <div className="flex min-h-11 items-center justify-between gap-2 border-t bg-muted/15 px-2.5 py-1.5 sm:px-3" aria-busy={pending}>
           <span className="flex min-w-0 items-center gap-1.5 truncate text-[0.68rem] font-semibold text-muted-foreground">
             <Library className="size-3.5 shrink-0 text-safir" aria-hidden="true" />
             {t("ownedCompact", { count: entry.ownedQuantity })}
@@ -91,21 +130,19 @@ export function CollectionQuantityControls({
               size="icon-xs"
               variant="ghost"
               className="rounded-full"
-              disabled={pending}
               onClick={() => adjustOwned(-1)}
               aria-label={t("remove", { name: cardName })}
             >
               <Minus />
             </Button>
             <span className="grid min-w-6 place-items-center font-mono text-xs font-semibold tabular-nums">
-              {pending ? <LoaderCircle className="size-3 animate-spin" /> : entry.ownedQuantity}
+              {entry.ownedQuantity}
             </span>
             <Button
               type="button"
               size="icon-xs"
               variant="ghost"
               className="rounded-full"
-              disabled={pending}
               onClick={() => adjustOwned(1)}
               aria-label={t("add", { name: cardName })}
             >
@@ -115,17 +152,16 @@ export function CollectionQuantityControls({
           <span className="sr-only" aria-live="polite">{message}</span>
         </div>
       ) : (
-        <div className="border-t bg-muted/10 p-1.5">
+        <div className="border-t bg-muted/10 p-1.5" aria-busy={pending}>
           <Button
             type="button"
             size="sm"
             variant="ghost"
             className="h-8 w-full rounded-lg text-xs text-safir hover:bg-safir/10 hover:text-safir"
-            disabled={pending}
             onClick={() => adjustOwned(1)}
             aria-label={t("add", { name: cardName })}
           >
-            {pending ? <LoaderCircle className="animate-spin" /> : <Plus />}
+            <Plus />
             {t("addShort")}
           </Button>
           <span className="sr-only" aria-live="polite">{message}</span>
@@ -135,14 +171,13 @@ export function CollectionQuantityControls({
 
     if (compactVariant === "floating") {
       return (
-        <div className="inline-flex items-center rounded-full border border-white/20 bg-background/88 p-1 shadow-lg shadow-black/15 backdrop-blur-xl">
+        <div className="inline-flex items-center rounded-full border border-white/20 bg-background/88 p-1 shadow-lg shadow-black/15 backdrop-blur-xl" aria-busy={pending}>
           {entry.ownedQuantity > 0 ? (
             <Button
               type="button"
               size="icon-xs"
               variant="ghost"
               className="rounded-full"
-              disabled={pending}
               onClick={() => adjustOwned(-1)}
               aria-label={t("remove", { name: cardName })}
             >
@@ -151,7 +186,7 @@ export function CollectionQuantityControls({
           ) : null}
           {entry.ownedQuantity > 0 ? (
             <span className="min-w-7 text-center font-mono text-xs font-semibold tabular-nums">
-              {pending ? <LoaderCircle className="mx-auto size-3 animate-spin" /> : entry.ownedQuantity}
+              {entry.ownedQuantity}
             </span>
           ) : null}
           <Button
@@ -159,11 +194,10 @@ export function CollectionQuantityControls({
             size={entry.ownedQuantity > 0 ? "icon-xs" : "sm"}
             variant={entry.ownedQuantity > 0 ? "ghost" : "default"}
             className="rounded-full"
-            disabled={pending}
             onClick={() => adjustOwned(1)}
             aria-label={t("add", { name: cardName })}
           >
-            {pending && entry.ownedQuantity === 0 ? <LoaderCircle className="animate-spin" /> : <Plus />}
+            <Plus />
             {entry.ownedQuantity === 0 ? <span>{t("quickAddShort")}</span> : null}
           </Button>
           <span className="sr-only" aria-live="polite">{message}</span>
@@ -172,7 +206,7 @@ export function CollectionQuantityControls({
     }
 
     return (
-      <div className={`flex min-h-11 items-center justify-between gap-2 px-3 py-2 ${compactVariant === "bar" ? "border-t bg-muted/20" : "sm:h-full sm:flex-col sm:justify-center sm:px-3"}`}>
+      <div className={`flex min-h-11 items-center justify-between gap-2 px-3 py-2 ${compactVariant === "bar" ? "border-t bg-muted/20" : "sm:h-full sm:flex-col sm:justify-center sm:px-3"}`} aria-busy={pending}>
         <span className="min-w-0 truncate text-[0.68rem] font-semibold text-muted-foreground">
           {entry.ownedQuantity > 0 ? `${t("owned")} · ${entry.ownedQuantity}` : t("quickAdd")}
         </span>
@@ -182,7 +216,6 @@ export function CollectionQuantityControls({
               type="button"
               size="icon-xs"
               variant="ghost"
-              disabled={pending}
               onClick={() => adjustOwned(-1)}
               aria-label={t("remove", { name: cardName })}
             >
@@ -190,13 +223,12 @@ export function CollectionQuantityControls({
             </Button>
           ) : null}
           <span className="min-w-5 text-center font-mono text-xs font-semibold tabular-nums">
-            {pending ? <LoaderCircle className="mx-auto size-3 animate-spin" /> : entry.ownedQuantity}
+            {entry.ownedQuantity}
           </span>
           <Button
             type="button"
             size="icon-xs"
             variant={entry.ownedQuantity > 0 ? "ghost" : "default"}
-            disabled={pending}
             onClick={() => adjustOwned(1)}
             aria-label={t("add", { name: cardName })}
           >
@@ -211,7 +243,7 @@ export function CollectionQuantityControls({
   if (detailLayout) {
     const hasError = Boolean(message && message !== t("saved"));
     return (
-      <div>
+      <div aria-busy={pending}>
         <div className="grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <div className="flex items-center justify-between gap-3 py-1.5 sm:pr-4">
             <div className="min-w-0">
@@ -251,7 +283,7 @@ export function CollectionQuantityControls({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" aria-busy={pending}>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-xl border bg-background/65 p-3">
         <div>
           <p className="text-xs font-semibold">{t("owned")}</p>
@@ -313,14 +345,14 @@ function QuantityButtons({
   onPlus: () => void;
 }) {
   return (
-    <div className="flex items-center rounded-lg border bg-card p-1">
-      <Button type="button" size="icon-sm" variant="ghost" disabled={pending || minusDisabled} onClick={onMinus} aria-label={minusLabel}>
+    <div className="flex items-center rounded-lg border bg-card p-1" aria-busy={pending}>
+      <Button type="button" size="icon-sm" variant="ghost" disabled={minusDisabled} onClick={onMinus} aria-label={minusLabel}>
         <Minus />
       </Button>
       <span className="min-w-10 text-center font-mono text-sm font-semibold tabular-nums">
-        {pending ? <LoaderCircle className="mx-auto size-3.5 animate-spin" /> : value}
+        {value}
       </span>
-      <Button type="button" size="icon-sm" variant="ghost" disabled={pending || plusDisabled} onClick={onPlus} aria-label={plusLabel}>
+      <Button type="button" size="icon-sm" variant="ghost" disabled={plusDisabled} onClick={onPlus} aria-label={plusLabel}>
         <Plus />
       </Button>
     </div>
