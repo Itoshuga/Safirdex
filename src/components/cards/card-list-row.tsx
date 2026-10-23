@@ -1,18 +1,29 @@
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import type { Ref } from "react";
 
 import { CollectionQuantityControls } from "@/components/collection/collection-quantity-controls";
 import type { CardListItem } from "@/features/cards/types";
 import type { CollectionEntryState } from "@/features/collection/types";
 import { Link } from "@/i18n/navigation";
 
-export function CardListRow({ card, collectionEntry }: { card: CardListItem; collectionEntry?: CollectionEntryState }) {
+export function CardListRow({
+  card,
+  collectionEntry,
+  onCollectionChange,
+  loadMoreRef,
+}: {
+  card: CardListItem;
+  collectionEntry?: CollectionEntryState;
+  onCollectionChange?: (entry: CollectionEntryState) => void;
+  loadMoreRef?: Ref<HTMLElement>;
+}) {
   const labels = useTranslations("Cards.labels");
   const showCollectionAction = Boolean(collectionEntry && card.collectible);
 
   return (
-    <article className={`overflow-hidden rounded-2xl border bg-card/80 ${showCollectionAction ? "sm:grid sm:grid-cols-[minmax(0,1fr)_12rem]" : ""}`}>
+    <article ref={loadMoreRef} className={`overflow-hidden rounded-2xl border bg-card/80 ${showCollectionAction ? "sm:grid sm:grid-cols-[minmax(0,1fr)_12rem]" : ""}`}>
       <Link
         href={`/cards/${card.slug}`}
         prefetch={false}
@@ -62,7 +73,7 @@ export function CardListRow({ card, collectionEntry }: { card: CardListItem; col
       </Link>
       {collectionEntry && card.collectible ? (
         <div className="bg-muted/10 sm:border-l sm:[&>div]:h-full sm:[&>div]:border-t-0">
-          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="catalogue" />
+          <CollectionQuantityControls cardId={card.id} cardName={card.name} initialEntry={collectionEntry} compact compactVariant="catalogue" onChange={onCollectionChange} />
         </div>
       ) : null}
     </article>

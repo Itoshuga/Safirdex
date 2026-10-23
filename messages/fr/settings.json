@@ -61,6 +61,19 @@
         "dark": "Sombre"
       },
       "savedLocally": "Cette préférence est enregistrée sur cet appareil.",
+      "catalogueNavigationTitle": "Navigation du catalogue",
+      "catalogueNavigationDescription": "Choisissez la manière dont les nouvelles cartes apparaissent lorsque vous parcourez le Codex.",
+      "catalogueNavigationModes": {
+        "pagination": {
+          "label": "Pagination",
+          "description": "Parcourez le catalogue page par page, avec 25 cartes à la fois."
+        },
+        "infinite": {
+          "label": "Défilement continu",
+          "description": "Charge automatiquement le lot suivant pendant votre progression."
+        }
+      },
+      "catalogueNavigationFootnote": "Le défilement continu anticipe le lot suivant sans charger tout le catalogue d’un coup. Ce choix est enregistré sur cet appareil.",
       "cardEffectsTitle": "Effets holographiques des cartes",
       "cardEffectsBetaLabel": "BETA",
       "cardEffectsBetaDescription": "Cette fonctionnalité est encore en cours d’ajustement.",

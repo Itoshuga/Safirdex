@@ -1,6 +1,14 @@
 "use client";
 
-import { Check, Laptop, Moon, Sparkles, Sun } from "lucide-react";
+import {
+  Check,
+  GalleryVerticalEnd,
+  Laptop,
+  Moon,
+  Rows3,
+  Sparkles,
+  Sun,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { useSyncExternalStore } from "react";
@@ -14,6 +22,11 @@ import {
   useCardEffectStylePreference,
   useCardEffectsPreference,
 } from "@/hooks/use-card-effects-preference";
+import {
+  CARD_CATALOGUE_NAVIGATION_MODES,
+  setCardCatalogueNavigationPreference,
+  useCardCatalogueNavigationPreference,
+} from "@/hooks/use-card-catalogue-navigation-preference";
 import { cn } from "@/lib/utils";
 
 import previewStyles from "./card-effect-style-preview.module.css";
@@ -29,18 +42,29 @@ const effectStylePreviews = {
   none: previewStyles.none,
 } as const;
 
-export function PreferencesControls({ showCardEffects = true }: { showCardEffects?: boolean }) {
+export function PreferencesControls({
+  showCardEffects = true,
+  showCatalogueNavigation = showCardEffects,
+}: {
+  showCardEffects?: boolean;
+  showCatalogueNavigation?: boolean;
+}) {
   const t = useTranslations("Settings.preferences");
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const { theme, setTheme } = useTheme();
   const cardEffectsEnabled = useCardEffectsPreference();
   const cardEffectStyle = useCardEffectStylePreference();
+  const catalogueNavigation = useCardCatalogueNavigationPreference();
   const selectedTheme = mounted ? theme ?? "system" : "system";
   const themes = [
     { key: "system", icon: Laptop },
     { key: "light", icon: Sun },
     { key: "dark", icon: Moon },
   ] as const;
+  const catalogueNavigationModes = {
+    pagination: Rows3,
+    infinite: GalleryVerticalEnd,
+  } as const;
 
   return (
     <div className="space-y-7">
@@ -74,6 +98,77 @@ export function PreferencesControls({ showCardEffects = true }: { showCardEffect
         </div>
         <p className="mt-3 text-xs text-muted-foreground">{t("savedLocally")}</p>
       </div>
+      {showCatalogueNavigation ? (
+        <div className="border-t pt-6">
+          <p className="text-sm font-semibold">{t("catalogueNavigationTitle")}</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            {t("catalogueNavigationDescription")}
+          </p>
+          <div
+            role="radiogroup"
+            aria-label={t("catalogueNavigationTitle")}
+            className="mt-4 grid gap-3 sm:grid-cols-2"
+          >
+            {CARD_CATALOGUE_NAVIGATION_MODES.map((mode) => {
+              const Icon = catalogueNavigationModes[mode];
+              const selected = catalogueNavigation === mode;
+
+              return (
+                <label
+                  key={mode}
+                  className={cn(
+                    "group flex cursor-pointer items-start gap-3 rounded-2xl border bg-background p-4 text-left transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring",
+                    selected
+                      ? "border-safir/40 bg-safir/6 ring-2 ring-safir/10"
+                      : "hover:border-foreground/15 hover:bg-muted/35",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="card-catalogue-navigation"
+                    value={mode}
+                    checked={selected}
+                    onChange={() => setCardCatalogueNavigationPreference(mode)}
+                    className="sr-only"
+                  />
+                  <span
+                    className={cn(
+                      "grid size-10 shrink-0 place-items-center rounded-xl border transition",
+                      selected
+                        ? "border-safir/25 bg-safir/10 text-safir"
+                        : "bg-muted/35 text-muted-foreground",
+                    )}
+                  >
+                    <Icon className="size-4.5" aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold">
+                      {t(`catalogueNavigationModes.${mode}.label`)}
+                    </span>
+                    <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                      {t(`catalogueNavigationModes.${mode}.description`)}
+                    </span>
+                  </span>
+                  <span
+                    className={cn(
+                      "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border transition",
+                      selected
+                        ? "border-safir bg-safir text-white"
+                        : "border-border text-transparent group-hover:border-foreground/30",
+                    )}
+                    aria-hidden="true"
+                  >
+                    <Check className="size-3" />
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">
+            {t("catalogueNavigationFootnote")}
+          </p>
+        </div>
+      ) : null}
       {showCardEffects ? (
         <div className="border-t pt-6">
           <div className="flex flex-wrap items-center gap-2">

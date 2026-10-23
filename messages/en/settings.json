@@ -61,6 +61,19 @@
         "dark": "Dark"
       },
       "savedLocally": "This preference is saved on this device.",
+      "catalogueNavigationTitle": "Catalogue navigation",
+      "catalogueNavigationDescription": "Choose how new cards appear while you browse the Codex.",
+      "catalogueNavigationModes": {
+        "pagination": {
+          "label": "Pagination",
+          "description": "Browse the catalogue page by page, 25 cards at a time."
+        },
+        "infinite": {
+          "label": "Continuous scrolling",
+          "description": "Automatically loads the next batch as you progress."
+        }
+      },
+      "catalogueNavigationFootnote": "Continuous scrolling anticipates the next batch without loading the entire catalogue at once. This choice is saved on this device.",
       "cardEffectsTitle": "Holographic card effects",
       "cardEffectsBetaLabel": "BETA",
       "cardEffectsBetaDescription": "This feature is still being fine-tuned.",

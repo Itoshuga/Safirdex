@@ -1,6 +1,7 @@
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import type { Ref } from "react";
 
 import { CollectionQuantityControls } from "@/components/collection/collection-quantity-controls";
 import { Link } from "@/i18n/navigation";
@@ -12,14 +13,21 @@ export interface CardPreviewProps {
   eager?: boolean;
   collectionEntry?: CollectionEntryState;
   onCollectionChange?: (entry: CollectionEntryState) => void;
+  loadMoreRef?: Ref<HTMLElement>;
 }
 
-export function CardPreview({ card, eager = false, collectionEntry, onCollectionChange }: CardPreviewProps) {
+export function CardPreview({
+  card,
+  eager = false,
+  collectionEntry,
+  onCollectionChange,
+  loadMoreRef,
+}: CardPreviewProps) {
   const labels = useTranslations("Cards.labels");
   const isHorizontal = card.artwork.orientation === "horizontal";
 
   return (
-    <article className={`relative flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] border bg-card/80 transition duration-200 hover:border-safir/35 hover:shadow-[0_22px_50px_-38px_color-mix(in_oklch,var(--safir)_65%,transparent)] ${isHorizontal ? "col-span-2" : ""}`}>
+    <article ref={loadMoreRef} className={`relative flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] border bg-card/80 transition duration-200 hover:border-safir/35 hover:shadow-[0_22px_50px_-38px_color-mix(in_oklch,var(--safir)_65%,transparent)] ${isHorizontal ? "col-span-2" : ""}`}>
       <Link
         href={`/cards/${card.slug}`}
         prefetch={false}
