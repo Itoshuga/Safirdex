@@ -10,17 +10,21 @@ import type { CollectionEntryState } from "@/features/collection/types";
 
 export interface CardPreviewProps {
   card: CardListItem;
+  detailHref?: string;
   eager?: boolean;
   collectionEntry?: CollectionEntryState;
   onCollectionChange?: (entry: CollectionEntryState) => void;
+  onOpen?: () => void;
   loadMoreRef?: Ref<HTMLElement>;
 }
 
 export function CardPreview({
   card,
+  detailHref,
   eager = false,
   collectionEntry,
   onCollectionChange,
+  onOpen,
   loadMoreRef,
 }: CardPreviewProps) {
   const labels = useTranslations("Cards.labels");
@@ -29,8 +33,9 @@ export function CardPreview({
   return (
     <article ref={loadMoreRef} className={`relative flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] border bg-card/80 transition duration-200 hover:border-safir/35 hover:shadow-[0_22px_50px_-38px_color-mix(in_oklch,var(--safir)_65%,transparent)] ${isHorizontal ? "col-span-2" : ""}`}>
       <Link
-        href={`/cards/${card.slug}`}
+        href={detailHref ?? `/cards/${card.slug}`}
         prefetch={false}
+        onClick={onOpen}
         className="group/artwork block focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring"
         aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
       >

@@ -1,8 +1,9 @@
-import { ArrowLeft, ImageIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { HolographicCard } from "@/components/cards/holographic-card";
+import { CardDetailBack } from "@/components/cards/card-detail-back";
 import { GlossaryText } from "@/components/cards/glossary-text";
 import { CardViewTracker } from "@/components/cards/card-view-tracker";
 import { StorageImage } from "@/components/admin/storage-image";
@@ -13,7 +14,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { CardDetailItem } from "@/features/cards/types";
-import { Link } from "@/i18n/navigation";
 import { CardCollectionPanel } from "@/components/collection/card-collection-panel";
 import { CardTradersSection } from "@/components/collection/card-traders-section";
 import type { CardTraderPage, CollectionEntryState } from "@/features/collection/types";
@@ -67,12 +67,14 @@ export function CardDetail({
   signedIn,
   traders,
   tradersExpanded,
+  fromCatalogue,
 }: {
   card: CardDetailItem;
   collectionEntry: CollectionEntryState | null;
   signedIn: boolean;
   traders: CardTraderPage;
   tradersExpanded: boolean;
+  fromCatalogue: boolean;
 }) {
   const labels = useTranslations("Cards.labels");
   const stats = useTranslations("Cards.stats");
@@ -82,9 +84,7 @@ export function CardDetail({
   return (
     <main className="site-container py-8 sm:py-12">
       <CardViewTracker slug={card.slug} />
-      <Link href="/cards" className="mb-7 inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground transition hover:text-foreground">
-        <ArrowLeft className="size-4" /> {detail("back")}
-      </Link>
+      <CardDetailBack label={detail("back")} fromCatalogue={fromCatalogue} />
       <article
         className={`grid gap-8 ${
           isHorizontal

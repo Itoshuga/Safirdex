@@ -10,13 +10,17 @@ import { Link } from "@/i18n/navigation";
 
 export function CardListRow({
   card,
+  detailHref,
   collectionEntry,
   onCollectionChange,
+  onOpen,
   loadMoreRef,
 }: {
   card: CardListItem;
+  detailHref?: string;
   collectionEntry?: CollectionEntryState;
   onCollectionChange?: (entry: CollectionEntryState) => void;
+  onOpen?: () => void;
   loadMoreRef?: Ref<HTMLElement>;
 }) {
   const labels = useTranslations("Cards.labels");
@@ -25,8 +29,9 @@ export function CardListRow({
   return (
     <article ref={loadMoreRef} className={`overflow-hidden rounded-2xl border bg-card/80 ${showCollectionAction ? "sm:grid sm:grid-cols-[minmax(0,1fr)_12rem]" : ""}`}>
       <Link
-        href={`/cards/${card.slug}`}
+        href={detailHref ?? `/cards/${card.slug}`}
         prefetch={false}
+        onClick={onOpen}
         className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-3 p-2.5 transition hover:bg-muted/25 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring sm:grid-cols-[4.25rem_minmax(0,1fr)_auto] sm:gap-4 sm:p-3"
         aria-label={`${card.name}, ${labels("number", { number: card.number })}`}
       >

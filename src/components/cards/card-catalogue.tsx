@@ -60,6 +60,67 @@ interface CardCatalogueProps {
 }
 
 const emptySubscribe = () => () => undefined;
+const RETURN_STATE_VERSION = 1;
+const RETURN_STATE_MAX_AGE_MS = 30 * 60 * 1_000;
+const RETURN_STATE_HISTORY_KEY = "__safirdexCardsReturn";
+const RETURN_STATE_STORAGE_PREFIX = "safirdex:cards:return";
+
+interface CatalogueReturnState {
+  version: typeof RETURN_STATE_VERSION;
+  key: string;
+  savedAt: number;
+  scrollY: number;
+  batches: CardBatch[];
+  collectionEntries: CollectionEntryState[];
+  nextCursor: string | null;
+  currentPage: number;
+  pageCount: number;
+}
+
+function returnStateStorageKey(key: string) {
+  return `${RETURN_STATE_STORAGE_PREFIX}:${key}`;
+}
+
+function parseReturnState(
+  serialized: string | null,
+  key: string,
+): CatalogueReturnState | null {
+  if (!serialized) return null;
+
+  try {
+    const value = JSON.parse(serialized) as Partial<CatalogueReturnState>;
+    const fresh =
+      typeof value.savedAt === "number" &&
+      Date.now() - value.savedAt <= RETURN_STATE_MAX_AGE_MS;
+    const validBatches =
+      Array.isArray(value.batches) &&
+      value.batches.every(
+        (batch) =>
+          batch &&
+          typeof batch === "object" &&
+          Array.isArray(batch.items) &&
+          typeof batch.fetchedCount === "number",
+      );
+
+    if (
+      value.version !== RETURN_STATE_VERSION ||
+      value.key !== key ||
+      !fresh ||
+      !validBatches ||
+      !Array.isArray(value.collectionEntries) ||
+      (value.nextCursor !== null && typeof value.nextCursor !== "string") ||
+      typeof value.scrollY !== "number" ||
+      typeof value.currentPage !== "number" ||
+      typeof value.pageCount !== "number"
+    ) {
+      return null;
+    }
+
+    return value as CatalogueReturnState;
+  } catch {
+    return null;
+  }
+}
 
 function uniqueCards(batches: CardBatch[]) {
   const knownIds = new Set<string>();
@@ -106,8 +167,11 @@ export function CardCatalogue({
   const loadTriggerRef = useRef<HTMLElement | null>(null);
   const requestInFlightRef = useRef(false);
   const requestControllerRef = useRef<AbortController | null>(null);
+  const didAttemptRestoreRef = useRef(false);
+  const pendingScrollRestoreRef = useRef<number | null>(null);
   const signedIn = initialCollectionEntries !== null;
   const items = useMemo(() => uniqueCards(batches), [batches]);
+  const returnStateKey = `${locale}:${cardsHref(query)}`;
   const lastBatch = batches.at(-1);
   const lastBatchStart = items.length - (lastBatch?.items.length ?? 0);
   const loadTriggerIndex = lastBatch?.items.length
@@ -121,6 +185,47 @@ export function CardCatalogue({
       return next;
     });
   }, []);
+
+  const saveReturnState = useCallback(() => {
+    const snapshot: CatalogueReturnState = {
+      version: RETURN_STATE_VERSION,
+      key: returnStateKey,
+      savedAt: Date.now(),
+      scrollY: window.scrollY,
+      batches,
+      collectionEntries: [...collectionEntries.values()],
+      nextCursor,
+      currentPage,
+      pageCount,
+    };
+
+    try {
+      window.sessionStorage.setItem(
+        returnStateStorageKey(returnStateKey),
+        JSON.stringify(snapshot),
+      );
+      const currentHistoryState =
+        window.history.state && typeof window.history.state === "object"
+          ? window.history.state
+          : {};
+      window.history.replaceState(
+        {
+          ...currentHistoryState,
+          [RETURN_STATE_HISTORY_KEY]: returnStateKey,
+        },
+        "",
+      );
+    } catch {
+      // Native browser scroll restoration remains available if storage is full.
+    }
+  }, [
+    batches,
+    collectionEntries,
+    currentPage,
+    nextCursor,
+    pageCount,
+    returnStateKey,
+  ]);
 
   const loadMore = useCallback(async () => {
     if (
@@ -187,6 +292,48 @@ export function CardCatalogue({
   useEffect(() => {
     return () => requestControllerRef.current?.abort();
   }, []);
+
+  useEffect(() => {
+    if (didAttemptRestoreRef.current) return;
+    didAttemptRestoreRef.current = true;
+
+    const frame = window.requestAnimationFrame(() => {
+      const historyState = window.history.state as
+        | Record<string, unknown>
+        | null;
+      if (historyState?.[RETURN_STATE_HISTORY_KEY] !== returnStateKey) return;
+
+      const snapshot = parseReturnState(
+        window.sessionStorage.getItem(returnStateStorageKey(returnStateKey)),
+        returnStateKey,
+      );
+      if (!snapshot) return;
+
+      pendingScrollRestoreRef.current = snapshot.scrollY;
+      setBatches(snapshot.batches);
+      setCollectionEntries(
+        new Map(snapshot.collectionEntries.map((entry) => [entry.cardId, entry])),
+      );
+      setNextCursor(snapshot.nextCursor);
+      setCurrentPage(snapshot.currentPage);
+      setPageCount(snapshot.pageCount);
+      setLoadError(false);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [returnStateKey]);
+
+  useEffect(() => {
+    if (pendingScrollRestoreRef.current === null) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const scrollY = pendingScrollRestoreRef.current;
+      pendingScrollRestoreRef.current = null;
+      if (scrollY !== null) window.scrollTo({ top: scrollY, behavior: "auto" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [batches]);
 
   useEffect(() => {
     if (navigationMode !== "infinite") return;
@@ -264,9 +411,11 @@ export function CardCatalogue({
               <CardPreview
                 key={card.id}
                 card={card}
+                detailHref={`/cards/${card.slug}?from=cards`}
                 eager={index < 2}
                 collectionEntry={collectionEntryFor(card)}
                 onCollectionChange={updateCollectionEntry}
+                onOpen={saveReturnState}
                 loadMoreRef={
                   isInfinite && index === loadTriggerIndex
                     ? loadTriggerRef
@@ -277,8 +426,10 @@ export function CardCatalogue({
               <CardListRow
                 key={card.id}
                 card={card}
+                detailHref={`/cards/${card.slug}?from=cards`}
                 collectionEntry={collectionEntryFor(card)}
                 onCollectionChange={updateCollectionEntry}
+                onOpen={saveReturnState}
                 loadMoreRef={
                   isInfinite && index === loadTriggerIndex
                     ? loadTriggerRef

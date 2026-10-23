@@ -56,6 +56,8 @@ export default async function CardPage({
   const card = await getCardDetails(slug, locale);
   if (!card) notFound();
   const tradersExpanded = query.traders === "all";
+  const fromValue = Array.isArray(query.from) ? query.from[0] : query.from;
+  const fromCatalogue = fromValue === "cards";
   const tradeCursor = Array.isArray(query.tradeCursor) ? query.tradeCursor[0] : query.tradeCursor;
   const [collectionEntry, traders] = await Promise.all([
     session && card.collectible ? getCollectionEntry(session.uid, card.id) : Promise.resolve(null),
@@ -65,7 +67,7 @@ export default async function CardPage({
   return (
     <div className="min-h-screen bg-background">
       <PublicHeader />
-      <CardDetail card={card} collectionEntry={collectionEntry ?? (session && card.collectible ? emptyCollectionEntry(card.id) : null)} signedIn={Boolean(session)} traders={traders} tradersExpanded={tradersExpanded} />
+      <CardDetail card={card} collectionEntry={collectionEntry ?? (session && card.collectible ? emptyCollectionEntry(card.id) : null)} signedIn={Boolean(session)} traders={traders} tradersExpanded={tradersExpanded} fromCatalogue={fromCatalogue} />
     </div>
   );
 }
